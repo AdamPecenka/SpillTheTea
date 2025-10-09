@@ -2,11 +2,23 @@
   <q-layout view="lHh Lpr lFf">
     <q-header elevated>
       <q-toolbar>
-        <q-btn flat dense round icon="menu" aria-label="Menu" @click="toggleLeftDrawer" />
+        <div class="row items-center no-wrap">
+          <q-btn 
+            flat 
+            dense 
+            round 
+            icon="menu" 
+            aria-label="Menu" 
+            @click="toggleLeftDrawer" 
+          />
 
-        <q-toolbar-title> Quasar App </q-toolbar-title>
-
-        <div>Quasar v{{ $q.version }}</div>
+          <q-toolbar-title> Spill The Tea </q-toolbar-title>
+          
+          <img
+            src="icons/tea_icon.png"
+            class="q-ml-sm toolbar-logo"
+          />
+        </div>
       </q-toolbar>
     </q-header>
 
@@ -94,3 +106,12 @@ export default defineComponent({
   },
 })
 </script>
+
+<style scoped>
+  .toolbar-logo {
+    height: 24px;
+    width: auto;
+    display: block;
+    align-self: center;
+  }
+</style>
