@@ -2,6 +2,8 @@
 // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file
 
 import { defineConfig } from '#q-app/wrappers'
+import os from 'os'
+
 
 export default defineConfig((/* ctx */) => {
   return {
@@ -72,13 +74,18 @@ export default defineConfig((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-      open: {
-        app: {
-          name: 'chrome' 
-        },
-      },
-      port: 9000,
-    },
+    port: 9000,
+    open: {
+      app: {
+        name:
+          os.platform() === 'darwin'
+            ? 'Google Chrome'      // macOS
+            : os.platform() === 'win32'
+              ? 'chrome'           // Windows
+              : 'google-chrome'    // Linux
+      }
+    }
+  },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
