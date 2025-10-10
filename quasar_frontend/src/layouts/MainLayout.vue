@@ -19,6 +19,15 @@
             class="q-ml-sm toolbar-logo"
           />
         </div>
+
+        <q-space />
+
+        <q-btn
+          label="Login" 
+          outline
+          icon-right="account_circle"
+          to="/auth/login"
+        />
       </q-toolbar>
     </q-header>
 
