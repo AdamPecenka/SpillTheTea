@@ -4,7 +4,6 @@
 import { defineConfig } from '#q-app/wrappers'
 import os from 'os'
 
-
 export default defineConfig((/* ctx */) => {
   return {
     // https://v2.quasar.dev/quasar-cli-vite/prefetch-feature

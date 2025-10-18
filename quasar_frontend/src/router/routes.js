@@ -4,8 +4,12 @@ const routes = [
   {
     name: 'home',
     path: '/',
-    component: () => import('layouts/MainLayout.vue'),
-    children: [{ path: '', component: () => import('pages/IndexPage.vue') }],
+    component: () => import('layouts/ChatLayout.vue'),
+    children: [
+      {
+      name: 'channels/channelId',
+      path: 'channels/:channelId', 
+      component: () => import('pages/ChatPage.vue') }],
   },
   {
     path: '/auth',
@@ -26,7 +30,7 @@ const routes = [
   {
     path: '/:catchAll(.*)*',
     component: () => import('pages/ErrorNotFound.vue'),
-  },
+  }
 ]
 
 export default routes
