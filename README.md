@@ -7,7 +7,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 
 ## Prípady použitia
 - [ ] registrácia, prihlásenie a odhlásenie používateľa
-    - [ ] používateľ má meno a priezvisko, nickName a email
+    - [x] používateľ má meno a priezvisko, nickName a email
 - [ ] používateľ vidí zoznam kanálov, v ktorých je členom
    - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
    - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
