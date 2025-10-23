@@ -1,3 +1,4 @@
+import { comment } from 'postcss'
 import { compile } from 'vue'
 
 const routes = [
@@ -6,6 +7,11 @@ const routes = [
     path: '/',
     component: () => import('layouts/ChatLayout.vue'),
     children: [
+      { 
+        path: '', 
+        name: 'IndexPage', 
+        component: () => import('pages/IndexPage.vue')
+      },
       { path: 'channel/:id', name: 'channel', component: () => import('pages/ChannelPage.vue') },
       { path: 'dm/:id',      name: 'dm',      component: () => import('pages/DmPage.vue') },
     ],

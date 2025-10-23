@@ -4,10 +4,12 @@
     <!-- Top App Bar -->
     <q-header elevated class="bg-grey-9 items-center text-white">
       <q-toolbar>
+
         <img
           src="icons/tea_icon.png"
-          style="width: 40px; height: 32px"
+          style="width: 40px; height: 36px"
         />
+
         <q-toolbar-title>
           <div class="row items-center no-wrap">
             <div class="text-weight-bold">Spill The Tea</div>
@@ -24,7 +26,7 @@
       </q-toolbar>
     </q-header>
 
-    <!-- Left Rail: Icons (Messages / Channels) - VŽDY VIDITEĽNÝ -->
+    <!-- Left Rail: Icons (Messages / Channels) -->
     <div class="left-rail bg-grey-10">
       <div class="column items-center q-pt-md q-gutter-sm full-height">
         <q-btn
@@ -53,7 +55,7 @@
       </div>
     </div>
 
-    <!-- Secondary Panel: zoznam DMs / Channels - VYSÚVA SA Z RAILU -->
+    <!-- Secondary Panel: zoznam DMs / Channels -->
     <div 
       class="secondary-panel bg-grey-3"
       :class="{ 'panel-open': panelOpen }"
@@ -71,43 +73,37 @@
         />
       </div>
 
-      <q-scroll-area class="panel-scroll">
-        <q-list padding v-if="leftTab === 'channels'">
-          <q-item v-for="ch in filteredChannels" :key="ch.id" clickable v-ripple @click="goChannel(ch)">
-            <q-item-section avatar>
-              <q-avatar size="28px" color="grey-5" text-color="white">#</q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-weight-medium">{{ ch.name }}</q-item-label>
-              <q-item-label caption>{{ ch.topic }}</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-list>
+      <!-- Channels List s kategóriami -->
+      <div v-if="leftTab === 'channels'" class="panel-scroll">
+        <ChannelList 
+          :channels="filteredChannels"
+          @channel-click="goChannel"
+        />
+      </div>
 
-        <q-list padding v-else>
-          <q-item v-for="u in filteredFriends" :key="u.id" clickable v-ripple @click="goDm(u)">
-            <q-item-section avatar>
-              <q-avatar size="28px" color="grey-5">
-                <q-icon name="person" color="grey-9" />
-              </q-avatar>
-            </q-item-section>
-            <q-item-section>
-              <q-item-label class="text-weight-medium">{{ u.name }}</q-item-label>
-              <q-item-label caption>{{ u.status }}</q-item-label>
-            </q-item-section>
-          </q-item>
+      <!-- DMs List s status guličkami -->
+      <q-scroll-area v-else class="panel-scroll">
+        <q-list padding>
+          <UserListItem
+            v-for="u in filteredFriends"
+            :key="u.id"
+            :user="u"
+            @click="goDm"
+          />
         </q-list>
       </q-scroll-area>
     </div>
 
-    <!-- Right: Profile Drawer -->
+        <!-- Right: Profile Drawer -->
     <q-drawer
       v-model="rightOpen"
       show-if-above
       side="right"
       :width="340"
-      :breakpoint="1440"
+      :breakpoint="1024"
+      bordered
       class="bg-grey-2"
+      behavior="desktop"
     >
       <div class="fit">
         <ProfileDrawer
@@ -122,14 +118,13 @@
     <!-- Page Content -->
     <q-page-container :class="{ 'content-shifted': panelOpen }">
       <q-page class="bg-grey-1">
-        <q-scroll-area class="fit">
-          <div class="q-pa-md">
-            <div class="text-h6 text-weight-bold q-mb-md">{{ currentChannel }}</div>
-            <div class="text-body1">
-              This is a placeholder for the channel content. The channel "{{ currentChannel }}" would display its messages here.
-            </div>
-          </div>
-        </q-scroll-area>
+        <div class="content-wrapper">
+          <router-view v-slot="{ Component }">
+            <keep-alive>
+              <component :is="Component" />
+            </keep-alive>
+          </router-view>
+        </div>
       </q-page>
     </q-page-container>
 
@@ -147,8 +142,11 @@
 import { computed, ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDirectoryStore } from 'src/store/useDirectoryStore'
+
 import ProfileButton from 'src/components/ProfileButton.vue'
 import ProfileDrawer from 'src/components/ProfileDrawer.vue'
+import UserListItem from 'src/components/UserListItem.vue'
+import ChannelList from 'src/components/ChannelList.vue'
 
 // UI state
 const panelOpen = ref(true)
@@ -172,10 +170,8 @@ function togglePanel() {
 
 function onRailClick(tab: 'dms' | 'channels') {
   if (leftTab.value === tab) {
-    // Ak klikneš na rovnakú ikonku, toggle panel
     panelOpen.value = !panelOpen.value
   } else {
-    // Ak klikneš na inú ikonku, prepni tab a otvor panel
     leftTab.value = tab
     panelOpen.value = true
   }
@@ -191,10 +187,28 @@ function onLogout() {
 
 // zotriedené zoznamy
 const channelsSorted = computed(() =>
-  [...dir.channels].sort((a, b) => a.name.localeCompare(b.name))
+  [...dir.channels].sort((a, b) => {
+    // Pinned na vrch
+    if (a.isPinned && !b.isPinned) return -1
+    if (!a.isPinned && b.isPinned) return 1
+    // Potom private
+    if (a.isPrivate && !b.isPrivate) return -1
+    if (!a.isPrivate && b.isPrivate) return 1
+    // Nakoniec abecedne
+    return a.name.localeCompare(b.name)
+  })
 )
+
 const friendsSorted = computed(() =>
-  [...dir.friends].sort((a, b) => a.name.localeCompare(b.name))
+  [...dir.friends].sort((a, b) => {
+    // Online na vrch
+    const statusOrder = { online: 0, away: 1, dnd: 2, offline: 3 }
+    const aStatus = statusOrder[a.status || 'offline']
+    const bStatus = statusOrder[b.status || 'offline']
+    if (aStatus !== bStatus) return aStatus - bStatus
+    // Potom abecedne
+    return a.name.localeCompare(b.name)
+  })
 )
 
 // filtrovanie
@@ -245,7 +259,7 @@ const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' 
   align-items: center;
 }
 
-/* Left Rail - úzky panel s ikonkami, vždy viditeľný */
+/* Left Rail */
 .left-rail {
   position: fixed;
   top: 64px;
@@ -261,7 +275,7 @@ const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' 
   height: 48px;
 }
 
-/* Secondary Panel - široký panel so zoznamom, vysúva sa z railu */
+/* Secondary Panel */
 .secondary-panel {
   position: fixed;
   top: 64px;
@@ -282,19 +296,33 @@ const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' 
   height: calc(100vh - 64px - 100px);
 }
 
-/* Page content - posúva sa keď je panel otvorený */
+/* Page content */
 .q-page-container {
   padding-left: 72px;
   transition: padding-left 0.3s ease;
+  height: calc(100vh - 64px - 50px);
 }
 
 .q-page-container.content-shifted {
-  padding-left: 332px; /* 72px rail + 260px panel */
+  padding-left: 332px;
 }
 
 /* Right drawer */
 .q-drawer--right {
   border-left: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+@media (max-width: 1024px) {
+  .q-drawer--right {
+    width: 100% !important;
+    max-width: 340px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .q-drawer--right {
+    max-width: 400px;
+  }
 }
 
 /* Tooltip */
@@ -303,7 +331,7 @@ const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' 
   font-size: 13px;
 }
 
-/* Responsive - na mobiloch schovaj rail a použij overlay */
+/* Responsive */
 @media (max-width: 1024px) {
   .left-rail {
     width: 100%;
@@ -331,11 +359,21 @@ const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' 
   }
   
   .q-page-container {
-    padding-left: 0;
-  }
+    transition: padding-right 0.3s ease;
+}
   
   .q-page-container.content-shifted {
     padding-left: 0;
+  }
+
+  .q-page {
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .fill-height {
+    height: 100%;
   }
 }
 </style>

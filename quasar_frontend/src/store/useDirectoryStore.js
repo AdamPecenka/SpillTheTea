@@ -2,22 +2,31 @@ import { defineStore } from 'pinia'
 
 // fake API – neskôr vymeníš za reálne volania
 async function delay(ms=150){ return new Promise(r=>setTimeout(r,ms)) }
+
 async function fetchChannels() {
   await delay()
   return [
-    { id:'general', name:'general', topic:'team-wide', members:12 },
-    { id:'random',  name:'random',  topic:'off-topic', members:7  },
-    { id:'uni',  name:'uni',  topic:'off-topic', members:250  },
+    { id:'general', name:'general', topic:'team-wide', members:12, isPrivate: false, isPinned: true  },
+    { id:'random',  name:'random',  topic:'off-topic', members:7, isPrivate: true, isPinned: false  },
+    { id:'uni',  name:'uni',  topic:'off-topic', members:250, isPrivate: false, isPinned: false  },
+    { id:'vpwa',  name:'VPWA',  topic:'web-dev', members:100, isPrivate: true, isPinned: true  },
+    { id:'cooked',  name:'cooked',  topic:'', members:45, isPrivate: true, isPinned: false  },
+    { id:'cars',  name:'cars',  topic:'car-meets', members:300, isPrivate: false, isPinned: false  },
   ]
 }
+
 async function fetchFriends() {
   await delay()
   return [
-    { id:'u-juraj',  name:'Juraj',  status:'online' },
-    { id:'u-eliska', name:'Eliška', status:'away'   },
-    { id:'u-michal', name:'Michal', status:'offline'},
-    { id:'u-juraj',  name:'Juraj',  status:'online' },
-    { id:'u-adam', name:'Adam', status:'offline'   },
+    { id:'u-damian',  name:'Damian',  status:'online' },
+    { id:'u-monika', name:'Monika', status:'away'   },
+    { id:'u-adam', name:'Adam', status:'offline'},
+    { id:'u-jano', name:'Jano', status:'dnd'   },
+    { id:'u-katka', name:'Katka', status:'offline'   },
+    { id:'u-terka', name:'Terka', status:'away'   },
+    { id:'u-ema', name:'Ema', status:'away'   },
+    { id:'u-tyty', name:'Tyty', status:'dnd'   },
+    { id:'u-marek', name:'Marek', status:'online'}
   ]
 }
 
