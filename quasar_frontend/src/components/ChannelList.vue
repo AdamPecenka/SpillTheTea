@@ -50,37 +50,32 @@
   </q-scroll-area>
 </template>
 
-<script setup lang="ts">
+<script>
 import { computed } from 'vue'
 import ChannelListItem from 'components/ChannelListItem.vue'
 
-interface Channel {
-  id: string
-  name: string
-  topic?: string
-  isPrivate?: boolean
-  isPinned?: boolean
+export default {
+  name: 'ChannelList',
+  components: {
+    ChannelListItem
+  },
+  props: {
+    channels: {
+      type: Array,
+      required: true
+    }
+  },
+  emits: ['channel-click'],
+  computed: {
+    pinnedChannels() {
+      return this.channels.filter(ch => ch.isPinned);
+    },
+    privateChannels() {
+      return this.channels.filter(ch => !ch.isPinned && ch.isPrivate);
+    },
+    publicChannels() {
+      return this.channels.filter(ch => !ch.isPinned && !ch.isPrivate);
+    }
+  }
 }
-
-interface Props {
-  channels: Channel[]
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{
-  (e: 'channel-click', channel: Channel): void
-}>()
-
-// Rozdelenie kanálov podľa typu
-const pinnedChannels = computed(() =>
-  props.channels.filter(ch => ch.isPinned)
-)
-
-const privateChannels = computed(() =>
-  props.channels.filter(ch => !ch.isPinned && ch.isPrivate)
-)
-
-const publicChannels = computed(() =>
-  props.channels.filter(ch => !ch.isPinned && !ch.isPrivate)
-)
 </script>

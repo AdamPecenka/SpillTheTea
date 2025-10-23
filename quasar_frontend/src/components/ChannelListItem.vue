@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple @click="$emit('click', channel)">
+  <q-item clickable v-ripple @click="handleClick">
     <q-item-section avatar>
       <q-avatar size="32px" :color="avatarColor" text-color="white">
         <q-icon :name="channelIcon" size="18px" />
@@ -21,49 +21,46 @@
       </q-item-label>
     </q-item-section>
 
-    <!-- Badge pre private channel -->
+    <!-- Badge for private channel -->
     <q-item-section side v-if="channel.isPrivate">
       <q-icon name="lock" size="16px" color="grey-6" />
     </q-item-section>
   </q-item>
 </template>
 
-<script setup lang="ts">
+<script>
 import { computed } from 'vue'
 
-interface Channel {
-  id: string
-  name: string
-  topic?: string
-  isPrivate?: boolean
-  isPinned?: boolean
-}
-
-interface Props {
-  channel: Channel
-  pinned?: boolean
-}
-
-const props = defineProps<Props>()
-const emit = defineEmits<{
-  (e: 'click', channel: Channel): void
-}>()
-
-// Ikona podľa typu kanála
-const channelIcon = computed(() => {
-  if (props.channel.isPrivate) {
-    return 'tag' // alebo 'lock' pre private
+export default {
+  name: 'ChannelListItem',
+  props: {
+    channel: {
+      type: Object,
+      required: true,
+      validator: (value) => {
+        return typeof value.id === 'string' && typeof value.name === 'string';
+      }
+    },
+    pinned: {
+      type: Boolean,
+      default: false
+    }
+  },
+  emits: ['click'],
+  computed: {
+    channelIcon() {
+      return this.channel.isPrivate ? 'tag' : 'tag'; // Adjust icon based on channel type
+    },
+    avatarColor() {
+      return this.pinned ? 'primary' : (this.channel.isPrivate ? 'grey-7' : 'grey-5');
+    }
+  },
+  methods: {
+    handleClick() {
+      this.$emit('click', this.channel);
+    }
   }
-  return 'tag' // hashtag pre public
-})
-
-// Farba avatara
-const avatarColor = computed(() => {
-  if (props.pinned) {
-    return 'primary'
-  }
-  return props.channel.isPrivate ? 'grey-7' : 'grey-5'
-})
+}
 </script>
 
 <style scoped>

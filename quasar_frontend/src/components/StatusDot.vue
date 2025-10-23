@@ -7,28 +7,36 @@
   />
 </template>
 
-<script setup lang="ts">
+<script>
 import { computed } from 'vue'
 
-interface Props {
-  status?: 'online' | 'away' | 'dnd' | 'offline'
-}
-
-const props = defineProps<Props>()
-
-const statusColor = computed(() => {
-  switch (props.status) {
-    case 'online':
-      return 'positive'
-    case 'away':
-      return 'warning'
-    case 'dnd':
-      return 'negative'
-    case 'offline':
-    default:
-      return 'grey-6'
+export default {
+  name: 'StatusDot',
+  props: {
+    status: {
+      type: String,
+      validator: (value) => {
+        return ['online', 'away', 'dnd', 'offline'].includes(value);
+      },
+      default: 'offline' // Default status if none is provided
+    }
+  },
+  computed: {
+    statusColor() {
+      switch (this.status) {
+        case 'online':
+          return 'positive';
+        case 'away':
+          return 'warning';
+        case 'dnd':
+          return 'negative';
+        case 'offline':
+        default:
+          return 'grey-6';
+      }
+    }
   }
-})
+}
 </script>
 
 <style scoped>

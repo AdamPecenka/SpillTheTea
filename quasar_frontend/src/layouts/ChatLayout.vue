@@ -138,111 +138,154 @@
   </q-layout>
 </template>
 
-<script setup lang="ts">
-import { computed, ref, onMounted } from 'vue'
+<script>
 import { useRouter } from 'vue-router'
 import { useDirectoryStore } from 'src/store/useDirectoryStore'
-
 import ProfileButton from 'src/components/ProfileButton.vue'
 import ProfileDrawer from 'src/components/ProfileDrawer.vue'
 import UserListItem from 'src/components/UserListItem.vue'
 import ChannelList from 'src/components/ChannelList.vue'
 
-// UI state
-const panelOpen = ref(true)
-const leftTab = ref<'dms' | 'channels'>('dms')
-const rightOpen = ref(false)
-const currentChannel = ref('Channel name')
-const channelSearch = ref('')
-
-// store
-const dir = useDirectoryStore()
-const router = useRouter()
-
-// načítanie data
-onMounted(async () => {
-  await Promise.all([dir.loadChannels(), dir.loadFriends()])
-})
-
-function togglePanel() {
-  panelOpen.value = !panelOpen.value
-}
-
-function onRailClick(tab: 'dms' | 'channels') {
-  if (leftTab.value === tab) {
-    panelOpen.value = !panelOpen.value
-  } else {
-    leftTab.value = tab
-    panelOpen.value = true
+export default {
+  name: 'ChatLayout',
+  
+  components: {
+    ProfileButton,
+    ProfileDrawer,
+    UserListItem,
+    ChannelList
+  },
+  
+  data() {
+    return {
+      panelOpen: true,
+      leftTab: 'dms',
+      rightOpen: false,
+      currentChannel: 'Channel name',
+      channelSearch: '',
+      messageText: '',
+      profile: {
+        nickname: 'nickname',
+        first: '',
+        last: '',
+        email: '',
+        status: 'online'
+      },
+      dir: null,
+      router: null
+    }
+  },
+  
+  computed: {
+    leftListTitle() {
+      return this.leftTab === 'channels' ? 'Channels' : 'Direct messages'
+    },
+    
+    channelsSorted() {
+      if (!this.dir || !this.dir.channels) return []
+      
+      return [...this.dir.channels].sort((a, b) => {
+        // Pinned na vrch
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        // Potom private
+        if (a.isPrivate && !b.isPrivate) return -1
+        if (!a.isPrivate && b.isPrivate) return 1
+        // Nakoniec abecedne
+        return a.name.localeCompare(b.name)
+      })
+    },
+    
+    friendsSorted() {
+      if (!this.dir || !this.dir.friends) return []
+      
+      return [...this.dir.friends].sort((a, b) => {
+        // Online na vrch
+        const statusOrder = { online: 0, away: 1, dnd: 2, offline: 3 }
+        const aStatus = statusOrder[a.status || 'offline']
+        const bStatus = statusOrder[b.status || 'offline']
+        if (aStatus !== bStatus) return aStatus - bStatus
+        // Potom abecedne
+        return a.name.localeCompare(b.name)
+      })
+    },
+    
+    filteredChannels() {
+      const q = this.channelSearch.trim().toLowerCase()
+      if (!q) return this.channelsSorted
+      
+      return this.channelsSorted.filter(
+        c => c.name.toLowerCase().includes(q) || 
+             (c.topic || '').toLowerCase().includes(q)
+      )
+    },
+    
+    filteredFriends() {
+      const q = this.channelSearch.trim().toLowerCase()
+      if (!q) return this.friendsSorted
+      
+      return this.friendsSorted.filter(
+        u => u.name.toLowerCase().includes(q) || 
+             (u.status || '').toLowerCase().includes(q)
+      )
+    }
+  },
+  
+  async mounted() {
+    // Inicializácia store a router
+    this.dir = useDirectoryStore()
+    this.router = useRouter()
+    
+    // Načítanie data
+    try {
+      await Promise.all([
+        this.dir.loadChannels(), 
+        this.dir.loadFriends()
+      ])
+    } catch (error) {
+      console.error('Failed to load data:', error)
+    }
+  },
+  
+  methods: {
+    togglePanel() {
+      this.panelOpen = !this.panelOpen
+    },
+    
+    onRailClick(tab) {
+      if (this.leftTab === tab) {
+        this.panelOpen = !this.panelOpen
+      } else {
+        this.leftTab = tab
+        this.panelOpen = true
+      }
+    },
+    
+    onProfileSave(updated) {
+      this.profile = { ...this.profile, ...updated }
+    },
+    
+    onLogout() {
+      console.log('logout clicked')
+      // Tu pridaj odhlásenie
+    },
+    
+    goChannel(ch) {
+      this.currentChannel = ch.name
+      this.router.push({ 
+        name: 'channel', 
+        params: { id: ch.name } 
+      })
+    },
+    
+    goDm(u) {
+      this.router.push({ 
+        name: 'dm', 
+        params: { id: u.id } 
+      })
+    }
   }
 }
-
-function onProfileSave(updated) {
-  profile.value = { ...profile.value, ...updated }
-}
-
-function onLogout() {
-  console.log('logout clicked')
-}
-
-// zotriedené zoznamy
-const channelsSorted = computed(() =>
-  [...dir.channels].sort((a, b) => {
-    // Pinned na vrch
-    if (a.isPinned && !b.isPinned) return -1
-    if (!a.isPinned && b.isPinned) return 1
-    // Potom private
-    if (a.isPrivate && !b.isPrivate) return -1
-    if (!a.isPrivate && b.isPrivate) return 1
-    // Nakoniec abecedne
-    return a.name.localeCompare(b.name)
-  })
-)
-
-const friendsSorted = computed(() =>
-  [...dir.friends].sort((a, b) => {
-    // Online na vrch
-    const statusOrder = { online: 0, away: 1, dnd: 2, offline: 3 }
-    const aStatus = statusOrder[a.status || 'offline']
-    const bStatus = statusOrder[b.status || 'offline']
-    if (aStatus !== bStatus) return aStatus - bStatus
-    // Potom abecedne
-    return a.name.localeCompare(b.name)
-  })
-)
-
-// filtrovanie
-const filteredChannels = computed(() => {
-  const q = channelSearch.value.trim().toLowerCase()
-  if (!q) return channelsSorted.value
-  return channelsSorted.value.filter(
-    c => c.name.toLowerCase().includes(q) || (c.topic || '').toLowerCase().includes(q)
-  )
-})
-
-const filteredFriends = computed(() => {
-  const q = channelSearch.value.trim().toLowerCase()
-  if (!q) return friendsSorted.value
-  return friendsSorted.value.filter(
-    u => u.name.toLowerCase().includes(q) || (u.status || '').toLowerCase().includes(q)
-  )
-})
-
-// navigácia
-function goChannel(ch: { id: string; name: string; topic?: string }) {
-  currentChannel.value = ch.name
-  router.push({ name: 'channel', params: { id: ch.name } })
-}
-
-function goDm(u: { id: string; name: string; status?: string }) {
-  router.push({ name: 'dm', params: { id: u.id } })
-}
-
-// profil
-const profile = ref({ nickname: 'nickname', first: '', last: '', email: '' })
-const messageText = ref('')
-
-const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' : 'Direct messages'))
 </script>
 
 <style scoped>
