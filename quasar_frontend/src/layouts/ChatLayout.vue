@@ -149,7 +149,7 @@
     <!-- Composer Bar -->
     <q-footer elevated class="bg-grey-9">
       <div class="row items-center q-pa-sm q-gutter-sm" style="max-width: 1200px; margin: 0 auto; width: 100%">
-        <q-input filled class="col" rounded dense placeholder="Typing..." :disable="true"/>
+        <q-input v-model="messageText" filled class="col" rounded dense placeholder="Typing..." :disable="true"/>
         <q-btn round dense icon="send" color="primary" :disable="true" />
       </div>
     </q-footer>
@@ -158,6 +158,13 @@
 
 <script setup lang="ts">
 import { computed, ref } from 'vue'
+
+// Define the interface first
+interface Channel {
+  id: number
+  name: string
+  topic?: string  // Make topic optional since it's not used in selectChannel
+}
 
 const railOpen = ref(true)
 const panelOpen = ref(true)
@@ -196,11 +203,12 @@ const filteredFriends = computed(() => {
 
 const leftListTitle = computed(() => (leftTab.value === 'channels' ? 'Channels' : 'Direct messages'))
 
-function selectChannel(ch: { id: number; name: string }) {
+function selectChannel(ch: Channel) {
   currentChannel.value = `# ${ch.name}`
 }
 
 const profile = ref({ nickname: 'nickname', first: '', last: '', email: '' })
+const messageText = ref('')
 
 const demoMessages = ref([
   { name: 'Eliška', text: 'Wireframe ready ✨', time: '09:12', sent: false, avatar: '' },
