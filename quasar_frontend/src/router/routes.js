@@ -6,10 +6,9 @@ const routes = [
     path: '/',
     component: () => import('layouts/ChatLayout.vue'),
     children: [
-      {
-      name: 'channels/channelId',
-      path: 'channels/:channelId', 
-      component: () => import('pages/ChatPage.vue') }],
+      { path: 'channel/:id', name: 'channel', component: () => import('pages/ChannelPage.vue') },
+      { path: 'dm/:id',      name: 'dm',      component: () => import('pages/DmPage.vue') },
+    ],
   },
   {
     path: '/auth',
