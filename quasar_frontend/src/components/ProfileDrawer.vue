@@ -84,8 +84,8 @@
 </template>
 
 <script setup>
-// ViewProfile.vue — minimal, mock data inside
 import { reactive, ref, computed, onMounted } from 'vue'
+import { useUserStore } from 'src/store/useUserStore'
 import AvatarPic from 'src/assets/AvatarProfilePic.png'
 
 const props = defineProps({
@@ -98,46 +98,44 @@ const openProxy = computed({
   set: v => emit('update:modelValue', v)
 })
 
-// mock user (vymeníš za store alebo API)
-const user = reactive({
+// use store
+const userStore = useUserStore()
+const user = computed(() => userStore.user || {
   id: 'u-demo',
   nickname: 'nickname',
   first: '',
   last: '',
   email: '',
-  avatarUrl: ''
+  avatarUrl: AvatarPic
 })
 
 const isEditing = ref(false)
 const edit = reactive({ first: '', last: '', email: '' })
 
 onMounted(async () => {
-  // fake load
-  await new Promise(r => setTimeout(r, 120))
-  Object.assign(user, {
-    nickname: 'johannatilesova',
-    first: 'Johanna',
-    last: 'Tiles',
-    email: 'johanna@example.com',
-    avatarUrl: AvatarPic
-  })
+  if (typeof userStore.loadUser === 'function') {
+    await userStore.loadUser().catch(() => {})
+  }
 })
 
 function enterEdit () {
-  edit.first = user.first || ''
-  edit.last  = user.last  || ''
-  edit.email = user.email || ''
+  edit.first = user.value.first || ''
+  edit.last  = user.value.last  || ''
+  edit.email = user.value.email || ''
   isEditing.value = true
 }
 function cancelEdit () {
   isEditing.value = false
 }
 function save () {
-  user.first = edit.first
-  user.last  = edit.last
-  user.email = edit.email
+  // update store directly (or call an action if you have one)
+  if (userStore.user) {
+    userStore.user.first = edit.first
+    userStore.user.last  = edit.last
+    userStore.user.email = edit.email
+  }
   isEditing.value = false
-  emit('save', { ...user })
+  emit('save', { ...(user.value) })
 }
 </script>
 

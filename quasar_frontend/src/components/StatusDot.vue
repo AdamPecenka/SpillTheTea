@@ -43,7 +43,7 @@ export default {
 .status-dot {
   width: 12px;
   height: 12px;
-  border: 2px solid white;
+  border: 2px solid rgba(0, 0, 0, 0.12);
   bottom: 0;
   right: 0;
 }

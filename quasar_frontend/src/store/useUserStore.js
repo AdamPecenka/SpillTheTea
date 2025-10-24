@@ -4,12 +4,12 @@ import AvatarPic from 'src/assets/AvatarProfilePic.png'
 const mockFetchUser = async () => {
   await new Promise(r => setTimeout(r, 120))
   return {
-    id: 'u-johanna',
-    nickname: 'johannatilesova',
-    first: 'Johanna',
-    last: 'Tiles',
-    email: 'johanna@example.com',
-    status: 'away',
+    id: 'u-abracadabra',
+    nickname: 'abracadabra',
+    first: 'Abraca',
+    last: 'Dabra',
+    email: 'abraca@dabra.com',
+    status: 'online',
     avatarUrl: AvatarPic
   }
 }
