@@ -110,7 +110,6 @@
           v-model="rightOpen"
           :user="profile"
           @save="onProfileSave"
-          @logout="onLogout"
         />
       </div>
     </q-drawer>
@@ -183,7 +182,7 @@ export default {
       channelSearch: '',
       messageText: '',
       profile: {
-        nickname: 'nickname',
+        username: 'username',
         first: '',
         last: '',
         email: '',
@@ -290,11 +289,6 @@ export default {
     
     onProfileSave(updated) {
       this.profile = { ...this.profile, ...updated }
-    },
-    
-    onLogout() {
-      console.log('logout clicked')
-      // Tu pridaj odhlásenie
     },
     
     goChannel(ch) {

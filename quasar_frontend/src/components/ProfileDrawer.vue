@@ -27,7 +27,7 @@
             alt="Your profile picture"
             @edit="onChangeAvatar"
           />
-          <div class="text-subtitle1">@{{ user.nickname }}</div>
+          <div class="text-subtitle1">@{{ user.username }}</div>
         </div>
 
         <!-- VIEW MODE -->
@@ -49,8 +49,8 @@
         <!-- EDIT MODE -->
         <q-form v-else @submit.prevent="save" class="column q-gutter-md">
           <q-input
-            label="Nickname"
-            :model-value="user.nickname"
+            label="Username"
+            :model-value="user.username"
             dense
             filled
             readonly
@@ -75,7 +75,7 @@
             class="btn-dark"
             label="Log out"
             no-caps
-            @click="$emit('logout')"
+            @click="onLogOut"
           />
         </template>
 
@@ -161,7 +161,7 @@ export default {
       if (!storeUser) {
         return {
           id: 'u-demo',
-          nickname: 'nickname',
+          username: 'Username',
           first: '',
           last: '',
           email: '',
@@ -174,13 +174,12 @@ export default {
     }
   },
   
-  async mounted() {
+  mounted() {
     this.userStore = useUserStore()
     if (typeof this.userStore.loadUser === 'function') {
-      await this.userStore.loadUser().catch(() => {})
+      this.userStore.loadUser()
     }
     
-    // Load user settings
     if (this.userStore.user?.settings) {
       this.userSettings = { ...this.userStore.user.settings }
     }
@@ -229,6 +228,11 @@ export default {
       
       // Emit to parent
       this.$emit('save', { ...this.user, settings: newSettings })
+    },
+    
+    onLogOut(){
+      this.userStore.isLogged = false
+      this.$router.push({ name: 'login'})
     }
   }
 }

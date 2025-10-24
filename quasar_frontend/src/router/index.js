@@ -6,6 +6,7 @@ import {
   createWebHashHistory,
 } from 'vue-router'
 import routes from './routes'
+import { useUserStore } from 'src/store/useUserStore'
 
 /*
  * If not building with SSR mode, you can
@@ -31,6 +32,20 @@ export default defineRouter(function (/* { store, ssrContext } */) {
     // quasar.conf.js -> build -> vueRouterMode
     // quasar.conf.js -> build -> publicPath
     history: createHistory(process.env.VUE_ROUTER_BASE),
+  })
+
+  Router.beforeEach((to, from, next) => {
+    const userStore = useUserStore()
+    const publicPages = ['login', 'register']
+    
+    // Check if the target route is protected
+    const authRequired = !publicPages.includes(to.name)
+    
+    if (authRequired && !userStore.isLogged) {
+      return next({ name: 'login' })
+    }
+    
+    next()
   })
 
   return Router

@@ -2,13 +2,13 @@
   <q-btn
     flat no-caps unelevated
     class="profile-bar-btn"
-    :aria-label="`Open profile of ${getUserNickname}`"
+    :aria-label="`Open profile of ${getUserUsername}`"
     @click="handleClick"
   >
     <div class="row items-center q-gutter-sm">
       <!-- Textová časť (vľavo) -->
       <div class="column items-end">
-        <div class="nick">@{{ getUserNickname }}</div>
+        <div class="nick">@{{ getUserUsername }}</div>
         
         <!-- Stavová pilulka - klikateľná, otvorí menu -->
         <div
@@ -110,8 +110,8 @@ export default {
       return this.userStore?.user || null
     },
     
-    getUserNickname() {
-      return this.user?.nickname || 'nickname'
+    getUserUsername() {
+      return this.user?.username || 'username'
     },
     
     getUserStatus() {
@@ -121,7 +121,7 @@ export default {
   
   mounted() {
     this.userStore = useUserStore()
-    this.userStore.loadUser().catch(() => {})
+    this.userStore.loadUser()
   },
   
   methods: {

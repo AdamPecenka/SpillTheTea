@@ -53,6 +53,9 @@
 </template>
 
 <script>
+import { useUserStore } from 'src/store/useUserStore';
+import { Notify } from 'quasar';
+
 export default {
   data () {
     return {
@@ -63,13 +66,24 @@ export default {
   },
   methods: {
     onSubmit () {
-      console.log('Login submitted:', {
-        identifier: this.identifier,
-        password: this.password,
-        rememberMe: this.rememberMe
-      })
+      const userStore = useUserStore()
+      userStore.loadUser()
 
-      this.$router.push({ name: 'home' })
+      if(userStore.user.username === this.username && userStore.user.password === this.password) {
+        userStore.isLogged = true
+        this.$router.push({ name: 'home' })
+      } else {
+        console.log(`[i] ${userStore.user.username}`)
+        console.log(`[i] ${userStore.user.password}`)
+        console.log(`[i] ${this.username}`)
+        console.log(`[i] ${this.password}`)
+
+        Notify.create({
+          type: 'negative',
+          message: 'Invalid credentials!'
+        })
+      }
+
     },
     goToRegister () {
       this.$router.push({ name: 'register' })
