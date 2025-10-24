@@ -116,7 +116,10 @@
     </q-drawer>
 
     <!-- Page Content -->
-    <q-page-container :class="{ 'content-shifted': panelOpen }">
+    <q-page-container
+      :class="{ 'content-shifted': panelOpen }"
+      :style="pageContainerStyle"
+    >
       <q-page class="bg-grey-1">
         <div class="content-wrapper">
           <router-view v-slot="{ Component }">
@@ -130,10 +133,7 @@
 
     <!-- Composer Bar -->
     <q-footer elevated class="bg-grey-9">
-      <div class="row items-center q-pa-sm q-gutter-sm" style="max-width: 1200px; margin: 0 auto; width: 100%">
-        <q-input v-model="messageText" filled class="col" rounded dense placeholder="Typing..." :disable="true"/>
-        <q-btn round dense icon="send" color="primary" :disable="true" />
-      </div>
+      
     </q-footer>
   </q-layout>
 </template>
@@ -228,6 +228,15 @@ export default {
         u => u.name.toLowerCase().includes(q) || 
              (u.status || '').toLowerCase().includes(q)
       )
+    },
+    pageContainerStyle() {
+      const left = this.panelOpen ? 332 : 72      // 72 = rail, 260 = panel -> 72+260=332
+      const right = this.rightOpen ? 340 : 0
+      return {
+        '--left-offset': `${left}px`,
+        '--right-offset': `${right}px`,
+        '--content-available': `calc(100vw - ${left}px - ${right}px)`
+      }
     }
   },
   
@@ -341,8 +350,9 @@ export default {
 
 /* Page content */
 .q-page-container {
-  padding-left: 72px;
-  transition: padding-left 0.3s ease;
+  padding-left: var(--left-offset, 72px);
+  padding-right: var(--right-offset, 0px);
+  transition: padding 0.24s ease;
   height: calc(100vh - 64px - 50px);
 }
 

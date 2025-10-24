@@ -18,7 +18,7 @@ export default {
       validator: (value) => {
         return ['online', 'away', 'dnd', 'offline'].includes(value);
       },
-      default: 'offline' // Default status if none is provided
+      default: 'offline'
     }
   },
   computed: {
