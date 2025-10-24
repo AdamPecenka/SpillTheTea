@@ -115,6 +115,8 @@
       </div>
     </q-drawer>
 
+    
+
     <!-- Page Content -->
     <q-page-container
       :class="{ 'content-shifted': panelOpen }"
@@ -129,7 +131,20 @@
           </router-view>
         </div>
       </q-page>
+
+      <q-page-sticky position="bottom" expand class="q-px-md q-pb-sm">
+        <div
+          class="flex justify-center"
+          style="width: 100%; max-width: var(--content-available, 1200px); margin: 0 auto;"
+        >
+          <TypingBar
+            placeholder="Enter some command /"
+          />
+        </div>
+      </q-page-sticky>
     </q-page-container>
+
+    
 
     <!-- Composer Bar -->
     <q-footer elevated class="bg-grey-9">
@@ -146,6 +161,7 @@ import ProfileDrawer from 'src/components/ProfileDrawer.vue'
 import UserListItem from 'src/components/UserListItem.vue'
 import ChannelList from 'src/components/ChannelList.vue'
 import SettingsPanel from 'src/components/SettingsPanel.vue'
+import TypingBar from 'src/components/TypingBar.vue'
 
 export default {
   name: 'ChatLayout',
@@ -154,7 +170,8 @@ export default {
     ProfileButton,
     ProfileDrawer,
     UserListItem,
-    ChannelList
+    ChannelList,
+    TypingBar
   },
   
   data() {
@@ -310,6 +327,10 @@ export default {
   height: 100%;
   display: flex;
   align-items: center;
+}
+
+.q-page-sticky {
+  z-index: 3000;
 }
 
 /* Left Rail */

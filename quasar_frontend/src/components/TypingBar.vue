@@ -1,51 +1,68 @@
 <template>
   <div class="typing-bar row items-center q-pa-sm q-gutter-sm">
     <q-input
-      v-model="localValue"
+      v-model="message"
       filled
       rounded
       dense
       :placeholder="placeholder"
       @keyup.enter="onSend"
       class="col"
-      :disable="disabled"
     />
     <q-btn
       round
       dense
-      :icon="sendIcon"
+      icon="send"
       color="primary"
-      :disable="disabled || !canSend"
       @click="onSend"
     />
   </div>
 </template>
 
 <script>
+import { Notify } from 'quasar';
+
 export default {
   name: 'TypingBar',
-  props: {
-    modelValue: { type: String, default: '' },
-    disabled: { type: Boolean, default: false },
-    placeholder: { type: String, default: 'Type a message...' },
-    sendIcon: { type: String, default: 'send' },
-    clearOnSend: { type: Boolean, default: true }
+  data() {
+    return {
+      message: ''
+    }
   },
-  emits: ['update:modelValue', 'send'],
-  computed: {
-    localValue: {
-      get() { return this.modelValue },
-      set(v) { this.$emit('update:modelValue', v) }
-    },
-    canSend() { return (this.modelValue || '').trim().length > 0 }
+  props: {
+    placeholder: { type: String, default: 'Type a message...' }
   },
   methods: {
     onSend() {
-      if (this.disabled) return
-      const text = (this.modelValue || '').trim()
+      const text = this.message.trim()
       if (!text) return
-      this.$emit('send', text)
-      if (this.clearOnSend) this.$emit('update:modelValue', '')
+
+      const cmd = text.split(' ')[0]
+
+      switch(cmd){
+        case "/join":
+        case "/invite":
+        case "/revoke":
+        case "/kick":
+        case "/quit":
+        case "/cancel":
+        case "/list":
+        case "/help":
+        case "/notify":
+          Notify.create({
+            message: 'Vedel si o t...',
+            caption: '@Tyty',
+            position: 'bottom-right',
+            color: 'primary',
+            progress: true,
+            timeout: 10000
+          })
+          break;
+        default:
+          console.log(`[i] Message sent: ${this.message}`)
+      }
+      
+      this.message = ''
     }
   }
 }

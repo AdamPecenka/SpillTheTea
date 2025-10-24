@@ -1,10 +1,6 @@
 import { defineStore } from 'pinia'
 
-// fake API – neskôr vymeníš za reálne volania
-async function delay(ms=150){ return new Promise(r=>setTimeout(r,ms)) }
-
 async function fetchChannels() {
-  await delay()
   return [
     { id:'general', name:'general', topic:'team-wide', members:12, isPrivate: false, isPinned: true  },
     { id:'random',  name:'random',  topic:'off-topic', members:7, isPrivate: true, isPinned: false  },
@@ -16,7 +12,6 @@ async function fetchChannels() {
 }
 
 async function fetchFriends() {
-  await delay()
   return [
     { id:'u-damian',  name:'Damian',  status:'online' },
     { id:'u-monika', name:'Monika', status:'away'   },
@@ -38,12 +33,12 @@ export const useDirectoryStore = defineStore('directory', {
     friendsLoaded: false,
   }),
   getters: {
-    channelBy: (s) => (idOrName) =>
-      s.channels.find(c => c.id === idOrName || c.name === idOrName),
-    friendBy: (s) => (idOrName) =>
-      s.friends.find(u => u.id === idOrName || u.name === idOrName),
-    channelsSorted: (s) => [...s.channels].sort((a,b)=>a.name.localeCompare(b.name)),
-    friendsSorted:  (s) => [...s.friends].sort((a,b)=>a.name.localeCompare(b.name)),
+    channelBy: (state) => (idOrName) =>
+      state.channels.find(c => c.id === idOrName || c.name === idOrName),
+    friendBy: (state) => (idOrName) =>
+      state.friends.find(u => u.id === idOrName || u.name === idOrName),
+    channelsSorted: (state) => [...state.channels].sort((a,b)=>a.name.localeCompare(b.name)),
+    friendsSorted:  (state) => [...state.friends].sort((a,b)=>a.name.localeCompare(b.name)),
   },
   actions: {
     async loadChannels(force=false){

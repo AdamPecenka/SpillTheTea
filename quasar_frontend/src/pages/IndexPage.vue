@@ -17,25 +17,14 @@
         Select a channel or direct message from the sidebar
       </div>
       
-      <div class="row items-center q-pa-sm q-gutter-sm" style="max-width: 1200px; margin: 0 auto; width: 100%"></div>
-        
-
-      <div class="row items-center q-pa-sm q-gutter-sm" style="max-width: 1200px; margin: 0 auto; width: 800px;">
-        <TypingBar
-          v-model="typing"
-          :placeholder="'Enter some command /'"
-          :disabled="false"
-          @send="onSend"
-        />
+      <div class="row items-center q-pa-sm q-gutter-sm" style="max-width: 1200px; margin: 0 auto; width: 100%">
       </div>
-
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from 'vue';
-import TypingBar from 'src/components/TypingBar.vue';
 
 const inputValue = ref('');
 const typing = ref(''); 
