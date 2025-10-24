@@ -145,6 +145,7 @@ import ProfileButton from 'src/components/ProfileButton.vue'
 import ProfileDrawer from 'src/components/ProfileDrawer.vue'
 import UserListItem from 'src/components/UserListItem.vue'
 import ChannelList from 'src/components/ChannelList.vue'
+import SettingsPanel from 'src/components/SettingsPanel.vue'
 
 export default {
   name: 'ChatLayout',

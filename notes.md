@@ -9,7 +9,7 @@
 - [x] Zobrazenie zoznamu kanálov
 - [ ] Zobrazenie pozvánok (zvýraznenie / topovanie)
 - [ ] UI pre vytvorenie / opustenie / zrušenie kanála
-- [ ] Výber typu kanála (public/private)
+- [x] Výber typu kanála (public/private)
 - [ ] Posielanie správ cez príkazový riadok
 - [ ] Zobrazenie histórie správ (infinite scroll)
 - [ ] Zobrazenie mentionov (vizuálne zvýraznenie)
@@ -23,7 +23,7 @@
 - [x] UI rozlíšenie public vs private kanál
 - [ ] Notifikácie iba pri neviditeľnej appke (AppVisibility)
 
-### BACKEN
+### BACKEND
 
 - [ ] Uloženie a overenie registrácie
 - [ ] Autentifikácia a správa session/tokenu

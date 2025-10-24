@@ -1,16 +1,16 @@
 <template>
-  <!-- celý blok je JEDNO tlačidlo na otvorenie profilu -->
   <q-btn
     flat no-caps unelevated
     class="profile-bar-btn"
     :aria-label="`Open profile of ${getUserNickname}`"
     @click="handleClick"
   >
-    <div class="row items-center q-gutter-md">
-      <!-- textová časť (vľavo) -->
+    <div class="row items-center q-gutter-sm">
+      <!-- Textová časť (vľavo) -->
       <div class="column items-end">
         <div class="nick">@{{ getUserNickname }}</div>
-        <!-- stavová „pilulka" je klikateľná – otvorí menu -->
+        
+        <!-- Stavová pilulka - klikateľná, otvorí menu -->
         <div
           class="row items-center q-gutter-xs status-ctl cursor-pointer"
           @click.stop="menu = true"
@@ -24,7 +24,9 @@
         <q-menu v-model="menu" anchor="bottom right" self="top right">
           <q-list separator style="min-width: 180px">
             <q-item clickable v-close-popup @click="setStatus('online')">
-              <q-item-section avatar><span class="dot online" /></q-item-section>
+              <q-item-section avatar>
+                <span class="dot online" />
+              </q-item-section>
               <q-item-section>Online</q-item-section>
               <q-item-section side>
                 <q-icon v-if="getUserStatus === 'online'" name="check" />
@@ -32,7 +34,9 @@
             </q-item>
             
             <q-item clickable v-close-popup @click="setStatus('away')">
-              <q-item-section avatar><span class="dot away" /></q-item-section>
+              <q-item-section avatar>
+                <span class="dot away" />
+              </q-item-section>
               <q-item-section>Away</q-item-section>
               <q-item-section side>
                 <q-icon v-if="getUserStatus === 'away'" name="check" />
@@ -40,7 +44,9 @@
             </q-item>
             
             <q-item clickable v-close-popup @click="setStatus('dnd')">
-              <q-item-section avatar><span class="dot dnd" /></q-item-section>
+              <q-item-section avatar>
+                <span class="dot dnd" />
+              </q-item-section>
               <q-item-section>Do Not Disturb</q-item-section>
               <q-item-section side>
                 <q-icon v-if="getUserStatus === 'dnd'" name="check" />
@@ -48,7 +54,9 @@
             </q-item>
             
             <q-item clickable v-close-popup @click="setStatus('offline')">
-              <q-item-section avatar><span class="dot offline" /></q-item-section>
+              <q-item-section avatar>
+                <span class="dot offline" />
+              </q-item-section>
               <q-item-section>Offline</q-item-section>
               <q-item-section side>
                 <q-icon v-if="getUserStatus === 'offline'" name="check" />
@@ -58,20 +66,28 @@
         </q-menu>
       </div>
       
-      <!-- avatar (vpravo) -->
-      <q-avatar :size="avatarSize" class="avatar">
-        <img v-if="user && user.avatarUrl" :src="user.avatarUrl" alt="avatar" />
-        <div v-else class="avatar-ph" />
-      </q-avatar>
+      <!-- ProfilePicture komponent (vpravo) -->
+      <ProfilePicture
+        :image-url="user && user.avatarUrl"
+        :status="getUserStatus"
+        :show-status="false"
+        size="36px"
+        alt="Your profile"
+      />
     </div>
   </q-btn>
 </template>
 
 <script>
 import { useUserStore } from 'src/store/useUserStore'
+import ProfilePicture from './ProfilePicture.vue'
 
 export default {
   name: 'ProfileButton',
+  
+  components: {
+    ProfilePicture
+  },
   
   props: {
     avatarSize: {
@@ -123,58 +139,46 @@ export default {
 </script>
 
 <style scoped>
-.profile-bar-btn { 
-  padding: 6px 10px; 
-  color: #fff; 
+.profile-bar-btn {
+  padding: 6px 10px;
+  color: #fff;
 }
 
-.nick { 
-  font-size: 14px; 
-  font-weight: 600; 
-  line-height: 1.1; 
+.nick {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.1;
 }
 
-.status { 
-  font-size: 12px; 
-  opacity: .9; 
+.status {
+  font-size: 12px;
+  opacity: .9;
 }
 
-.status-ctl:hover { 
-  opacity: .95; 
+.status-ctl:hover {
+  opacity: .95;
 }
 
-.dot { 
-  width: 10px; 
-  height: 10px; 
-  border-radius: 50%; 
-  display: inline-block; 
+.dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  display: inline-block;
 }
 
-.dot.online { 
-  background: #8ee16a; 
+.dot.online {
+  background: #8ee16a;
 }
 
-.dot.away { 
-  background: #f2c037; 
+.dot.away {
+  background: #f2c037;
 }
 
-.dot.dnd { 
-  background: #e53935; 
+.dot.dnd {
+  background: #e53935;
 }
 
-.dot.offline { 
-  background: #9e9e9e; 
-}
-
-.avatar-ph { 
-  width: 100%; 
-  height: 100%; 
-  background: #d9d9d9; 
-  border-radius: 50%; 
-}
-
-.avatar { 
-  background: transparent; 
-  border: none; 
+.dot.offline {
+  background: #9e9e9e;
 }
 </style>

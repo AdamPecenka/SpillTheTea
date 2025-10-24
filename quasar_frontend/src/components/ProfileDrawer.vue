@@ -1,16 +1,32 @@
 <template>
   <div class="profile-drawer full-height">
     <div class="q-pa-lg column justify-between full-height">
-      <!-- Top -->
+      <!-- Top with Settings Icon -->
       <div>
-        <div class="text-h6 q-mb-lg">Avatar</div>
+        <div class="row items-center justify-between q-mb-lg">
+          <div class="text-h6">Avatar</div>
+          <!-- Settings Icon Button -->
+          <q-btn
+            flat
+            round
+            dense
+            icon="settings"
+            color="grey-7"
+            @click="settingsOpen = true"
+          >
+            <q-tooltip>Settings</q-tooltip>
+          </q-btn>
+        </div>
 
         <!-- Avatar + nick -->
         <div class="column items-center q-gutter-sm q-mb-xl">
-          <q-avatar size="160px" color="grey-4">
-            <img v-if="user.avatarUrl" :src="user.avatarUrl" alt="avatar" />
-            <div v-else class="avatar-ph" />
-          </q-avatar>
+          <ProfilePicture
+            :image-url="user.avatarUrl"
+            size="160px"
+            :editable="!isEditing"
+            alt="Your profile picture"
+            @edit="onChangeAvatar"
+          />
           <div class="text-subtitle1">@{{ user.nickname }}</div>
         </div>
 
@@ -80,82 +96,163 @@
         </template>
       </div>
     </div>
+
+    <!-- Settings Panel -->
+    <SettingsPanel
+      v-model="settingsOpen"
+      :settings="userSettings"
+      :user-status="user.status"
+      @update:settings="onSettingsUpdate"
+    />
   </div>
 </template>
 
-<script setup>
-import { reactive, ref, computed, onMounted } from 'vue'
+<script>
 import { useUserStore } from 'src/store/useUserStore'
+import ProfilePicture from 'src/components/ProfilePicture.vue'
+import SettingsPanel from 'src/components/SettingsPanel.vue'
 import AvatarPic from 'src/assets/AvatarProfilePic.png'
 
-const props = defineProps({
-  modelValue: { type: Boolean, default: false }
-})
-const emit = defineEmits(['update:modelValue', 'save', 'logout'])
-
-const openProxy = computed({
-  get: () => props.modelValue,
-  set: v => emit('update:modelValue', v)
-})
-
-// use store
-const userStore = useUserStore()
-const user = computed(() => userStore.user || {
-  id: 'u-demo',
-  nickname: 'nickname',
-  first: '',
-  last: '',
-  email: '',
-  avatarUrl: AvatarPic
-})
-
-const isEditing = ref(false)
-const edit = reactive({ first: '', last: '', email: '' })
-
-onMounted(async () => {
-  if (typeof userStore.loadUser === 'function') {
-    await userStore.loadUser().catch(() => {})
+export default {
+  name: 'ProfileDrawer',
+  
+  components: {
+    ProfilePicture,
+    SettingsPanel
+  },
+  
+  props: {
+    modelValue: { 
+      type: Boolean, 
+      default: false 
+    }
+  },
+  
+  emits: ['update:modelValue', 'save', 'logout'],
+  
+  data() {
+    return {
+      isEditing: false,
+      settingsOpen: false,
+      edit: {
+        first: '',
+        last: '',
+        email: ''
+      },
+      userSettings: {
+        onlyMentions: false
+      },
+      userStore: null
+    }
+  },
+  
+  computed: {
+    openProxy: {
+      get() {
+        return this.modelValue
+      },
+      set(v) {
+        this.$emit('update:modelValue', v)
+      }
+    },
+    
+    user() {
+      const storeUser = this.userStore?.user
+      if (!storeUser) {
+        return {
+          id: 'u-demo',
+          nickname: 'nickname',
+          first: '',
+          last: '',
+          email: '',
+          status: 'online',
+          avatarUrl: AvatarPic
+        }
+      }
+      // Vráť aktuálneho usera zo store
+      return storeUser
+    }
+  },
+  
+  async mounted() {
+    this.userStore = useUserStore()
+    if (typeof this.userStore.loadUser === 'function') {
+      await this.userStore.loadUser().catch(() => {})
+    }
+    
+    // Load user settings
+    if (this.userStore.user?.settings) {
+      this.userSettings = { ...this.userStore.user.settings }
+    }
+  },
+  
+  methods: {
+    enterEdit() {
+      this.edit.first = this.user.first || ''
+      this.edit.last = this.user.last || ''
+      this.edit.email = this.user.email || ''
+      this.isEditing = true
+    },
+    
+    cancelEdit() {
+      this.isEditing = false
+    },
+    
+    save() {
+      // update store directly (or call an action if you have one)
+      if (this.userStore.user) {
+        this.userStore.user.first = this.edit.first
+        this.userStore.user.last = this.edit.last
+        this.userStore.user.email = this.edit.email
+      }
+      this.isEditing = false
+      this.$emit('save', { ...this.user })
+    },
+    
+    onChangeAvatar() {
+      // Tu môžeš pridať upload avatara
+      this.$q.notify({
+        message: 'Avatar upload coming soon!',
+        caption: 'Click to upload your memoji',
+        position: 'top',
+        icon: 'photo_camera'
+      })
+    },
+    
+    onSettingsUpdate(newSettings) {
+      this.userSettings = { ...newSettings }
+      
+      // Save to store
+      if (this.userStore.user) {
+        this.userStore.user.settings = { ...newSettings }
+      }
+      
+      // Emit to parent
+      this.$emit('save', { ...this.user, settings: newSettings })
+    }
   }
-})
-
-function enterEdit () {
-  edit.first = user.value.first || ''
-  edit.last  = user.value.last  || ''
-  edit.email = user.value.email || ''
-  isEditing.value = true
-}
-function cancelEdit () {
-  isEditing.value = false
-}
-function save () {
-  // update store directly (or call an action if you have one)
-  if (userStore.user) {
-    userStore.user.first = edit.first
-    userStore.user.last  = edit.last
-    userStore.user.email = edit.email
-  }
-  isEditing.value = false
-  emit('save', { ...(user.value) })
 }
 </script>
 
 <style scoped>
-.avatar-ph {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  background: #d9d9d9;
-}
-
 .profile-drawer {
   height: 100%;
 }
 
 /* čistý "list" štýl vo view mode */
-.info-list .field { margin-bottom: 22px; }
-.info-list .label { color: #2f2f2f; opacity: .9; margin-bottom: 10px; }
-.info-list .value { color: #000; }
+.info-list .field { 
+  margin-bottom: 22px; 
+}
 
+.info-list .label { 
+  color: #2f2f2f; 
+  opacity: .9; 
+  margin-bottom: 10px; 
+}
+
+.info-list .value { 
+  color: #000; 
+}
 
 .btn-cancel {
   min-width: 240px;
@@ -174,6 +271,14 @@ function save () {
   border-radius: 12px;
   padding: 12px 14px;
 }
-.btn-light { background: #d68ac3; color: #111; }
-.btn-dark  { background: #111; color: #fff; }
+
+.btn-light { 
+  background: #d68ac3; 
+  color: #111; 
+}
+
+.btn-dark { 
+  background: #111; 
+  color: #fff; 
+}
 </style>
