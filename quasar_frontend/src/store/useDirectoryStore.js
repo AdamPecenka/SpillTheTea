@@ -56,6 +56,15 @@ export const useDirectoryStore = defineStore('directory', {
         this.channels.push(c)
       }
     },
+    deleteChannel(id) {
+      this.channels = this.channels.filter((c) => c.id !== id)
+    },
+    togglePin(id) {
+      const ch = this.channels.find((c) => c.id === id)
+      if (ch) {
+        ch.isPinned = !ch.isPinned
+      }
+    }
   },
   persist: {
     storage: sessionStorage,

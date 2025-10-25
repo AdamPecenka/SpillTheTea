@@ -21,18 +21,57 @@
       </q-item-label>
     </q-item-section>
 
-    <!-- Badge for private channel -->
-    <q-item-section side v-if="channel.isPrivate">
-      <q-icon name="lock" size="16px" color="grey-6" />
+    
+    <q-item-section side class="row items-center q-gutter-xs">
+      <div class="row items-center q-gutter-xs justify-end">
+        <q-icon v-if="channel.isPrivate" name="lock" size="16px" color="grey-6" />
+        
+        <q-btn
+          dense
+          flat
+          round
+          icon="more_vert"
+          @click.stop
+        >
+          <q-menu auto-close transition-show="jump-down" transition-hide="jump-up">
+            <q-list style="min-width: 120px">
+              <q-item clickable v-ripple @click="togglePin">
+                <q-item-section avatar>
+                  <q-icon name="push_pin" />
+                </q-item-section>
+                <q-item-section>
+                  {{ pinned ? 'Unpin' : 'Pin' }}
+                </q-item-section>
+              </q-item>
+
+              <q-separator />
+
+              <q-item clickable v-ripple class="text-negative" @click="deleteChannel">
+                <q-item-section avatar>
+                  <q-icon name="delete" color="negative" />
+                </q-item-section>
+                <q-item-section>
+                  Delete
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+      </div>  
     </q-item-section>
   </q-item>
 </template>
 
 <script>
-import { computed } from 'vue'
+import { useDirectoryStore } from 'src/store/useDirectoryStore';
 
 export default {
   name: 'ChannelListItem',
+  data () {
+    return {
+      channelStore: useDirectoryStore()
+    }
+  },
   props: {
     channel: {
       type: Object,
@@ -49,7 +88,7 @@ export default {
   emits: ['click'],
   computed: {
     channelIcon() {
-      return this.channel.isPrivate ? 'tag' : 'tag'; // Adjust icon based on channel type
+      return this.channel.isPrivate ? 'tag' : 'tag';
     },
     avatarColor() {
       return this.pinned ? 'primary' : (this.channel.isPrivate ? 'grey-7' : 'grey-5');
@@ -58,6 +97,12 @@ export default {
   methods: {
     handleClick() {
       this.$emit('click', this.channel);
+    },
+    togglePin () {
+      this.channelStore.togglePin(this.channel.id)
+    },
+    deleteChannel () {
+      this.channelStore.deleteChannel(this.channel.id)
     }
   }
 }

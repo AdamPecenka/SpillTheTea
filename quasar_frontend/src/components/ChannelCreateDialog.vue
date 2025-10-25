@@ -79,6 +79,20 @@ export default {
       const name = this.channelName.trim()
       if (!name) return
 
+      const existing = this.channelStore.channels.find(
+        c => c.name.toLowerCase() === name.toLowerCase()
+      )
+
+      if (existing) {
+        Notify.create({
+          message: `A channel named "${name}" already exists.`,
+          color: 'negative',
+          position: 'top',
+          icon: 'error'
+        })
+        return
+      }
+
       const newChannel = {
         id: name.toLowerCase(),
         name,

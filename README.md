@@ -2,14 +2,14 @@
 Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 
 ### Authors
-- Johanna Tilešová [@JohannaTilesova](https://github.com/johannatilesova)
+- Johanna Tilešová [@JohannaTilesova](https://github.com/johannatilesova) sere ma
 - Adam Pečenka [@AdamPecenka](https://github.com/AdamPecenka)
 
 ## Prípady použitia
 - [x] registrácia, prihlásenie a odhlásenie používateľa
     - [x] používateľ má meno a priezvisko, nickName a email
 - [x] používateľ vidí zoznam kanálov, v ktorých je členom
-   - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
+   - [x] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
    - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
    - [x] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
    - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
@@ -22,7 +22,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [ ] do verejného kanála sa môže pridať ľubovolný používateľ cez príkaz /join channelName (ak kanál neexistuje, automaticky sa vytvorí)
    - [ ] do verejného kanála môže člen kanála pozvať iného používateľa príkazom /invite nickName
    - [ ] vo verejnom kanáli môže člen "vyhodiť" iného člena príkazom /kick nickName. ak tak spravia aspoň 3 členovia, používateľ má "trvalý" ban pre daný kanál. správca môže používateľa vyhodiť "natrvalo" kedykoľvek príkazom /kick nickName, alebo naopak "obnovit" používateľovi prístup do kanála cez príkaz /invite
-   - [ ] nickName ako aj channelName sú unikátne
+   - [x] nickName ako aj channelName sú unikátne
    - [ ] správca môže kanál zatvoriť/zrušiť príkazom /quit
 - [ ] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
 - [x] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname

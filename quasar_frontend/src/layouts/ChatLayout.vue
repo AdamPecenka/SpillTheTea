@@ -121,7 +121,6 @@
         <!-- Right: Profile Drawer -->
     <q-drawer
       v-model="rightOpen"
-      show-if-above
       side="right"
       :width="340"
       :breakpoint="1024"
@@ -195,7 +194,7 @@ export default {
   
   data() {
     return {
-      panelOpen: true,
+      panelOpen: false,
       leftTab: 'dms',
       rightOpen: false,
       currentChannel: 'Channel name',
@@ -213,7 +212,6 @@ export default {
       router: null
     }
   },
-  
   computed: {
     leftListTitle() {
       return this.leftTab === 'channels' ? 'Channels' : 'Direct messages'
@@ -278,17 +276,18 @@ export default {
     }
   },
   
-  async mounted() {
+  mounted() {
+
+    console.log('Mounted ChatLayout, rightOpen =', this.rightOpen);
+
     // Inicializácia store a router
     this.dir = useDirectoryStore()
     this.router = useRouter()
     
     // Načítanie data
     try {
-      await Promise.all([
         this.dir.loadChannels(), 
         this.dir.loadFriends()
-      ])
     } catch (error) {
       console.error('Failed to load data:', error)
     }
