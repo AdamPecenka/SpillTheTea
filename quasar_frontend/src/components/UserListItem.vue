@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple @click="handleClick">
+  <q-item clickable v-ripple @click="goToChat">
     <q-item-section avatar>
       <q-avatar size="40px" color="grey-5">
         <q-icon name="person" color="grey-9" size="24px" />
@@ -77,8 +77,8 @@ export default {
     }
   },
   methods: {
-    handleClick() {
-      this.$emit('click', this.user)
+    goToChat() {
+      this.$router.push({ name: 'chat' })
     }
   }
 }

@@ -5,16 +5,21 @@
     <q-header elevated class="bg-grey-9 items-center text-white">
       <q-toolbar>
 
-        <img
-          src="icons/tea_icon.png"
-          style="width: 40px; height: 36px"
-        />
-
-        <q-toolbar-title>
-          <div class="row items-center no-wrap">
+        <q-btn
+          flat
+          no-caps
+          class="row items-center no-wrap q-pa-none"
+          @click="goHome"
+        >
+          <img
+            src="icons/tea_icon.png"
+            style="width: 40px; height: 36px"
+          />
+          <q-toolbar-title class="q-ml-sm">
             <div class="text-weight-bold">Spill The Tea</div>
-          </div>
-        </q-toolbar-title>
+          </q-toolbar-title>
+        </q-btn>
+
         <q-space />
         
         <ProfileButton
@@ -77,7 +82,6 @@
       <div v-if="leftTab === 'channels'" class="panel-scroll">
         <ChannelList 
           :channels="filteredChannels"
-          @channel-click="goChannel"
         />
       </div>
 
@@ -88,7 +92,6 @@
             v-for="u in filteredFriends"
             :key="u.id"
             :user="u"
-            @click="goDm"
           />
         </q-list>
       </q-scroll-area>
@@ -125,30 +128,23 @@
         <div class="content-wrapper">
           <router-view v-slot="{ Component }">
             <keep-alive>
-              <component :is="Component" />
+              <component :is="Component"  :page-style="pageContainerStyle" />
             </keep-alive>
           </router-view>
         </div>
       </q-page>
-
-      <q-page-sticky position="bottom" expand class="q-px-md q-pb-sm">
-        <div
-          class="flex justify-center"
-          style="width: 100%; max-width: var(--content-available, 1200px); margin: 0 auto;"
-        >
-          <TypingBar
-            placeholder="Enter some command /"
-          />
-        </div>
-      </q-page-sticky>
     </q-page-container>
 
-    
-
-    <!-- Composer Bar -->
-    <q-footer elevated class="bg-grey-9">
-      
-    </q-footer>
+    <q-page-sticky position="bottom" expand class="q-px-md q-pb-sm" :style="pageStyle">
+      <div
+        class="flex justify-center"
+        style="width: 100%; max-width: var(--content-available, 1200px); margin: 0 auto;"
+      >
+        <TypingBar
+          placeholder="Enter some command /"
+        />
+      </div>
+    </q-page-sticky>
   </q-layout>
 </template>
 
@@ -170,6 +166,7 @@ export default {
     ProfileDrawer,
     UserListItem,
     ChannelList,
+    SettingsPanel,
     TypingBar
   },
   
@@ -290,20 +287,9 @@ export default {
     onProfileSave(updated) {
       this.profile = { ...this.profile, ...updated }
     },
-    
-    goChannel(ch) {
-      this.currentChannel = ch.name
-      this.router.push({ 
-        name: 'channel', 
-        params: { id: ch.name } 
-      })
-    },
-    
-    goDm(u) {
-      this.router.push({ 
-        name: 'dm', 
-        params: { id: u.id } 
-      })
+
+    goHome() {
+      this.$router.push({ name: 'index' })
     }
   }
 }

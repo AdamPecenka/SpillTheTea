@@ -11,7 +11,7 @@
           :key="ch.id"
           :channel="ch"
           :pinned="true"
-          @click="$emit('channel-click', ch)"
+          @click="goToChat"
         />
       </q-list>
       <q-separator class="q-mx-md q-my-xs" />
@@ -27,7 +27,7 @@
           v-for="ch in privateChannels"
           :key="ch.id"
           :channel="ch"
-          @click="$emit('channel-click', ch)"
+          @click="goToChat"
         />
       </q-list>
       <q-separator class="q-mx-md q-my-xs" />
@@ -43,7 +43,7 @@
           v-for="ch in publicChannels"
           :key="ch.id"
           :channel="ch"
-          @click="$emit('channel-click', ch)"
+          @click="goToChat"
         />
       </q-list>
     </div>
@@ -65,7 +65,6 @@ export default {
       required: true
     }
   },
-  emits: ['channel-click'],
   computed: {
     pinnedChannels() {
       return this.channels.filter(ch => ch.isPinned);
@@ -75,6 +74,11 @@ export default {
     },
     publicChannels() {
       return this.channels.filter(ch => !ch.isPinned && !ch.isPrivate);
+    }
+  },
+  methods: {
+    goToChat() {
+      this.$router.push({ name: 'chat' })
     }
   }
 }
