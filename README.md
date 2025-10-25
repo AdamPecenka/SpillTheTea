@@ -25,8 +25,8 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [ ] nickName ako aj channelName sú unikátne
    - [ ] správca môže kanál zatvoriť/zrušiť príkazom /quit
 - [ ] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
-- [ ] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
-   - [ ] správa je zvýraznená danému používateľovi v zozname správ
+- [x] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
+   - [x] správa je zvýraznená danému používateľovi v zozname správ
 - [x] používateľ si môže pozrieť kompletnú históriu správ
    - [x] efektívny inifinite scroll
 - [x] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
