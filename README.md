@@ -6,13 +6,13 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - Adam Pečenka [@AdamPecenka](https://github.com/AdamPecenka)
 
 ## Prípady použitia
-- [ ] registrácia, prihlásenie a odhlásenie používateľa
+- [x] registrácia, prihlásenie a odhlásenie používateľa
     - [x] používateľ má meno a priezvisko, nickName a email
-- [ ] používateľ vidí zoznam kanálov, v ktorých je členom
+- [x] používateľ vidí zoznam kanálov, v ktorých je členom
    - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
    - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
    - [ ] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
-   - [ ] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
+   - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
    - [ ] správcom kanála je používateľ, ktorý kanál vytvoril
    - [ ] ak nie je kanál aktívny (nie je pridaná nová správa) viac ako 30 dní, kanál prestáva existovať (následne je možné použiť channelName kanála pre "nový" kanál)
 - [ ] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
@@ -27,14 +27,14 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - [ ] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
 - [ ] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
    - [ ] správa je zvýraznená danému používateľovi v zozname správ
-- [ ] používateľ si môže pozrieť kompletnú históriu správ
-   - [ ] efektívny inifinite scroll
-- [ ] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
+- [x] používateľ si môže pozrieť kompletnú históriu správ
+   - [x] efektívny inifinite scroll
+- [x] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
    - [ ] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
-   - [ ] notifikácia obsahuje časť zo správy a odosielateľa
-   - [ ] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
-- [ ] používateľ si môže nastaviť stav (online, DND, offline)
-   - [ ] stav sa zobrazuje používateľom
+   - [x] notifikácia obsahuje časť zo správy a odosielateľa
+   - [x] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
+- [x] používateľ si môže nastaviť stav (online, DND, offline)
+   - [x] stav sa zobrazuje používateľom
    - [ ] ak je nastavený DND stav, neprichádzajú notifikácie
    - [ ] ak je nastavený offline stav, neprichádzajú používateľovi správy, po prepnutí do online sú kanály automaticky aktualizované
 - [ ] používateľ si môže pozrieť zoznam členov kanála (ak je tiež členom kanála) príkazom /list
