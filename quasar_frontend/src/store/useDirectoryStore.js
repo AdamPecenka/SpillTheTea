@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-async function fetchChannels() {
+function fetchChannels() {
   return [
     { id:'general', name:'general', topic:'team-wide', members:12, isPrivate: false, isPinned: true  },
     { id:'random',  name:'random',  topic:'off-topic', members:7, isPrivate: true, isPinned: false  },
@@ -11,7 +11,7 @@ async function fetchChannels() {
   ]
 }
 
-async function fetchFriends() {
+function fetchFriends() {
   return [
     { id:'u-damian',  name:'Damian',  status:'online' },
     { id:'u-monika', name:'Monika', status:'away'   },
@@ -34,22 +34,30 @@ export const useDirectoryStore = defineStore('directory', {
   }),
   getters: {
     channelBy: (state) => (idOrName) =>
-      state.channels.find(c => c.id === idOrName || c.name === idOrName),
+      state.channels.find((c) => c.id === idOrName || c.name === idOrName),
     friendBy: (state) => (idOrName) =>
-      state.friends.find(u => u.id === idOrName || u.name === idOrName),
-    channelsSorted: (state) => [...state.channels].sort((a,b)=>a.name.localeCompare(b.name)),
-    friendsSorted:  (state) => [...state.friends].sort((a,b)=>a.name.localeCompare(b.name)),
+      state.friends.find((u) => u.id === idOrName || u.name === idOrName),
+    channelsSorted: (state) => [...state.channels].sort((a, b) => a.name.localeCompare(b.name)),
+    friendsSorted: (state) => [...state.friends].sort((a, b) => a.name.localeCompare(b.name)),
   },
   actions: {
-    async loadChannels(force=false){
+    loadChannels(force = false) {
       if (this.channelsLoaded && !force) return
-      this.channels = await fetchChannels()
+      this.channels = fetchChannels()
       this.channelsLoaded = true
     },
-    async loadFriends(force=false){
+    loadFriends(force = false) {
       if (this.friendsLoaded && !force) return
-      this.friends = await fetchFriends()
+      this.friends = fetchFriends()
       this.friendsLoaded = true
     },
+    addChannel(c) {
+      if (c) {
+        this.channels.push(c)
+      }
+    },
+  },
+  persist: {
+    storage: sessionStorage,
   }
 })

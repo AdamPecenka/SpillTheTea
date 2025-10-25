@@ -34,6 +34,8 @@
     <!-- Left Rail: Icons (Messages / Channels) -->
     <div class="left-rail bg-grey-10">
       <div class="column items-center q-pt-md q-gutter-sm full-height">
+        
+        <!-- DMs -->
         <q-btn
           round flat icon="chat"
           :color="leftTab === 'dms' ? 'primary' : 'grey-4'"
@@ -46,6 +48,7 @@
           </q-tooltip>
         </q-btn>
 
+        <!-- Channels -->
         <q-btn
           round flat icon="forum"
           :color="leftTab === 'channels' ? 'primary' : 'grey-4'"
@@ -57,8 +60,26 @@
             Channels
           </q-tooltip>
         </q-btn>
+
+        <!-- Add channel dialog-->
+        <q-btn
+          round flat icon="add"
+          :color="leftTab === 'add' ? 'primary' : 'grey-4'"
+          @click="openChannelDialog"
+          class="rail-btn"
+        >
+          <q-tooltip class="custom-tooltip" transition-show="jump-right" transition-hide="jump-left"
+            anchor="center right" self="center left">
+            Add Channel
+          </q-tooltip>
+        </q-btn>
       </div>
     </div>
+
+    <!-- Add Channel Dialog -->
+    <ChannelCreateDialog
+      v-model="channelDialogOpen"
+    />
 
     <!-- Secondary Panel: zoznam DMs / Channels -->
     <div 
@@ -157,6 +178,7 @@ import UserListItem from 'src/components/UserListItem.vue'
 import ChannelList from 'src/components/ChannelList.vue'
 import SettingsPanel from 'src/components/SettingsPanel.vue'
 import TypingBar from 'src/components/TypingBar.vue'
+import ChannelCreateDialog from 'src/components/ChannelCreateDialog.vue'
 
 export default {
   name: 'ChatLayout',
@@ -167,7 +189,8 @@ export default {
     UserListItem,
     ChannelList,
     SettingsPanel,
-    TypingBar
+    TypingBar,
+    ChannelCreateDialog
   },
   
   data() {
@@ -176,6 +199,7 @@ export default {
       leftTab: 'dms',
       rightOpen: false,
       currentChannel: 'Channel name',
+      channelDialogOpen: false,
       channelSearch: '',
       messageText: '',
       profile: {
@@ -282,6 +306,10 @@ export default {
         this.leftTab = tab
         this.panelOpen = true
       }
+    },
+
+    openChannelDialog() {
+      this.channelDialogOpen = true
     },
     
     onProfileSave(updated) {

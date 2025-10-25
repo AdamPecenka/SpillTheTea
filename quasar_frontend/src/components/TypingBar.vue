@@ -21,6 +21,7 @@
 
 <script>
 import { Notify } from 'quasar';
+import { useUserStore } from 'src/store/useUserStore';
 
 export default {
   name: 'TypingBar',
@@ -31,6 +32,12 @@ export default {
   },
   props: {
     placeholder: { type: String, default: 'Type a message...' }
+  },
+  computed: {
+    userStatus() {
+      const userstore = useUserStore()
+      return userstore.user.status 
+    }
   },
   methods: {
     onSend() {
@@ -49,14 +56,16 @@ export default {
         case "/list":
         case "/help":
         case "/notify":
-          Notify.create({
-            message: 'Vedel si o t...',
-            caption: '@Tyty',
-            position: 'bottom-right',
-            color: 'primary',
-            progress: true,
-            timeout: 10000
-          })
+          if(this.userStatus !== 'dnd') {
+            Notify.create({
+              message: 'Vedel si o t...',
+              caption: '@Tyty',
+              position: 'bottom-right',
+              color: 'primary',
+              progress: true,
+              timeout: 2000
+            })
+          }
           break;
         default:
           console.log(`[i] Message sent: ${this.message}`)

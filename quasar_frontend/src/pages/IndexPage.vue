@@ -23,16 +23,7 @@
   </div>
 </template>
 
-<script setup lang="ts">
-import { ref } from 'vue';
-
-const inputValue = ref('');
-const typing = ref(''); 
-
-function onSend(text) {
-  // handle send (navigate, dispatch, emit, whatever)
-  console.log('send:', text)
-}
+<script>
 </script>
 
 <style scoped>

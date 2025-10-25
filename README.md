@@ -11,11 +11,11 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - [x] používateľ vidí zoznam kanálov, v ktorých je členom
    - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
    - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
-   - [ ] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
+   - [x] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
    - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
    - [ ] správcom kanála je používateľ, ktorý kanál vytvoril
    - [ ] ak nie je kanál aktívny (nie je pridaná nová správa) viac ako 30 dní, kanál prestáva existovať (následne je možné použiť channelName kanála pre "nový" kanál)
-- [ ] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
+- [x] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
 - [ ] vytvorenie komunikačného kanála (channel) cez príkazový riadok
    - [ ] kanál môže vytvoriť ľubovolný používateľ cez príkaz /join channelName [private]
    - [ ] do súkromného kanála môže pridávať/odoberať používateľov iba správca kanála cez príkazy /invite nickName a /revoke nickName
@@ -35,7 +35,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [x] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
 - [x] používateľ si môže nastaviť stav (online, DND, offline)
    - [x] stav sa zobrazuje používateľom
-   - [ ] ak je nastavený DND stav, neprichádzajú notifikácie
+   - [x] ak je nastavený DND stav, neprichádzajú notifikácie
    - [ ] ak je nastavený offline stav, neprichádzajú používateľovi správy, po prepnutí do online sú kanály automaticky aktualizované
 - [ ] používateľ si môže pozrieť zoznam členov kanála (ak je tiež členom kanála) príkazom /list
 - [ ] ak má používateľ aktívny niektorý z kanálov (nachádza sa v okne správ pre daný kanál) vidí v stavovej lište informáciu o tom, kto aktuálne píše správu (napr. Ed is typing)
