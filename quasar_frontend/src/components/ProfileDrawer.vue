@@ -25,7 +25,7 @@
             size="160px"
             :editable="!isEditing"
             alt="Your profile picture"
-            @edit="onChangeAvatar"
+            @edit="openAvatarPicker"
           />
           <div class="text-subtitle1">@{{ user.username }}</div>
         </div>
@@ -104,6 +104,13 @@
       :user-status="user.status"
       @update:settings="onSettingsUpdate"
     />
+
+    <!-- Avatar Picker Dialog -->
+    <AvatarPicker
+      v-model="avatarPickerOpen"
+      :current-avatar="user.avatarUrl"
+      @select="onAvatarSelected"
+    />
   </div>
 </template>
 
@@ -111,6 +118,7 @@
 import { useUserStore } from 'src/store/useUserStore'
 import ProfilePicture from 'src/components/ProfilePicture.vue'
 import SettingsPanel from 'src/components/SettingsPanel.vue'
+import AvatarPicker from 'src/components/AvatarPicker.vue'
 import AvatarPic from 'src/assets/AvatarProfilePic.png'
 
 export default {
@@ -118,7 +126,8 @@ export default {
   
   components: {
     ProfilePicture,
-    SettingsPanel
+    SettingsPanel,
+    AvatarPicker
   },
   
   props: {
@@ -134,6 +143,7 @@ export default {
     return {
       isEditing: false,
       settingsOpen: false,
+      avatarPickerOpen: false,
       edit: {
         first: '',
         last: '',
@@ -169,7 +179,6 @@ export default {
           avatarUrl: AvatarPic
         }
       }
-      // Vráť aktuálneho usera zo store
       return storeUser
     }
   },
@@ -208,13 +217,22 @@ export default {
       this.$emit('save', { ...this.user })
     },
     
-    onChangeAvatar() {
-      // Tu môžeš pridať upload avatara
+    openAvatarPicker() {
+      this.avatarPickerOpen = true
+    },
+    
+    onAvatarSelected(avatarUrl) {
+      // Update user avatar in store
+      if (this.userStore.user) {
+        this.userStore.user.avatarUrl = avatarUrl
+      }
+      
       this.$q.notify({
-        message: 'Avatar upload coming soon!',
-        caption: 'Click to upload your memoji',
+        message: 'Avatar updated!',
+        color: 'positive',
         position: 'top',
-        icon: 'photo_camera'
+        timeout: 2000,
+        icon: 'check_circle'
       })
     },
     
