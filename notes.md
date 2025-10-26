@@ -4,24 +4,21 @@
 
 - [x] Registrácia
 - [x] Prihlásenie
-- [ ] Odhlásenie používateľa
+- [x] Odhlásenie používateľa
 - [x] Zobrazenie / úprava profilu (meno, priezvisko, nickName, email)
 - [x] Zobrazenie zoznamu kanálov
-- [ ] Zobrazenie pozvánok (zvýraznenie / topovanie)
-- [ ] UI pre vytvorenie / opustenie / zrušenie kanála
+- [x] Zobrazenie pozvánok (zvýraznenie / topovanie)
+- [x] UI pre vytvorenie / opustenie / zrušenie kanála
 - [x] Výber typu kanála (public/private)
-- [ ] Posielanie správ cez príkazový riadok
-- [ ] Zobrazenie histórie správ (infinite scroll)
-- [ ] Zobrazenie mentionov (vizuálne zvýraznenie)
-- [ ] Notifikácie (zobrazenie / správa preferencií)
+- [x] Zobrazenie histórie správ (infinite scroll)
+- [x] Zobrazenie mentionov (vizuálne zvýraznenie)
+- [x] Notifikácie (zobrazenie / správa preferencií)
 - [x] Rozhranie na zmenu stavu (online / DND / offline)
 - [ ] Zobrazenie zoznamu členov kanála (/list)
 - [ ] Typing indicator (“X is typing”)
 - [ ] Live draft – vizualizácia rozpísaného textu
 - [ ] UI pre potvrdenie opustenia / zrušenia kanála
-- [ ] Sync kanálov po návrate z offline do online
 - [x] UI rozlíšenie public vs private kanál
-- [ ] Notifikácie iba pri neviditeľnej appke (AppVisibility)
 
 ### BACKEND
 

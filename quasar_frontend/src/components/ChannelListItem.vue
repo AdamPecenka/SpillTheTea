@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple @click="handleClick">
+  <q-item clickable v-ripple @click="handleClick" :class="{ 'invite-highlight': channel.isInvite }">
     <q-item-section avatar>
       <q-avatar size="32px" :color="avatarColor" text-color="white">
         <q-icon :name="channelIcon" size="18px" />
@@ -35,25 +35,45 @@
         >
           <q-menu auto-close transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 120px">
-              <q-item clickable v-ripple @click="togglePin">
-                <q-item-section avatar>
-                  <q-icon name="push_pin" />
-                </q-item-section>
-                <q-item-section>
-                  {{ pinned ? 'Unpin' : 'Pin' }}
-                </q-item-section>
-              </q-item>
+              <!-- Invite Menu -->
+              <template v-if="channel.isInvite">
+                <q-item clickable v-ripple @click="acceptInvite">
+                  <q-item-section avatar>
+                    <q-icon name="login" color="grey-7" />
+                  </q-item-section>
+                  <q-item-section>Join</q-item-section>
+                </q-item>
+                
+                <q-separator />
 
-              <q-separator />
+                <q-item clickable v-ripple @click="rejectInvite" class="text-negative">
+                  <q-item-section avatar>
+                    <q-icon name="cancel" color="negative" />
+                  </q-item-section>
+                  <q-item-section>Reject</q-item-section>
+                </q-item>
+              </template>
 
-              <q-item clickable v-ripple class="text-negative" @click="deleteChannel">
-                <q-item-section avatar>
-                  <q-icon name="delete" color="negative" />
-                </q-item-section>
-                <q-item-section>
-                  Delete
-                </q-item-section>
-              </q-item>
+              <!-- Normal Channel Menu -->
+              <template v-else>
+                <q-item clickable v-ripple @click="togglePin">
+                  <q-item-section avatar>
+                    <q-icon name="push_pin" color="grey-7"/>
+                  </q-item-section>
+                  <q-item-section>
+                    {{ pinned ? 'Unpin' : 'Pin' }}
+                  </q-item-section>
+                </q-item>
+
+                <q-separator />
+
+                <q-item clickable v-ripple class="text-negative" @click="deleteChannel">
+                  <q-item-section avatar>
+                    <q-icon name="logout" color="negative" />
+                  </q-item-section>
+                  <q-item-section>Leave</q-item-section>
+                </q-item>
+              </template>
             </q-list>
           </q-menu>
         </q-btn>
@@ -91,7 +111,7 @@ export default {
       return this.channel.isPrivate ? 'tag' : 'tag';
     },
     avatarColor() {
-      return this.pinned ? 'primary' : (this.channel.isPrivate ? 'grey-7' : 'grey-5');
+      return this.pinned ? 'primary' : (this.channel.isPrivate || this.channel.isInvite ? 'grey-7' : 'grey-5');
     }
   },
   methods: {
@@ -111,5 +131,13 @@ export default {
 <style scoped>
 .q-item {
   min-height: 48px;
+}
+.invite-highlight {
+  background-color: rgba(219, 136, 194, 0.3);
+  border-left: 5px solid #9c27b0; 
+  transition: background-color 0.2s, border-color 0.2s;
+}
+.invite-highlight:hover {
+  background-color: rgba(219, 136, 194, 0.4);
 }
 </style>

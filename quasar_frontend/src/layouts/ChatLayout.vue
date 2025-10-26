@@ -277,14 +277,9 @@ export default {
   },
   
   mounted() {
-
-    console.log('Mounted ChatLayout, rightOpen =', this.rightOpen);
-
-    // Inicializácia store a router
     this.dir = useDirectoryStore()
     this.router = useRouter()
     
-    // Načítanie data
     try {
         this.dir.loadChannels(), 
         this.dir.loadFriends()

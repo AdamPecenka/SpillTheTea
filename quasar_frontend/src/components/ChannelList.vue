@@ -17,6 +17,22 @@
       <q-separator class="q-mx-md q-my-xs" />
     </div>
 
+    <!-- Ivnitations -->
+    <div v-if="inviteChannels.length > 0">
+      <div class="q-px-md q-pt-sm q-pb-xs">
+        <div class="text-caption text-weight-bold text-grey-7">INVITED</div>
+      </div>
+      <q-list padding>
+        <ChannelListItem
+          v-for="ch in inviteChannels"
+          :key="ch.id"
+          :channel="ch"
+          @click="goToChat"
+        />
+      </q-list>
+      <q-separator class="q-mx-md q-my-xs" />
+    </div>
+
     <!-- Private Channels -->
     <div v-if="privateChannels.length > 0">
       <div class="q-px-md q-pt-sm q-pb-xs">
@@ -70,10 +86,13 @@ export default {
       return this.channels.filter(ch => ch.isPinned);
     },
     privateChannels() {
-      return this.channels.filter(ch => !ch.isPinned && ch.isPrivate);
+      return this.channels.filter(ch => !ch.isPinned && ch.isPrivate && !ch.isInvite);
     },
     publicChannels() {
-      return this.channels.filter(ch => !ch.isPinned && !ch.isPrivate);
+      return this.channels.filter(ch => !ch.isPinned && !ch.isPrivate && !ch.isInvite);
+    },
+    inviteChannels() {
+      return this.channels.filter(ch => !ch.isPinned && ch.isInvite);
     }
   },
   methods: {

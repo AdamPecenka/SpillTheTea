@@ -20,7 +20,7 @@
           :bg-color="msg.sent ? 'pink-11' : 'purple-4'"
           text-color="white"
           :stamp="new Date(msg.stamp).toLocaleTimeString()"
-          :class="{ 'ping-highlight': msg.text.includes('@abracadabra') }"        
+          :class="{ 'ping-highlight': msg.text.includes('@abracadabra') }"      
         />
       </q-infinite-scroll>
     </div>
@@ -48,12 +48,6 @@ export default {
           isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
         i % 2 === 0
       )
-    }
-  },
-  computed: {
-    isPing() {
-      const username = '@abracadabra'
-      return this.text?.includes(username)
     }
   },
   methods: {
@@ -109,10 +103,7 @@ export default {
 
 <style scoped>
 .ping-highlight {
-  background-color: rgba(56, 189, 248, 0.15);
-  border-left: 3px solid #38bdf8;
-  border-radius: 8px;
-  padding-left: 8px;
-  transition: background-color 0.3s;
+  background-color: rgba(219, 136, 194, 0.15);
+  border-radius: 10px;
 } 
 </style>

@@ -2,26 +2,83 @@ import { defineStore } from 'pinia'
 
 function fetchChannels() {
   return [
-    { id:'general', name:'general', topic:'team-wide', members:12, isPrivate: false, isPinned: true  },
-    { id:'random',  name:'random',  topic:'off-topic', members:7, isPrivate: true, isPinned: false  },
-    { id:'uni',  name:'uni',  topic:'off-topic', members:250, isPrivate: false, isPinned: false  },
-    { id:'vpwa',  name:'VPWA',  topic:'web-dev', members:100, isPrivate: true, isPinned: true  },
-    { id:'cooked',  name:'cooked',  topic:'', members:45, isPrivate: true, isPinned: false  },
-    { id:'cars',  name:'cars',  topic:'car-meets', members:300, isPrivate: false, isPinned: false  },
+    {
+      id: 'general',
+      name: 'general',
+      topic: 'team-wide',
+      members: 12,
+      isPrivate: false,
+      isPinned: true,
+      isInvite: false,
+    },
+    {
+      id: 'random',
+      name: 'random',
+      topic: 'off-topic',
+      members: 7,
+      isPrivate: true,
+      isPinned: false,
+      isInvite: false,
+    },
+    {
+      id: 'uni',
+      name: 'uni',
+      topic: 'off-topic',
+      members: 250,
+      isPrivate: false,
+      isPinned: false,
+      isInvite: false,
+    },
+    {
+      id: 'vpwa',
+      name: 'VPWA',
+      topic: 'web-dev',
+      members: 100,
+      isPrivate: true,
+      isPinned: true,
+      isInvite: false,
+    },
+    {
+      id: 'cooked',
+      name: 'cooked',
+      topic: '',
+      members: 45,
+      isPrivate: true,
+      isPinned: false,
+      isInvite: false,
+    },
+    {
+      id: 'cars',
+      name: 'cars',
+      topic: 'car-meets',
+      members: 300,
+      isPrivate: false,
+      isPinned: false,
+      isInvite: false,
+    },
+    {
+      id: 'nsfw',
+      name: 'NSFW(18+)',
+      topic: 'Single moms in ur area',
+      members: 69,
+      isPrivate: true,
+      isPinned: false,
+      isInvite: true,
+    },
   ]
 }
 
 function fetchFriends() {
   return [
-    { id:'u-damian',  name:'Damian',  status:'online' },
-    { id:'u-monika', name:'Monika', status:'away'   },
-    { id:'u-adam', name:'Adam', status:'offline'},
-    { id:'u-jano', name:'Jano', status:'dnd'   },
-    { id:'u-katka', name:'Katka', status:'offline'   },
-    { id:'u-terka', name:'Terka', status:'away'   },
-    { id:'u-ema', name:'Ema', status:'away'   },
-    { id:'u-tyty', name:'Tyty', status:'dnd'   },
-    { id:'u-marek', name:'Marek', status:'online'}
+    { id: 'u-damian', name: 'Damian', status: 'online' },
+    { id: 'u-monika', name: 'Monika', status: 'away' },
+    { id: 'u-adam', name: 'Adam', status: 'offline' },
+    { id: 'u-jano', name: 'Jano', status: 'dnd' },
+    { id: 'u-katka', name: 'Katka', status: 'offline' },
+    { id: 'u-terka', name: 'Terka', status: 'away' },
+    { id: 'u-ema', name: 'Ema', status: 'away' },
+    { id: 'u-tyty', name: 'Tyty', status: 'dnd' },
+    { id: 'u-marek', name: 'Marek', status: 'online' },
   ]
 }
 
@@ -64,9 +121,9 @@ export const useDirectoryStore = defineStore('directory', {
       if (ch) {
         ch.isPinned = !ch.isPinned
       }
-    }
+    },
   },
   persist: {
     storage: sessionStorage,
-  }
+  },
 })

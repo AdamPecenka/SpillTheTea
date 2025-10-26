@@ -10,7 +10,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
     - [x] používateľ má meno a priezvisko, nickName a email
 - [x] používateľ vidí zoznam kanálov, v ktorých je členom
    - [x] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
-   - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
+   - [x] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
    - [x] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
    - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
    - [ ] správcom kanála je používateľ, ktorý kanál vytvoril
@@ -23,8 +23,8 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [ ] do verejného kanála môže člen kanála pozvať iného používateľa príkazom /invite nickName
    - [ ] vo verejnom kanáli môže člen "vyhodiť" iného člena príkazom /kick nickName. ak tak spravia aspoň 3 členovia, používateľ má "trvalý" ban pre daný kanál. správca môže používateľa vyhodiť "natrvalo" kedykoľvek príkazom /kick nickName, alebo naopak "obnovit" používateľovi prístup do kanála cez príkaz /invite
    - [x] nickName ako aj channelName sú unikátne
-   - [ ] správca môže kanál zatvoriť/zrušiť príkazom /quit
-- [ ] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
+   - [x] správca môže kanál zatvoriť/zrušiť príkazom /quit
+- [x] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
 - [x] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
    - [x] správa je zvýraznená danému používateľovi v zozname správ
 - [x] používateľ si môže pozrieť kompletnú históriu správ
