@@ -88,6 +88,8 @@ export const useDirectoryStore = defineStore('directory', {
     channelsLoaded: false,
     friends: [],
     friendsLoaded: false,
+    // Active chat tracking
+    activeChat: null, // { type: 'channel' | 'dm', id: 'channel-id' | 'user-id' }
   }),
   getters: {
     channelBy: (state) => (idOrName) =>
@@ -96,6 +98,42 @@ export const useDirectoryStore = defineStore('directory', {
       state.friends.find((u) => u.id === idOrName || u.name === idOrName),
     channelsSorted: (state) => [...state.channels].sort((a, b) => a.name.localeCompare(b.name)),
     friendsSorted: (state) => [...state.friends].sort((a, b) => a.name.localeCompare(b.name)),
+    // Getters pre aktívny chat
+    activeChatData: (state) => {
+      if (!state.activeChat) return null
+      
+      if (state.activeChat.type === 'channel') {
+        const channel = state.channels.find(c => c.id === state.activeChat.id)
+        if (channel) {
+          return {
+            type: 'channel',
+            title: `#${channel.name}`,
+            subtitle: channel.topic || null,
+            data: channel
+          }
+        }
+      }
+      
+      if (state.activeChat.type === 'dm') {
+        const user = state.friends.find(u => u.id === state.activeChat.id)
+        if (user) {
+          const statusMap = {
+            'online': 'Online',
+            'away': 'Away',
+            'dnd': 'Do not disturb',
+            'offline': 'Offline'
+          }
+          return {
+            type: 'dm',
+            title: `@${user.name}`,
+            subtitle: statusMap[user.status] || user.status,
+            data: user
+          }
+        }
+      }
+      
+      return null
+    }
   },
   actions: {
     loadChannels(force = false) {
@@ -115,6 +153,10 @@ export const useDirectoryStore = defineStore('directory', {
     },
     deleteChannel(id) {
       this.channels = this.channels.filter((c) => c.id !== id)
+      // Clear active chat if deleting active channel
+      if (this.activeChat?.type === 'channel' && this.activeChat?.id === id) {
+        this.activeChat = null
+      }
     },
     togglePin(id) {
       const ch = this.channels.find((c) => c.id === id)
@@ -122,6 +164,16 @@ export const useDirectoryStore = defineStore('directory', {
         ch.isPinned = !ch.isPinned
       }
     },
+    // Set active chat
+    setActiveChannel(channelId) {
+      this.activeChat = { type: 'channel', id: channelId }
+    },
+    setActiveDM(userId) {
+      this.activeChat = { type: 'dm', id: userId }
+    },
+    clearActiveChat() {
+      this.activeChat = null
+    }
   },
   persist: {
     storage: sessionStorage,

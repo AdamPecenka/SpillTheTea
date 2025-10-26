@@ -1,8 +1,65 @@
 <template>
   <q-page class="flex column">
+    <!-- Chat Header -->
+    <div v-if="activeChatData" class="chat-header">
+      <div class="chat-header-content" :class="{ 'has-subtitle': activeChatData.subtitle }">
+        <div class="chat-header-left">
+          <div class="text-h6 text-weight-medium">{{ activeChatData.title }}</div>
+          <div v-if="activeChatData.subtitle" class="text-caption text-grey-7">{{ activeChatData.subtitle }}</div>
+        </div>
+        <div class="chat-header-right">
+          <q-btn flat round dense icon="more_vert">
+            <q-menu auto-close>
+              <q-list style="min-width: 180px">
+                <!-- Mute/Unmute -->
+                <q-item clickable v-ripple @click="toggleMute">
+                  <q-item-section avatar>
+                    <q-icon :name="isMuted ? 'notifications_off' : 'notifications_active'" :color="isMuted ? 'negative' : 'grey-7'" />
+                  </q-item-section>
+                  <q-item-section>
+                    {{ isMuted ? 'Unmute' : 'Mute' }} notifications
+                  </q-item-section>
+                </q-item>
+
+                <q-separator />
+
+                <!-- View members (pre channels) -->
+                <q-item 
+                  v-if="activeChatData.type === 'channel'" 
+                  clickable 
+                  v-ripple 
+                  @click="viewMembers"
+                >
+                  <q-item-section avatar>
+                    <q-icon name="people" color="grey-7" />
+                  </q-item-section>
+                  <q-item-section>
+                    View members
+                  </q-item-section>
+                </q-item>
+
+                <q-separator v-if="activeChatData.type === 'channel'" />
+
+                <!-- Leave channel / Close DM -->
+                <q-item clickable v-ripple @click="leaveChat" class="text-negative">
+                  <q-item-section avatar>
+                    <q-icon name="logout" color="negative" />
+                  </q-item-section>
+                  <q-item-section>
+                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat Messages -->
     <div 
-      class="q-pa-md overflow-auto col"
-      :style="{ maxHeight: `calc(100vh - ${typingUsers.length ? 160 : 130}px)` }"
+      class="q-pa-md overflow-auto col chat-messages-container"
+      :style="chatContainerStyle"
     >
       <q-infinite-scroll reverse @load="onLoad">
         <template v-slot:loading>
@@ -46,6 +103,9 @@
 </template>
 
 <script>
+import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { Notify, Dialog } from 'quasar'
+
 export default {
   name: 'ChatPage',
 
@@ -58,27 +118,77 @@ export default {
       typingText: {
         user1: 'Hello, I am typing this...',
         user2: 'And I am typing something else'
+      },
+      directoryStore: null,
+      isMuted: false,
+      // Mock members (same as in TypingBar.vue)
+      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
+    }
+  },
+
+  computed: {
+    activeChatData() {
+      return this.directoryStore?.activeChatData || null
+    },
+    
+    chatContainerStyle() {
+      // 64px header + 56px chat header + 70px typing bar + typing indicator
+      const typingIndicatorHeight = this.typingUsers.length ? 40 : 0
+      return {
+        maxHeight: `calc(100vh - 64px - 56px - 70px - ${typingIndicatorHeight}px)`,
+        paddingBottom: this.typingUsers.length ? '16px' : '8px'
       }
+    }
+  },
+  
+  watch: {
+    'directoryStore.activeChat': {
+      handler() {
+        // Reload messages when active chat changes
+        this.loadMessages()
+        // Reset mute state for new chat
+        this.isMuted = false
+      },
+      deep: true
     }
   },
 
   created() {
-    for (let i = 0; i < 20; i++) {
-      const isPing = Math.random() < 0.2
-
-      this.addMessage(
-        i % 2 === 0 ? 'abracadabra' : 'simsalabim',
-        i % 2 === 0 ? 'Smrdis' : 
-          isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
-        i % 2 === 0
-      )
-    }
+    this.directoryStore = useDirectoryStore()
+    this.directoryStore.loadChannels()
+    this.directoryStore.loadFriends()
+    
+    // Load initial messages
+    this.loadMessages()
   },
+  
   mounted() {
-    this.scrollToBottom()  
+    this.scrollToBottom()
   },
   
   methods: {
+    loadMessages() {
+      // Clear existing messages
+      this.messages = []
+      this.idCounter = 1
+      
+      // Load demo messages
+      for (let i = 0; i < 20; i++) {
+        const isPing = Math.random() < 0.2
+
+        this.addMessage(
+          i % 2 === 0 ? 'abracadabra' : 'simsalabim',
+          i % 2 === 0 ? 'Smrdis' : 
+            isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
+          i % 2 === 0
+        )
+      }
+      
+      this.$nextTick(() => {
+        this.scrollToBottom()
+      })
+    },
+    
     addMessage(name, text, sent) {
       this.messages.push({
         id: this.idCounter++,
@@ -121,12 +231,119 @@ export default {
       if (container) {
         container.scrollTop = container.scrollHeight
       }
+    },
+
+    toggleMute() {
+      this.isMuted = !this.isMuted
+      
+      const chatName = this.activeChatData?.title || 'Chat'
+      
+      Notify.create({
+        message: this.isMuted 
+          ? `Notifications muted for ${chatName}` 
+          : `Notifications enabled for ${chatName}`,
+        icon: this.isMuted ? 'notifications_off' : 'notifications_active',
+        color: this.isMuted ? 'negative' : 'positive',
+        position: 'top',
+        timeout: 2000
+      })
+    },
+
+    viewMembers() {
+      // Same dialog as /list command in TypingBar.vue
+      Dialog.create({
+        title: 'Channel Members',
+        message: `<ul style="padding-left: 1rem; list-style: none;">
+          ${this.members.map(m => `
+            <li style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; line-height: 1.5;">
+              <i class="material-icons" style="font-size: 1.5rem;">person</i> ${m}
+            </li>
+          `).join('')}
+        </ul>`,
+        html: true,
+        ok: true,
+        persistent: true
+      })
+    },
+
+    leaveChat() {
+      if (!this.activeChatData) return
+      
+      const isChannel = this.activeChatData.type === 'channel'
+      const chatName = this.activeChatData.title
+      
+      Dialog.create({
+        title: isChannel ? 'Leave Channel' : 'Close Conversation',
+        message: isChannel 
+          ? `Are you sure you want to leave ${chatName}?`
+          : `Are you sure you want to close this conversation with ${chatName}?`,
+        cancel: true,
+        persistent: true
+      }).onOk(() => {
+        // Clear active chat
+        this.directoryStore.clearActiveChat()
+        
+        // Navigate back to index
+        this.$router.push({ name: 'index' })
+        
+        Notify.create({
+          message: isChannel ? 'Left channel' : 'Conversation closed',
+          color: 'info',
+          position: 'top',
+          timeout: 2000
+        })
+      })
     }
   }
 }
 </script>
 
 <style scoped>
+/* Chat Header - Fixed height */
+.chat-header {
+  background: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  height: 56px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.chat-header-content {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.chat-header-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Ak NEMÁ subtitle, centruj vertikálne */
+.chat-header-content:not(.has-subtitle) .chat-header-left {
+  justify-content: center;
+}
+
+/* Ak má subtitle, nechaj štandardne */
+.chat-header-content.has-subtitle .chat-header-left {
+  justify-content: center;
+}
+
+.chat-header-right {
+  flex-shrink: 0;
+}
+
+.chat-messages-container {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .ping-highlight {
   background-color: rgba(219, 136, 194, 0.15);
   border-radius: 10px;
@@ -137,6 +354,9 @@ export default {
   font-size: 0.95rem;
   color: #444;
   position: relative;
+  background: rgba(255, 255, 255, 0.9);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  flex-shrink: 0;
 }
 
 .typing-user {

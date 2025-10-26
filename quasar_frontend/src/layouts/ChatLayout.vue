@@ -118,53 +118,50 @@
       </q-scroll-area>
     </div>
 
-        <!-- Right: Profile Drawer -->
-    <q-drawer
-      v-model="rightOpen"
-      side="right"
-      :width="340"
-      :breakpoint="1024"
-      bordered
-      class="bg-grey-2"
-      behavior="desktop"
+    <!-- Right Panel - CUSTOM (nie q-drawer) -->
+    <div 
+      class="right-panel bg-grey-2"
+      :class="{ 'panel-open': rightOpen }"
     >
-      <div class="fit">
+      <div class="right-panel-content">
         <ProfileDrawer
           v-model="rightOpen"
           :user="profile"
           @save="onProfileSave"
         />
       </div>
-    </q-drawer>
+    </div>
 
-    
+    <!-- Overlay pre zatvorenie right panelu -->
+    <div 
+      v-if="rightOpen" 
+      class="panel-overlay"
+      @click="rightOpen = false"
+    ></div>
 
     <!-- Page Content -->
     <q-page-container
-      :class="{ 'content-shifted': panelOpen }"
       :style="pageContainerStyle"
     >
       <q-page class="bg-grey-1">
         <div class="content-wrapper">
           <router-view v-slot="{ Component }">
             <keep-alive>
-              <component :is="Component"  :page-style="pageContainerStyle" />
+              <component :is="Component" :page-style="pageContainerStyle" />
             </keep-alive>
           </router-view>
         </div>
       </q-page>
     </q-page-container>
 
-    <q-page-sticky position="bottom" expand class="q-px-md q-pb-sm" :style="pageStyle">
-      <div
-        class="flex justify-center"
-        style="width: 100%; max-width: var(--content-available, 1200px); margin: 0 auto;"
-      >
+    <!-- Typing Bar - Fixed at bottom with dynamic width -->
+    <div class="typing-bar-fixed" :style="typingBarStyle">
+      <div class="typing-bar-wrapper">
         <TypingBar
           placeholder="message @someone or enter /command"
         />
       </div>
-    </q-page-sticky>
+    </div>
   </q-layout>
 </template>
 
@@ -212,6 +209,7 @@ export default {
       router: null
     }
   },
+  
   computed: {
     leftListTitle() {
       return this.leftTab === 'channels' ? 'Channels' : 'Direct messages'
@@ -265,13 +263,24 @@ export default {
              (u.status || '').toLowerCase().includes(q)
       )
     },
+    
     pageContainerStyle() {
-      const left = this.panelOpen ? 332 : 72      // 72 = rail, 260 = panel -> 72+260=332
+      const left = this.panelOpen ? 332 : 72
       const right = this.rightOpen ? 340 : 0
       return {
         '--left-offset': `${left}px`,
         '--right-offset': `${right}px`,
         '--content-available': `calc(100vw - ${left}px - ${right}px)`
+      }
+    },
+    
+    typingBarStyle() {
+      const left = this.panelOpen ? 332 : 72
+      const right = this.rightOpen ? 340 : 0
+      return {
+        left: `${left}px`,
+        right: `${right}px`,
+        width: `calc(100vw - ${left}px - ${right}px)`
       }
     }
   },
@@ -331,10 +340,6 @@ export default {
   align-items: center;
 }
 
-.q-page-sticky {
-  z-index: 3000;
-}
-
 /* Left Rail */
 .left-rail {
   position: fixed;
@@ -351,7 +356,7 @@ export default {
   height: 48px;
 }
 
-/* Secondary Panel */
+/* Secondary Panel (Left) */
 .secondary-panel {
   position: fixed;
   top: 64px;
@@ -361,7 +366,8 @@ export default {
   border-right: 1px solid rgba(0, 0, 0, 0.12);
   z-index: 1400;
   transform: translateX(-100%);
-  transition: transform 0.3s ease;
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
 }
 
 .secondary-panel.panel-open {
@@ -372,34 +378,64 @@ export default {
   height: calc(100vh - 64px - 100px);
 }
 
+/* Right Panel (CUSTOM - nie q-drawer!) */
+.right-panel {
+  position: fixed;
+  top: 64px;
+  right: 0;
+  width: 340px;
+  height: calc(100vh - 64px);
+  border-left: 1px solid rgba(0, 0, 0, 0.12);
+  z-index: 1400;
+  transform: translateX(100%);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform;
+  overflow-y: auto;
+}
+
+.right-panel.panel-open {
+  transform: translateX(0);
+}
+
+/* Overlay pre zatvorenie */
+.panel-overlay {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1399;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
 /* Page content */
 .q-page-container {
   padding-left: var(--left-offset, 72px);
   padding-right: var(--right-offset, 0px);
-  transition: padding 0.24s ease;
-  height: calc(100vh - 64px - 50px);
+  transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  height: calc(100vh - 64px - 60px);
 }
 
-.q-page-container.content-shifted {
-  padding-left: 332px;
+/* Typing Bar */
+.typing-bar-fixed {
+  position: fixed;
+  bottom: 0;
+  padding: 8px 16px;
+  background: transparent;
+  transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              right 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
+              width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  will-change: left, right, width;
 }
 
-/* Right drawer */
-.q-drawer--right {
-  border-left: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-@media (max-width: 1024px) {
-  .q-drawer--right {
-    width: 100% !important;
-    max-width: 340px;
-  }
-}
-
-@media (min-width: 1025px) {
-  .q-drawer--right {
-    max-width: 400px;
-  }
+.typing-bar-wrapper {
+  width: 100%;
+  max-width: 1200px;
 }
 
 /* Tooltip */
@@ -409,7 +445,7 @@ export default {
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
+@media (max-width: 768px) {
   .left-rail {
     width: 100%;
     height: auto;
@@ -435,12 +471,14 @@ export default {
     transform: translateX(0);
   }
   
-  .q-page-container {
-    transition: padding-right 0.3s ease;
-}
+  .right-panel {
+    width: 100%;
+    max-width: 340px;
+  }
   
-  .q-page-container.content-shifted {
+  .q-page-container {
     padding-left: 0;
+    padding-right: 0;
   }
 
   .q-page {
@@ -451,6 +489,12 @@ export default {
 
   .fill-height {
     height: 100%;
+  }
+  
+  .typing-bar-fixed {
+    left: 0 !important;
+    right: 0 !important;
+    width: 100% !important;
   }
 }
 </style>

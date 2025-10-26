@@ -18,6 +18,7 @@
 
 <script>
 import StatusDot from 'components/StatusDot.vue'
+import { useDirectoryStore } from 'src/store/useDirectoryStore'  // <-- PRIDAJ TOTO 
 
 export default {
   name: 'UserListItem',
@@ -78,6 +79,8 @@ export default {
   },
   methods: {
     goToChat() {
+      const directoryStore = useDirectoryStore()
+      directoryStore.setActiveDM(this.user.id)
       this.$router.push({ name: 'chat' })
     }
   }

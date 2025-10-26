@@ -69,6 +69,7 @@
 <script>
 import { computed } from 'vue'
 import ChannelListItem from 'components/ChannelListItem.vue'
+import { useDirectoryStore } from 'src/store/useDirectoryStore'  // <-- PRIDAJ TOTO
 
 export default {
   name: 'ChannelList',
@@ -96,7 +97,9 @@ export default {
     }
   },
   methods: {
-    goToChat() {
+    goToChat(channel) {
+      const directoryStore = useDirectoryStore()
+      directoryStore.setActiveChannel(channel.id)
       this.$router.push({ name: 'chat' })
     }
   }
