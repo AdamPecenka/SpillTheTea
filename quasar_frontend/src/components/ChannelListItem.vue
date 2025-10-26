@@ -35,13 +35,14 @@
         >
           <q-menu auto-close transition-show="jump-down" transition-hide="jump-up">
             <q-list style="min-width: 120px">
+              
               <!-- Invite Menu -->
               <template v-if="channel.isInvite">
                 <q-item clickable v-ripple @click="acceptInvite">
                   <q-item-section avatar>
                     <q-icon name="login" color="grey-7" />
                   </q-item-section>
-                  <q-item-section>Join</q-item-section>
+                  <q-item-section> Join </q-item-section>
                 </q-item>
                 
                 <q-separator />
@@ -50,11 +51,11 @@
                   <q-item-section avatar>
                     <q-icon name="cancel" color="negative" />
                   </q-item-section>
-                  <q-item-section>Reject</q-item-section>
+                  <q-item-section> Reject </q-item-section>
                 </q-item>
               </template>
 
-              <!-- Normal Channel Menu -->
+              <!-- Default Menu -->
               <template v-else>
                 <q-item clickable v-ripple @click="togglePin">
                   <q-item-section avatar>
@@ -67,11 +68,11 @@
 
                 <q-separator />
 
-                <q-item clickable v-ripple class="text-negative" @click="deleteChannel">
+                <q-item clickable v-ripple class="text-negative" @click="openLeaveChannelDialog">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
-                  <q-item-section>Leave</q-item-section>
+                  <q-item-section> Leave </q-item-section>
                 </q-item>
               </template>
             </q-list>
@@ -79,6 +80,26 @@
         </q-btn>
       </div>  
     </q-item-section>
+
+    <!-- Leave Confirmation Dialog -->
+    <q-dialog v-model="leaveDialog">
+      <q-card style="min-width: 300px">
+        <q-card-section class="text-h4">
+          Leave Channel
+        </q-card-section>
+
+        <q-card-section class="text-body1">
+          <p>Leaving channel as an <b>Admin</b> will cause the channel to be deleted!</p>
+          <p>Are you sure you want to leave <b>{{ channel.name }}</b>?</p>
+        </q-card-section>
+
+        <q-card-actions align="right">
+          <q-btn flat label="Cancel" color="grey-7" v-close-popup />
+          <q-btn flat label="Leave" color="negative" @click="confirmLeaveChannel" />
+        </q-card-actions>
+      </q-card>
+    </q-dialog>
+
   </q-item>
 </template>
 
@@ -89,7 +110,8 @@ export default {
   name: 'ChannelListItem',
   data () {
     return {
-      channelStore: useDirectoryStore()
+      channelStore: useDirectoryStore(),
+      leaveDialog: false
     }
   },
   props: {
@@ -118,10 +140,14 @@ export default {
     handleClick() {
       this.$emit('click', this.channel);
     },
-    togglePin () {
+    togglePin() {
       this.channelStore.togglePin(this.channel.id)
     },
-    deleteChannel () {
+    openLeaveChannelDialog() {
+      this.leaveDialog = true
+    },
+    confirmLeaveChannel() {
+      this.leaveDialog = false
       this.channelStore.deleteChannel(this.channel.id)
     }
   }

@@ -71,7 +71,7 @@ export default {
 
       if(userStore.user.username === this.username && userStore.user.password === this.password) {
         userStore.isLogged = true
-        this.$router.push({ name: 'home' })
+        this.$router.push({ name: 'index' })
       } else {
         console.log(`[i] ${userStore.user.username}`)
         console.log(`[i] ${userStore.user.password}`)

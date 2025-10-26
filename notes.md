@@ -17,7 +17,7 @@
 - [ ] Zobrazenie zoznamu členov kanála (/list)
 - [ ] Typing indicator (“X is typing”)
 - [ ] Live draft – vizualizácia rozpísaného textu
-- [ ] UI pre potvrdenie opustenia / zrušenia kanála
+- [x] UI pre potvrdenie opustenia / zrušenia kanála
 - [x] UI rozlíšenie public vs private kanál
 
 ### BACKEND

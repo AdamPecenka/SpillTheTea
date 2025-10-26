@@ -59,7 +59,7 @@ function fetchChannels() {
     {
       id: 'nsfw',
       name: 'NSFW(18+)',
-      topic: 'Single moms in ur area',
+      topic: 'Single moms in ur area <3',
       members: 69,
       isPrivate: true,
       isPinned: false,
