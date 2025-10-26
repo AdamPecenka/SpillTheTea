@@ -15,8 +15,8 @@
 - [x] Notifikácie (zobrazenie / správa preferencií)
 - [x] Rozhranie na zmenu stavu (online / DND / offline)
 - [x] Zobrazenie zoznamu členov kanála (/list)
-- [ ] Typing indicator (“X is typing”)
-- [ ] Live draft – vizualizácia rozpísaného textu
+- [x] Typing indicator (“X is typing”)
+- [x] Live draft – vizualizácia rozpísaného textu
 - [x] UI pre potvrdenie opustenia / zrušenia kanála
 - [x] UI rozlíšenie public vs private kanál
 
