@@ -161,7 +161,7 @@
         style="width: 100%; max-width: var(--content-available, 1200px); margin: 0 auto;"
       >
         <TypingBar
-          placeholder="Enter some command /"
+          placeholder="message @someone or enter /command"
         />
       </div>
     </q-page-sticky>

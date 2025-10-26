@@ -67,7 +67,7 @@ export default {
       const isPing = Math.random() < 0.2
 
       this.addMessage(
-        i % 2 === 0 ? 'abracadabra' : 'SuperUser123',
+        i % 2 === 0 ? 'abracadabra' : 'simsalabim',
         i % 2 === 0 ? 'Smrdis' : 
           isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
         i % 2 === 0
