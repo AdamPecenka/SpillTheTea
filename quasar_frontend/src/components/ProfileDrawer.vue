@@ -47,7 +47,10 @@
         </div>
 
         <!-- EDIT MODE -->
-        <q-form v-else @submit.prevent="save" class="column q-gutter-md">
+        <q-form 
+          v-else @submit.prevent="save"
+          class="column q-gutter-md q-mb-xl">
+          
           <q-input
             label="Username"
             :model-value="user.username"
@@ -55,6 +58,7 @@
             filled
             readonly
           />
+
           <q-input v-model="edit.first" label="First name" dense filled />
           <q-input v-model="edit.last" label="Last name" dense filled />
           <q-input v-model="edit.email" label="E-mail address" type="email" dense filled />

@@ -209,6 +209,16 @@ export default {
         event.preventDefault()
         this.showCommandMenu = false
       }
+
+      // Enter to select (when menu is open)
+      if (event.key === 'Enter') {
+        event.preventDefault()
+        const selected = this.filteredCommands[this.selectedCommandIndex]
+        if (selected) {
+          this.selectCommand(selected)
+        }
+        return
+      }
     },
     
     selectCommand(cmd) {
