@@ -14,7 +14,7 @@
 - [x] Zobrazenie mentionov (vizuálne zvýraznenie)
 - [x] Notifikácie (zobrazenie / správa preferencií)
 - [x] Rozhranie na zmenu stavu (online / DND / offline)
-- [ ] Zobrazenie zoznamu členov kanála (/list)
+- [x] Zobrazenie zoznamu členov kanála (/list)
 - [ ] Typing indicator (“X is typing”)
 - [ ] Live draft – vizualizácia rozpísaného textu
 - [x] UI pre potvrdenie opustenia / zrušenia kanála
