@@ -70,6 +70,7 @@
 import { computed } from 'vue'
 import ChannelListItem from 'components/ChannelListItem.vue'
 import { useDirectoryStore } from 'src/store/useDirectoryStore'  // <-- PRIDAJ TOTO
+import { Notify } from 'quasar';
 
 export default {
   name: 'ChannelList',
@@ -99,8 +100,20 @@ export default {
   methods: {
     goToChat(channel) {
       const directoryStore = useDirectoryStore()
-      directoryStore.setActiveChannel(channel.id)
-      this.$router.push({ name: 'chat' })
+
+      console.log(channel)
+
+      if(!channel.isInvite){
+        directoryStore.setActiveChannel(channel.id)
+        this.$router.push({ name: 'chat' })
+      } else {
+        Notify.create({
+          message: 'You cant preview this channel, since u are not part of it',
+          type: 'negative',
+          position: 'top'
+        })
+        this.$router.push({ name: 'index' })
+      }
     }
   }
 }

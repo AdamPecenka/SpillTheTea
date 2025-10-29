@@ -2,7 +2,7 @@
 Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 
 ### Authors
-- Johanna Tilešová [@JohannaTilesova](https://github.com/johannatilesova) sere ma
+- Johanna Tilešová [@JohannaTilesova](https://github.com/johannatilesova)
 - Adam Pečenka [@AdamPecenka](https://github.com/AdamPecenka)
 
 ## Prípady použitia
