@@ -6,11 +6,11 @@
     @click="handleClick"
   >
     <div class="row items-center q-gutter-sm">
-      <!-- Textová časť (vľavo) -->
+      <!-- Text vľavo -->
       <div class="column items-end">
         <div class="nick">@{{ getUserUsername }}</div>
         
-        <!-- Stavová pilulka - klikateľná, otvorí menu -->
+        <!-- Status dot - klikateľná, otvorí menu -->
         <div
           class="row items-center q-gutter-xs status-ctl cursor-pointer"
           @click.stop="menu = true"

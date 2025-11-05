@@ -31,7 +31,7 @@
       </q-toolbar>
     </q-header>
 
-    <!-- Left Rail: Icons (Messages / Channels) -->
+    <!-- Left Rail: Icons (Messages & Channels) -->
     <div class="left-rail bg-grey-10">
       <div class="column items-center q-pt-md q-gutter-sm full-height">
         
@@ -118,7 +118,7 @@
       </q-scroll-area>
     </div>
 
-    <!-- Right Panel - CUSTOM (nie q-drawer) -->
+    <!-- Right Panel - CUSTOM, nie q-drawer, kvoli typing baru -->
     <div 
       class="right-panel bg-grey-2"
       :class="{ 'panel-open': rightOpen }"
