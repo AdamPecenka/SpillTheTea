@@ -47,4 +47,22 @@ export default {
   bottom: 0;
   right: 0;
 }
+
+
+.dot.online {
+  background: #8ee16a;
+}
+
+.dot.away {
+  background: #f2c037;
+}
+
+.dot.dnd {
+  background: #e53935;
+}
+
+.dot.offline {
+  background: #9e9e9e;
+}
+
 </style>

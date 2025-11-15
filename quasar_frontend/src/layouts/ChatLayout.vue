@@ -1,10 +1,9 @@
 <template>
   <q-layout view="hHh LpR fFf">
-    
+
     <!-- Top App Bar -->
     <q-header elevated class="bg-grey-9 items-center text-white">
       <q-toolbar>
-
         <q-btn
           flat
           no-caps
@@ -26,33 +25,18 @@
           :show-status="true"
           :show-status-text="true"
           :status-uppercase="true"
-          @click="rightOpen = !rightOpen"
+          @click="toggleProfileDrawer"
         />
       </q-toolbar>
     </q-header>
 
-    <!-- Left Rail: Icons (Messages & Channels) -->
+    <!-- Left Rail - Always visible -->
     <div class="left-rail bg-grey-10">
       <div class="column items-center q-pt-md q-gutter-sm full-height">
-        
-        <!-- DMs -->
-        <q-btn
-          round flat icon="chat"
-          :color="leftTab === 'dms' ? 'primary' : 'grey-4'"
-          @click="onRailClick('dms')"
-          class="rail-btn"
-        >
-          <q-tooltip class="custom-tooltip" transition-show="jump-right" transition-hide="jump-left"
-            anchor="center right" self="center left">
-            Direct Messages
-          </q-tooltip>
-        </q-btn>
-
-        <!-- Channels -->
         <q-btn
           round flat icon="forum"
-          :color="leftTab === 'channels' ? 'primary' : 'grey-4'"
-          @click="onRailClick('channels')"
+          :color="panelOpen || leftDrawerOpen ? 'primary' : 'grey-4'"
+          @click="toggleChannels"
           class="rail-btn"
         >
           <q-tooltip class="custom-tooltip" transition-show="jump-right" transition-hide="jump-left"
@@ -61,10 +45,9 @@
           </q-tooltip>
         </q-btn>
 
-        <!-- Add channel dialog-->
         <q-btn
           round flat icon="add"
-          :color="leftTab === 'add' ? 'primary' : 'grey-4'"
+          color="grey-4"
           @click="openChannelDialog"
           class="rail-btn"
         >
@@ -76,18 +59,24 @@
       </div>
     </div>
 
-    <!-- Add Channel Dialog -->
-    <ChannelCreateDialog
-      v-model="channelDialogOpen"
-    />
-
-    <!-- Secondary Panel: zoznam DMs / Channels -->
+    <!-- Secondary Panel: Channel List - Works on both desktop and mobile -->
     <div 
       class="secondary-panel bg-grey-3"
-      :class="{ 'panel-open': panelOpen }"
+      :class="{ 'panel-open': panelOpen || (isSmallScreen && leftDrawerOpen) }"
     >
       <div class="q-pa-md q-pb-none">
-        <div class="text-subtitle1 text-weight-bold q-mb-sm">{{ leftListTitle }}</div>
+        <div class="row items-center justify-between q-mb-sm">
+          <div class="text-subtitle1 text-weight-bold">Channels</div>
+          <q-btn
+            v-if="isSmallScreen"
+            flat
+            round
+            dense
+            icon="close"
+            color="grey-7"
+            @click="leftDrawerOpen = false"
+          />
+        </div>
         <q-input 
           dense 
           rounded 
@@ -99,66 +88,69 @@
         />
       </div>
 
-      <!-- Channels List s kategóriami -->
-      <div v-if="leftTab === 'channels'" class="panel-scroll">
-        <ChannelList 
-          :channels="filteredChannels"
-        />
-      </div>
-
-      <!-- DMs List s status guličkami -->
-      <q-scroll-area v-else class="panel-scroll">
-        <q-list padding>
-          <UserListItem
-            v-for="u in filteredFriends"
-            :key="u.id"
-            :user="u"
-          />
-        </q-list>
-      </q-scroll-area>
-    </div>
-
-    <!-- Right Panel - CUSTOM, nie q-drawer, kvoli typing baru -->
-    <div 
-      class="right-panel bg-grey-2"
-      :class="{ 'panel-open': rightOpen }"
-    >
-      <div class="right-panel-content">
-        <ProfileDrawer
-          v-model="rightOpen"
-          :user="profile"
-          @save="onProfileSave"
-        />
+      <div class="panel-scroll">
+        <ChannelList :channels="filteredChannels" @channel-selected="isSmallScreen ? leftDrawerOpen = false : null" />
       </div>
     </div>
 
-    <!-- Overlay pre zatvorenie right panelu -->
-    <div 
-      v-if="rightOpen" 
-      class="panel-overlay"
-      @click="rightOpen = false"
+    <!-- Overlay for mobile when panel is open -->
+    <div
+      v-if="isSmallScreen && leftDrawerOpen"
+      class="mobile-panel-overlay"
+      @click="leftDrawerOpen = false"
     ></div>
 
-    <!-- Page Content -->
-    <q-page-container
-      :style="pageContainerStyle"
+    <!-- Add Channel Dialog -->
+    <ChannelCreateDialog v-model="channelDialogOpen" />
+
+    <!-- Right Drawer - JEDEN drawer s dvoma režimami -->
+    <q-drawer
+      v-model="rightDrawerOpen"
+      side="right"
+      behavior="desktop"
+      :overlay="isSmallScreen"
+      elevated
+      bordered
+      class="bg-grey-2 drawer-under-header"
+      :width="rightDrawerWidth"
     >
+      <!-- Profile mode -->
+      <ProfileDrawer
+        v-if="rightDrawerMode === 'profile'"
+        v-model="rightDrawerOpen"
+        :user="profile"
+        @save="onProfileSave"
+      />
+
+      <!-- Members mode -->
+      <MemberListDrawer
+        v-else-if="rightDrawerMode === 'members'"
+        v-model="rightDrawerOpen"
+        :members="currentChannelMembers"
+        @kick-member="handleKickMember"
+      />
+    </q-drawer>
+
+    <!-- Page Content -->
+    <q-page-container :style="pageContainerStyle">
       <q-page class="bg-grey-1">
         <div class="content-wrapper">
           <router-view v-slot="{ Component }">
             <keep-alive>
-              <component :is="Component" :page-style="pageContainerStyle" />
+              <component :is="Component" @view-members="openMembersDrawer" />
             </keep-alive>
           </router-view>
         </div>
       </q-page>
     </q-page-container>
 
-    <!-- Typing Bar - Fixed at bottom with dynamic width -->
+    <!-- Typing Bar -->
     <div class="typing-bar-fixed" :style="typingBarStyle">
       <div class="typing-bar-wrapper">
-        <TypingBar
-          placeholder="message @someone or enter /command"
+        <TypingBar 
+          placeholder="message @someone or enter /command" 
+          @view-members="openMembersDrawer"
+          @show-notification="handleShowNotification"
         />
       </div>
     </div>
@@ -168,11 +160,11 @@
 <script>
 import { useRouter } from 'vue-router'
 import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { useQuasar } from 'quasar'
 import ProfileButton from 'src/components/ProfileButton.vue'
 import ProfileDrawer from 'src/components/ProfileDrawer.vue'
-import UserListItem from 'src/components/UserListItem.vue'
+import MemberListDrawer from 'src/components/MemberListDrawer.vue'
 import ChannelList from 'src/components/ChannelList.vue'
-import SettingsPanel from 'src/components/SettingsPanel.vue'
 import TypingBar from 'src/components/TypingBar.vue'
 import ChannelCreateDialog from 'src/components/ChannelCreateDialog.vue'
 
@@ -182,9 +174,8 @@ export default {
   components: {
     ProfileButton,
     ProfileDrawer,
-    UserListItem,
+    MemberListDrawer,
     ChannelList,
-    SettingsPanel,
     TypingBar,
     ChannelCreateDialog
   },
@@ -192,12 +183,11 @@ export default {
   data() {
     return {
       panelOpen: false,
-      leftTab: 'dms',
-      rightOpen: false,
-      currentChannel: 'Channel name',
+      leftDrawerOpen: false,
+      rightDrawerOpen: false,
+      rightDrawerMode: null,
       channelDialogOpen: false,
       channelSearch: '',
-      messageText: '',
       profile: {
         username: 'username',
         first: '',
@@ -206,40 +196,28 @@ export default {
         status: 'online'
       },
       dir: null,
-      router: null
+      router: null,
     }
+  },
+
+  setup() {
+    const $q = useQuasar()
+    return { $q }
   },
   
   computed: {
-    leftListTitle() {
-      return this.leftTab === 'channels' ? 'Channels' : 'Direct messages'
+    isSmallScreen() {
+      return this.$q.screen.width < 768
     },
-    
+
     channelsSorted() {
       if (!this.dir || !this.dir.channels) return []
       
       return [...this.dir.channels].sort((a, b) => {
-        // Pinned na vrch
         if (a.isPinned && !b.isPinned) return -1
         if (!a.isPinned && b.isPinned) return 1
-        // Potom private
         if (a.isPrivate && !b.isPrivate) return -1
         if (!a.isPrivate && b.isPrivate) return 1
-        // Nakoniec abecedne
-        return a.name.localeCompare(b.name)
-      })
-    },
-    
-    friendsSorted() {
-      if (!this.dir || !this.dir.friends) return []
-      
-      return [...this.dir.friends].sort((a, b) => {
-        // Online na vrch
-        const statusOrder = { online: 0, away: 1, dnd: 2, offline: 3 }
-        const aStatus = statusOrder[a.status || 'offline']
-        const bStatus = statusOrder[b.status || 'offline']
-        if (aStatus !== bStatus) return aStatus - bStatus
-        // Potom abecedne
         return a.name.localeCompare(b.name)
       })
     },
@@ -248,39 +226,43 @@ export default {
       const q = this.channelSearch.trim().toLowerCase()
       if (!q) return this.channelsSorted
       
-      return this.channelsSorted.filter(
-        c => c.name.toLowerCase().includes(q) || 
-             (c.topic || '').toLowerCase().includes(q)
-      )
+      return this.channelsSorted.filter(c => {
+        return c.name.toLowerCase().includes(q) || (c.topic || '').toLowerCase().includes(q)
+      })
     },
-    
-    filteredFriends() {
-      const q = this.channelSearch.trim().toLowerCase()
-      if (!q) return this.friendsSorted
-      
-      return this.friendsSorted.filter(
-        u => u.name.toLowerCase().includes(q) || 
-             (u.status || '').toLowerCase().includes(q)
-      )
+
+    currentChannelMembers() {
+      return this.mockMembers
+    },
+
+    rightDrawerWidth() {
+      if (this.isSmallScreen) {
+        // Mobile: full width minus left rail, but minimum 280px
+        const calculatedWidth = this.$q.screen.width - 60
+        return Math.max(calculatedWidth, 280)
+      }
+      // Desktop: fixed width - same as secondary panel
+      return 280
     },
     
     pageContainerStyle() {
       const left = this.panelOpen ? 332 : 72
-      const right = this.rightOpen ? 340 : 0
+      const right = (!this.isSmallScreen && this.rightDrawerOpen) ? 280 : 0
+      
       return {
-        '--left-offset': `${left}px`,
-        '--right-offset': `${right}px`,
-        '--content-available': `calc(100vw - ${left}px - ${right}px)`
+        paddingLeft: left + 'px',
+        paddingRight: right + 'px',
+        transition: 'padding 0.25s cubic-bezier(0.4, 0, 0.2, 1)'
       }
     },
     
     typingBarStyle() {
       const left = this.panelOpen ? 332 : 72
-      const right = this.rightOpen ? 340 : 0
+      const right = (!this.isSmallScreen && this.rightDrawerOpen) ? 280 : 0
+      
       return {
-        left: `${left}px`,
-        right: `${right}px`,
-        width: `calc(100vw - ${left}px - ${right}px)`
+        left: left + 'px',
+        right: right + 'px'
       }
     }
   },
@@ -290,25 +272,30 @@ export default {
     this.router = useRouter()
     
     try {
-        this.dir.loadChannels(), 
-        this.dir.loadFriends()
+      this.dir.loadChannels()
     } catch (error) {
       console.error('Failed to load data:', error)
     }
   },
   
   methods: {
+    toggleChannels() {
+      // Desktop: toggle secondary panel
+      if (!this.isSmallScreen) {
+        this.panelOpen = !this.panelOpen
+      } 
+      // Mobile: toggle left drawer
+      else {
+        // Close right drawer if open
+        if (this.rightDrawerOpen) {
+          this.rightDrawerOpen = false
+        }
+        this.leftDrawerOpen = !this.leftDrawerOpen
+      }
+    },
+
     togglePanel() {
       this.panelOpen = !this.panelOpen
-    },
-    
-    onRailClick(tab) {
-      if (this.leftTab === tab) {
-        this.panelOpen = !this.panelOpen
-      } else {
-        this.leftTab = tab
-        this.panelOpen = true
-      }
     },
 
     openChannelDialog() {
@@ -319,19 +306,72 @@ export default {
       this.profile = { ...this.profile, ...updated }
     },
 
+    // PROFIL z horného toolbaru
+    toggleProfileDrawer() {
+      // Na mobile zavrieť left drawer ak je otvorený
+      if (this.isSmallScreen && this.leftDrawerOpen) {
+        this.leftDrawerOpen = false
+      }
+      
+      if (this.rightDrawerMode === 'profile') {
+        // Už sme v profile → len toggle open/close
+        this.rightDrawerOpen = !this.rightDrawerOpen
+      } else {
+        // Prepnúť na profile mód a otvoriť
+        this.rightDrawerMode = 'profile'
+        this.rightDrawerOpen = true
+      }
+    },
+
+    // MEMBERS z chat page (emit @view-members)
+    openMembersDrawer() {
+      // Na mobile zavrieť left drawer ak je otvorený
+      if (this.isSmallScreen && this.leftDrawerOpen) {
+        this.leftDrawerOpen = false
+      }
+      
+      this.rightDrawerMode = 'members'
+      this.rightDrawerOpen = true
+    },
+
     goHome() {
       this.$router.push({ name: 'index' })
+    },
+
+    closeDrawers() {
+      this.rightDrawerOpen = false
+    },
+
+    handleKickMember (member) {
+      console.log('KICK:', member)
+    },
+
+    handleShowNotification(notificationData) {
+      // This will be handled by NotificationContainer component
+      // For now, just use Quasar Notify as temporary solution
+      // You'll need to add NotificationContainer component later
+      this.$q.notify({
+        message: `${notificationData.username} in #${notificationData.channel}`,
+        caption: notificationData.message,
+        position: 'top-right',
+        color: 'primary',
+        timeout: 5000,
+        avatar: notificationData.avatar || undefined,
+        actions: [
+          { icon: 'close', color: 'white', handler: () => {} }
+        ]
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-/* Header */
+/* Header - najvyšší z-index, prekrýva drawer */
 .q-header {
   height: 64px;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  z-index: 2000;
+  z-index: 3000 !important;
 }
 
 .q-header .q-toolbar {
@@ -339,6 +379,19 @@ export default {
   display: flex;
   align-items: center;
 }
+
+/* Drawer under header - správne umiestnenie */
+.drawer-under-header {
+  top: 64px !important;
+  height: calc(100vh - 64px) !important;
+  z-index: 2000 !important;
+}
+
+/* Odstránenie overlay pozadia pre drawer */
+.drawer-under-header :deep(.q-drawer__backdrop) {
+  display: none !important;
+}
+
 
 /* Left Rail */
 .left-rail {
@@ -356,7 +409,7 @@ export default {
   height: 48px;
 }
 
-/* Secondary Panel (Left) */
+/* Secondary Panel (Left) - Works on both desktop and mobile */
 .secondary-panel {
   position: fixed;
   top: 64px;
@@ -367,7 +420,6 @@ export default {
   z-index: 1400;
   transform: translateX(-100%);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
 }
 
 .secondary-panel.panel-open {
@@ -376,61 +428,39 @@ export default {
 
 .panel-scroll {
   height: calc(100vh - 64px - 100px);
-}
-
-/* Right Panel (CUSTOM - nie q-drawer!) */
-.right-panel {
-  position: fixed;
-  top: 64px;
-  right: 0;
-  width: 340px;
-  height: calc(100vh - 64px);
-  border-left: 1px solid rgba(0, 0, 0, 0.12);
-  z-index: 1400;
-  transform: translateX(100%);
-  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: transform;
   overflow-y: auto;
 }
 
-.right-panel.panel-open {
-  transform: translateX(0);
-}
-
-/* Overlay pre zatvorenie */
-.panel-overlay {
+/* Mobile panel overlay */
+.mobile-panel-overlay {
   position: fixed;
   top: 64px;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.5);
   z-index: 1399;
-  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
 }
 
 /* Page content */
 .q-page-container {
-  padding-left: var(--left-offset, 72px);
-  padding-right: var(--right-offset, 0px);
-  transition: padding 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  height: calc(100vh - 64px - 60px);
+  height: calc(100vh - 64px - 70px);
 }
 
 /* Typing Bar */
 .typing-bar-fixed {
   position: fixed;
   bottom: 0;
+  height: 70px;
   padding: 8px 16px;
   background: transparent;
   transition: left 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              right 0.25s cubic-bezier(0.4, 0, 0.2, 1), 
-              width 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  z-index: 3000;
+              right 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  z-index: 1800; /* Below drawers */
   display: flex;
   justify-content: center;
   align-items: center;
-  will-change: left, right, width;
 }
 
 .typing-bar-wrapper {
@@ -444,57 +474,80 @@ export default {
   font-size: 13px;
 }
 
+/* Responsive helpers */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none !important;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .mobile-only {
+    display: block !important;
+  }
+
+  /* Left rail stays but adjusts size slightly for mobile */
   .left-rail {
-    width: 100%;
-    height: auto;
-    position: relative;
-    top: 0;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    width: 60px;
+    z-index: 5001; /* Above secondary panel */
   }
-  
+
+  .rail-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  /* Secondary panel on mobile - slides out from behind left rail */
   .secondary-panel {
-    position: fixed;
-    top: 64px;
-    left: 0;
+    left: 60px; /* Start after left rail */
     width: 280px;
-    transform: translateX(-100%);
-    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.15);
+    z-index: 5000;
+    transform: translateX(calc(-100% - 60px)); /* Hide completely including the 60px offset */
   }
-  
+
   .secondary-panel.panel-open {
-    transform: translateX(0);
+    transform: translateX(0); /* Slide out to visible position */
   }
-  
-  .right-panel {
-    width: 100%;
-    max-width: 340px;
+
+  /* When panel is open, overlay appears */
+  .mobile-panel-overlay {
+    z-index: 4999; /* Below secondary panel */
   }
   
   .q-page-container {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .q-page {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .fill-height {
-    height: 100%;
+    padding-left: 60px !important; /* left rail width on mobile */
+    padding-right: 0 !important;
   }
   
+  /* Typing bar on mobile */
   .typing-bar-fixed {
-    left: 0 !important;
+    left: 60px !important;
     right: 0 !important;
-    width: 100% !important;
+    z-index: 1800; /* Below panels */
+  }
+
+  /* Right drawer na mobile - positioning */
+  .drawer-under-header {
+    min-width: 280px !important; /* Minimum width same as secondary panel */
+    left: 60px !important; /* Start after left rail */
+    top: 64px !important; /* Below header */
+    height: calc(100vh - 64px) !important;
+    z-index: 6000 !important; /* Above everything except header */
+  }
+
+  /* Show backdrop on mobile when drawer is open */
+  .drawer-under-header :deep(.q-drawer__backdrop) {
+    display: block !important;
+    top: 64px !important;
+    height: calc(100vh - 64px) !important;
   }
 }
 </style>

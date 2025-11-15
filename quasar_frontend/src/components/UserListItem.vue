@@ -1,5 +1,5 @@
 <template>
-  <q-item clickable v-ripple @click="goToChat">
+  <q-item>
     <q-item-section avatar>
       <q-avatar size="40px" color="grey-5">
         <q-icon name="person" color="grey-9" size="24px" />
@@ -13,18 +13,33 @@
         {{ statusText }}
       </q-item-label>
     </q-item-section>
+
+    <!-- Kick ikonka -->
+    <q-item-section side class="actions">
+      <q-btn
+        flat
+        dense
+        round
+        icon="logout"
+        class="kick-btn"
+        @click.stop="$emit('kick', user)"
+      >
+        <q-tooltip>Kick</q-tooltip>
+      </q-btn>
+    </q-item-section>
   </q-item>
 </template>
 
 <script>
 import StatusDot from 'components/StatusDot.vue'
-import { useDirectoryStore } from 'src/store/useDirectoryStore'  // <-- PRIDAJ TOTO 
 
 export default {
   name: 'UserListItem',
+  
   components: {
     StatusDot
   },
+  
   props: {
     user: {
       type: Object,
@@ -36,6 +51,9 @@ export default {
       }
     }
   },
+
+  emits:['kick'],
+  
   computed: {
     statusColor() {
       switch (this.user.status) {
@@ -50,6 +68,7 @@ export default {
           return 'grey-6'
       }
     },
+    
     statusText() {
       switch (this.user.status) {
         case 'online':
@@ -63,6 +82,7 @@ export default {
           return 'Offline'
       }
     },
+    
     statusTextClass() {
       switch (this.user.status) {
         case 'online':
@@ -76,14 +96,8 @@ export default {
           return 'text-grey-6'
       }
     }
-  },
-  methods: {
-    goToChat() {
-      const directoryStore = useDirectoryStore()
-      directoryStore.setActiveDM(this.user.id)
-      this.$router.push({ name: 'chat' })
-    }
   }
+  
 }
 </script>
 
@@ -94,5 +108,26 @@ export default {
   border: 2px solid white;
   bottom: 0;
   right: 0;
+}
+
+/* Kick button styling */
+.kick-btn {
+  color: #9e9e9e;
+  transition: all 0.2s ease;
+}
+
+.kick-btn:hover {
+  color: #d68ac3;
+  background-color: rgba(214, 138, 195, 0.1);
+}
+
+/* Kick ikonku zobrazíme len pri hover */
+.actions {
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+
+.q-item:hover .actions {
+  opacity: 1;
 }
 </style>

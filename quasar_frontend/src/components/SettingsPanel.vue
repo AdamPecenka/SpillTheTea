@@ -1,5 +1,6 @@
 <template>
-  <q-dialog v-model="dialogOpen" position="right">
+  <q-dialog v-model="dialogOpen" 
+  :position="isMobile ? 'standard' : 'right'">
     <q-card class="settings-card">
       <!-- Header -->
       <q-card-section class="row items-center q-pb-none">
@@ -120,6 +121,10 @@ export default {
         return 'Automatically disabled when status is "Do Not Disturb"'
       }
       return 'Receive notifications for new messages'
+    },
+
+    isMobile(){
+      return this.$q.screen.width < 600
     }
   },
   
@@ -192,10 +197,14 @@ export default {
 /* Mobile responsive */
 @media (max-width: 599px) {
   .settings-card {
-    width: 100vw;
-    height: 100vh;
-    max-width: 100vw;
-    border-radius: 0;
+    width: calc(100vw - 32px); /* Margins on sides */
+    max-width: 400px;
+    max-height: 60vh; /* Limit height to 60% of viewport */
+    border-radius: 16px; /* Rounded corners */
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
   }
 }
 </style>

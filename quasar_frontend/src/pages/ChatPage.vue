@@ -40,13 +40,13 @@
 
                 <q-separator v-if="activeChatData.type === 'channel'" />
 
-                <!-- Leave channel / Close DM -->
+                <!-- Leave channel -->
                 <q-item clickable v-ripple @click="leaveChat" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
                   <q-item-section>
-                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
+                    Leave channel
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -56,9 +56,9 @@
       </div>
     </div>
 
-    <!-- Chat Messages -->
+    <!-- Chat Messages - REMOVED 'col' class -->
     <div 
-      class="q-pa-md overflow-auto col chat-messages-container"
+      class="q-pa-md chat-messages-container"
       :style="chatContainerStyle"
     >
       <q-infinite-scroll reverse @load="onLoad">
@@ -83,7 +83,7 @@
     </div>
 
     <!-- Typing indicator -->
-    <div v-if="typingUsers.length" class="typing-indicator row items-center q-pa-sm relative">
+    <div v-if="typingUsers.length" class="typing-indicator row items-center q-pa-sm">
       <span>
         <template v-for="user in typingUsers" :key="user">
           <a href="#" class="typing-user q-mr-xs" @click.prevent="onUserClick(user)">
@@ -109,6 +109,8 @@ import { Notify, Dialog } from 'quasar'
 export default {
   name: 'ChatPage',
 
+  emits: ['view-members'],
+
   data() {
     return {
       idCounter: 1,
@@ -121,8 +123,7 @@ export default {
       },
       directoryStore: null,
       isMuted: false,
-      // Mock members (same as in TypingBar.vue)
-      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
+      isLoadingMessages: false  // PRIDANÉ
     }
   },
 
@@ -134,23 +135,36 @@ export default {
     chatContainerStyle() {
       // 64px header + 56px chat header + 70px typing bar + typing indicator
       const typingIndicatorHeight = this.typingUsers.length ? 40 : 0
+      const typingBarHeight = 70
       return {
-        maxHeight: `calc(100vh - 64px - 56px - 70px - ${typingIndicatorHeight}px)`,
-        paddingBottom: this.typingUsers.length ? '16px' : '8px'
+        height: `calc(100vh - 64px - 56px - ${typingBarHeight}px - ${typingIndicatorHeight}px)`,
+        overflowY: 'auto',
+        overflowX: 'hidden',
+        flex: 'none' // Zabráni flex-grow
       }
     }
   },
   
   watch: {
+    // DOČASNE VYPNUTÉ PRE DEBUGGING
+    /*
     'directoryStore.activeChat': {
-      handler() {
-        // Reload messages when active chat changes
+      handler(newChat, oldChat) {
+        // Ak sa iba zmenil DM (nie celý channel), nereloaduj messages
+        if (oldChat && newChat && 
+            oldChat.type === 'dm' && newChat.type === 'dm') {
+          // Iba DM sa zmenil, ponechaj messages
+          this.isMuted = false
+          return
+        }
+        
+        // Inak reload messages
         this.loadMessages()
-        // Reset mute state for new chat
         this.isMuted = false
       },
       deep: true
     }
+    */
   },
 
   created() {
@@ -168,21 +182,30 @@ export default {
   
   methods: {
     loadMessages() {
-      // Clear existing messages
-      this.messages = []
-      this.idCounter = 1
+      this.isLoadingMessages = true
+      
+      // Pripravíme nové messages PRED vymazaním starých
+      const newMessages = []
+      let counter = 1
       
       // Load demo messages
       for (let i = 0; i < 20; i++) {
         const isPing = Math.random() < 0.2
 
-        this.addMessage(
-          i % 2 === 0 ? 'abracadabra' : 'simsalabim',
-          i % 2 === 0 ? 'Smrdis' : 
+        newMessages.push({
+          id: counter++,
+          name: i % 2 === 0 ? 'abracadabra' : 'simsalabim',
+          text: i % 2 === 0 ? 'Smrdis' : 
             isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
-          i % 2 === 0
-        )
+          sent: i % 2 === 0,
+          stamp: Date.now()
+        })
       }
+      
+      // Teraz NARAZ vymeníme messages (žiadny prázdny stav)
+      this.messages = newMessages
+      this.idCounter = counter
+      this.isLoadingMessages = false
       
       this.$nextTick(() => {
         this.scrollToBottom()
@@ -250,33 +273,18 @@ export default {
     },
 
     viewMembers() {
-      // Same dialog as /list command in TypingBar.vue
-      Dialog.create({
-        title: 'Channel Members',
-        message: `<ul style="padding-left: 1rem; list-style: none;">
-          ${this.members.map(m => `
-            <li style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; line-height: 1.5;">
-              <i class="material-icons" style="font-size: 1.5rem;">person</i> ${m}
-            </li>
-          `).join('')}
-        </ul>`,
-        html: true,
-        ok: true,
-        persistent: true
-      })
+      // Emitujeme event nahor do layoutu
+      this.$emit('view-members')
     },
 
     leaveChat() {
       if (!this.activeChatData) return
       
-      const isChannel = this.activeChatData.type === 'channel'
       const chatName = this.activeChatData.title
       
       Dialog.create({
-        title: isChannel ? 'Leave Channel' : 'Close Conversation',
-        message: isChannel 
-          ? `Are you sure you want to leave ${chatName}?`
-          : `Are you sure you want to close this conversation with ${chatName}?`,
+        title: 'Leave Channel',
+        message: `Are you sure you want to leave ${chatName}?`,
         cancel: true,
         persistent: true
       }).onOk(() => {
@@ -287,7 +295,7 @@ export default {
         this.$router.push({ name: 'index' })
         
         Notify.create({
-          message: isChannel ? 'Left channel' : 'Conversation closed',
+          message: 'Left channel',
           color: 'info',
           position: 'top',
           timeout: 2000
@@ -303,7 +311,7 @@ export default {
 .chat-header {
   background: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  height: 56px;
+  height: 64px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -339,7 +347,9 @@ export default {
   flex-shrink: 0;
 }
 
+/* Chat messages container - FIXED HEIGHT, nie flex-grow */
 .chat-messages-container {
+  flex-shrink: 0; /* Nezmení sa */
   overflow-y: auto;
   overflow-x: hidden;
 }

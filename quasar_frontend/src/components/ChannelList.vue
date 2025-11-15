@@ -83,6 +83,7 @@ export default {
       required: true
     }
   },
+  emits: ['channel-selected'],
   computed: {
     pinnedChannels() {
       return this.channels.filter(ch => ch.isPinned);
@@ -106,6 +107,7 @@ export default {
       if(!channel.isInvite){
         directoryStore.setActiveChannel(channel.id)
         this.$router.push({ name: 'chat' })
+        this.$emit('channel-selected') // Emit event pre mobile drawer close
       } else {
         Notify.create({
           message: 'You cant preview this channel, since u are not part of it',

@@ -133,6 +133,8 @@ export default {
   props: {
     placeholder: { type: String, default: 'Type a message...' }
   },
+
+  emits: ['view-members'],
   
   computed: {
     userStatus() {
@@ -311,19 +313,8 @@ export default {
           break
           
         case "/list":
-          Dialog.create({
-            title: 'Channel Members',
-            message: `<ul style="padding-left: 1rem; list-style: none;">
-              ${this.members.map(m => `
-                <li style="display: flex; align-items: center; gap: 0.5rem; font-size: 1.2rem; line-height: 1.5;">
-                  <i class="material-icons" style="font-size: 1.5rem;">person</i> ${m}
-                </li>
-              `).join('')}
-            </ul>`,
-            html: true,
-            ok: true,
-            persistent: true
-          })
+          // ZMENA: Emit event na otvorenie Members drawer
+          this.$emit('view-members')
           break
           
         case "/help":
