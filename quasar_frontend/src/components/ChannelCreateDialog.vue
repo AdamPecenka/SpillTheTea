@@ -1,8 +1,8 @@
 <template>
   <q-dialog v-model="isOpen" persistent>
-    <q-card style="min-width: 400px; max-width: 90vw;">
+    <q-card style="min-width: 400px; max-width: 90vw; border-radius: 16px;">
       <q-card-section class="row items-center justify-between">
-        <div class="text-h6">Create a New Channel</div>
+        <div class="text-h6">Create a new channel</div>
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
 
@@ -35,13 +35,21 @@
         />
       </q-card-section>
 
-      <q-card-actions align="right">
-        <q-btn flat label="Cancel" color="grey" v-close-popup />
+      <q-card-actions align="right" class="q-gutter-sm">
+        <q-btn 
+          flat 
+          label="Cancel" 
+          color="grey-7" 
+          class="rounded-btn"
+          v-close-popup 
+        />
+
         <q-btn
           unelevated
-          color="primary"
           label="Create"
+          color="primary"
           :disable="!channelName.trim()"
+          class="rounded-btn create-btn"
           @click="createChannel"
         />
       </q-card-actions>
@@ -119,3 +127,21 @@ export default {
   }
 }
 </script>
+
+<style>
+.rounded-btn {
+  border-radius: 12px;
+  padding: 8px 18px !important;
+  font-size: 15px;
+}
+
+.create-btn {
+  background: #D68AC3 !important;
+  color: white !important;
+}
+
+.create-btn:disabled {
+  background: #E8CAE2 !important;
+  color: #ffffffcc !important;
+}
+</style>

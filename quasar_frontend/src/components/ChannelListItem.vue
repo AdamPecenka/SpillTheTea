@@ -83,9 +83,9 @@
 
     <!-- Leave Confirmation Dialog -->
     <q-dialog v-model="leaveDialog">
-      <q-card style="min-width: 300px">
+      <q-card class="leave-card" style="min-width: 300px">
         <q-card-section class="text-h4">
-          Leave Channel
+          Leave channel
         </q-card-section>
 
         <q-card-section class="text-body1">
@@ -93,10 +93,24 @@
           <p>Are you sure you want to leave <b>{{ channel.name }}</b>?</p>
         </q-card-section>
 
-        <q-card-actions align="right">
-          <q-btn flat label="Cancel" color="grey-7" v-close-popup />
-          <q-btn flat label="Leave" color="negative" @click="confirmLeaveChannel" />
+        <q-card-actions align="right" class="q-gutter-sm">
+          <q-btn 
+            flat 
+            label="Cancel" 
+            color="grey-7" 
+            class="rounded-btn"
+            v-close-popup 
+          />
+
+          <q-btn 
+            unelevated
+            label="Leave" 
+            color="primary"
+            class="rounded-btn"
+            @click="confirmLeaveChannel" 
+          />
         </q-card-actions>
+
       </q-card>
     </q-dialog>
 
@@ -165,5 +179,13 @@ export default {
 }
 .invite-highlight:hover {
   background-color: rgba(219, 136, 194, 0.4);
+}
+.rounded-btn {
+  border-radius: 12px !important;
+  padding: 8px 18px !important;
+  font-size: 15px;
+}
+.leave-card {
+  border-radius: 16px !important;
 }
 </style>
