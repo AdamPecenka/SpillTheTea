@@ -73,7 +73,7 @@ export default {
       commands: [
         { 
           cmd: '/join', 
-          desc: 'Vytvorenie kanala / Vstupenie do verejneho kanala',
+          desc: 'Vytvorenie kanala / Vstup do verejneho kanala',
           icon: 'login',
           args: '<channel-name>'
         },
@@ -143,18 +143,22 @@ export default {
     },
     
     filteredCommands() {
+      // keď je len samotné "/" → zobraz všetky príkazy
       if (!this.commandSearch && this.message === '/') {
         return this.commands
       }
-      
+
+      // keď je za "/" nič → nič neukazuj
       if (!this.commandSearch) {
         return []
       }
-      
+
       const search = this.commandSearch.toLowerCase()
-      return this.commands.filter(cmd => 
-        cmd.cmd.toLowerCase().includes('/' + search) || 
-        cmd.desc.toLowerCase().includes(search)
+      const full = '/' + search
+
+      // prefix match, napr. "/j", "/jo", "/join"
+      return this.commands.filter(cmd =>
+        cmd.cmd.toLowerCase().startsWith(full)
       )
     }
   },

@@ -232,9 +232,9 @@ export default {
     filteredChannels() {
       const q = this.channelSearch.trim().toLowerCase()
       if (!q) return this.channelsSorted
-      
+
       return this.channelsSorted.filter(c => {
-        return c.name.toLowerCase().includes(q) || (c.topic || '').toLowerCase().includes(q)
+        return c.name.toLowerCase().startsWith(q)
       })
     },
 
