@@ -26,7 +26,7 @@
     <div class="drawer-content-scroll">
       <q-list padding class="members-list">
         <UserListItem
-          v-for="member in displayMembers"
+          v-for="member in sortedMembers"
           :key="member.id"
           :user="member"
           @kick="onKick"
@@ -49,12 +49,12 @@
             </div>
           </q-card-section>
 
-          <q-separator />
-
           <q-card-section class="q-pt-md q-pb-md">
             <div v-if="memberToKick" class="text-body1">
               Do you really want to kick
-              <span class="text-weight-bold">{{ memberToKick.name }}</span>
+              <span style="display: inline-block; padding: 2px 8px; background: #f0f0f0; border-radius: 6px; font-weight: 600; color: #000;">
+                {{ memberToKick.name }}
+              </span>
               from this channel?
             </div>
           </q-card-section>
@@ -112,7 +112,14 @@ export default {
   data(){
     return {
       confirmKickOpen:false,
-      memberToKick: null
+      memberToKick: null,
+      // Definícia poradia statusov (nižšie číslo = vyššia priorita)
+      statusOrder: {
+        'online': 1,
+        'away': 2,
+        'dnd': 3,
+        'offline': 4
+      }
     }
   },
   
@@ -134,6 +141,21 @@ export default {
         { id: '7', name: 'Grace Lee', status: 'away' },
         { id: '8', name: 'Henry Wilson', status: 'offline' }
       ]
+    },
+
+    sortedMembers() {
+      return [...this.displayMembers].sort((a, b) => {
+        // Najprv porovnaj podľa statusu
+        const statusA = this.statusOrder[a.status] || 999
+        const statusB = this.statusOrder[b.status] || 999
+        
+        if (statusA !== statusB) {
+          return statusA - statusB
+        }
+        
+        // Ak majú rovnaký status, porovnaj podľa mena
+        return a.name.localeCompare(b.name)
+      })
     }
   },
   
@@ -208,6 +230,7 @@ export default {
   color: #b0b0b0;
   font-weight: 500;
   font-size: 14px;
+  border-radius: 12px;
   padding: 8px 20px;
   letter-spacing: 0.5px;
   transition: all 0.2s ease;

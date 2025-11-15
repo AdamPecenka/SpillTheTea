@@ -37,7 +37,7 @@
       <div class="q-pa-lg column q-gutter-lg">
 
         <!-- Avatar + nick -->
-        <div class="column items-center q-gutter-sm q-mb-xl">
+        <div class="column items-center q-gutter-sm q-mb-l">
           <ProfilePicture
             :image-url="user.avatarUrl"
             size="160px"
@@ -298,6 +298,32 @@ export default {
   overflow-x: hidden;
 }
 
+/* 🔧 unify alignment for view & edit modes */
+.profile-scroll-container .field,
+.profile-scroll-container .q-input {
+  width: 100%;
+  max-width: 480px;       /* nech to má limit a nesahá dohora až ku kraju */
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.profile-scroll-container .q-input .q-mb-l {
+  margin-bottom: 16px;
+}
+
+.profile-scroll-container .q-input :deep(.q-field__control) {
+  border-radius: 12px;
+  background: #f5f5f5;
+  padding: 6px 12px;
+  min-height: 48px;
+}
+
+.profile-scroll-container .q-input :deep(.q-field__label) {
+  padding-left: 4px;
+  opacity: 0.8;
+  font-weight: 500;
+}
+
 .profile-buttons-footer {
   flex-shrink: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
@@ -321,7 +347,6 @@ export default {
   box-sizing: border-box;
 }
 
-/* čistý "list" štýl vo view mode */
 .info-list .field { 
   margin-bottom: 22px; 
 }

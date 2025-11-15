@@ -40,13 +40,13 @@
 
                 <q-separator v-if="activeChatData.type === 'channel'" />
 
-                <!-- Leave channel / Close DM -->
+                <!-- Leave channel -->
                 <q-item clickable v-ripple @click="leaveChat" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
                   <q-item-section>
-                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
+                    Leave channel
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -300,12 +300,34 @@ export default {
       const chatName = this.activeChatData.title
       
       Dialog.create({
-        title: isChannel ? 'Leave Channel' : 'Close Conversation',
-        message: isChannel 
-          ? `Are you sure you want to leave ${chatName}?`
-          : `Are you sure you want to close this conversation with ${chatName}?`,
-        cancel: true,
-        persistent: true
+        title: 'Leave channel',
+        message: `
+          <div style="font-size: 15px; line-height: 1.5; color: #333;">
+            Are you sure you want to leave 
+            <span style="display: inline-block; padding: 2px 8px; background: #f0f0f0; border-radius: 6px; font-weight: 600; color: #000;">
+              ${chatName}
+            </span>?
+          </div>
+        `,
+
+        class: 'leave-channel-dialog',
+        
+        cancel: {
+          label: 'CANCEL',
+          flat: true,
+          color: 'grey-7',
+        style: 'border-radius: 12px; padding: 8px 20px; text-transform: none;'
+        },
+        ok: {
+          label: 'LEAVE',
+          color: 'primary',
+          unelevated: true,
+          style: 'border-radius: 12px; padding: 8px 20px; text-transform: none;'
+        },
+        html: true,
+        persistent: true,
+        cardStyle: 'border-radius: 12px',
+        cardClass: 'leave-channel-dialog'
       }).onOk(() => {
         // Clear active chat
         this.directoryStore.clearActiveChat()
@@ -352,12 +374,10 @@ export default {
   min-width: 0;
 }
 
-/* Ak NEMÁ subtitle, centruj vertikálne */
 .chat-header-content:not(.has-subtitle) .chat-header-left {
   justify-content: center;
 }
 
-/* Ak má subtitle, nechaj štandardne */
 .chat-header-content.has-subtitle .chat-header-left {
   justify-content: center;
 }
@@ -381,7 +401,6 @@ export default {
   font-size: 0.95rem;
   color: #444;
   position: relative;
-  background: rgba(255, 255, 255, 0.9);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
@@ -408,5 +427,10 @@ export default {
   min-width: 180px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   z-index: 2000;
+}
+
+/* Leave Channel Dialog Styling */
+.leave-channel-dialog :deep(.q-card) {
+  border-radius: 12px;  /* Popup má zaoblené rohy */
 }
 </style>

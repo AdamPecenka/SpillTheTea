@@ -100,6 +100,13 @@
       @click="leftDrawerOpen = false"
     ></div>
 
+    <!-- Desktop Profile Overlay - len pre profile mode na desktope -->
+    <div
+      v-if="!isSmallScreen && rightDrawerOpen && rightDrawerMode === 'profile'"
+      class="desktop-profile-overlay"
+      @click="rightDrawerOpen = false"
+    ></div>
+
     <!-- Add Channel Dialog -->
     <ChannelCreateDialog v-model="channelDialogOpen" />
 
@@ -380,19 +387,26 @@ export default {
   align-items: center;
 }
 
-/* Drawer under header - správne umiestnenie */
+/* Drawer pod headerom */
 .drawer-under-header {
-  top: 64px !important;
-  height: calc(100vh - 64px) !important;
-  z-index: 2000 !important;
+  position: fixed;
+  top: 64px;                          /* výška headera */
+  height: calc(100vh - 64px);
+  z-index: 2000 !important;           /* pod headerom (3000), nad contentom */
 }
 
-/* Odstránenie overlay pozadia pre drawer */
-.drawer-under-header :deep(.q-drawer__backdrop) {
-  display: none !important;
+/* Desktop Profile Overlay - len pre profile mode */
+.desktop-profile-overlay {
+  position: fixed;
+  top: 64px;                          /* pod headerom */
+  left: 0;
+  right: 0;                           /* kľudne cez celý width – drawer je nad tým */
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1900;                      /* nad contentom, pod drawerom */
+  cursor: pointer;
+  /* žiadny transition → rýchlejší pocitovo */
 }
-
-
 /* Left Rail */
 .left-rail {
   position: fixed;
@@ -441,6 +455,19 @@ export default {
   background: rgba(0, 0, 0, 0.5);
   z-index: 1399;
   cursor: pointer;
+}
+
+/* Desktop Profile Overlay - len pre profile mode */
+.desktop-profile-overlay {
+  position: fixed;
+  top: 64px;
+  left: 0;
+  right: 280px; /* width of right drawer */
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 1900; /* Above content, below drawer */
+  cursor: pointer;
+  transition: opacity 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* Page content */
@@ -548,6 +575,11 @@ export default {
     display: block !important;
     top: 64px !important;
     height: calc(100vh - 64px) !important;
+  }
+
+  /* Hide desktop profile overlay on mobile */
+  .desktop-profile-overlay {
+    display: none !important;
   }
 }
 </style>
