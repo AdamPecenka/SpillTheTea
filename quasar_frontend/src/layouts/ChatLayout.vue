@@ -354,9 +354,6 @@ export default {
     },
 
     handleShowNotification(notificationData) {
-      // This will be handled by NotificationContainer component
-      // For now, just use Quasar Notify as temporary solution
-      // You'll need to add NotificationContainer component later
       this.$q.notify({
         message: `${notificationData.username} in #${notificationData.channel}`,
         caption: notificationData.message,
