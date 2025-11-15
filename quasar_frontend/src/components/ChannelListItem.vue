@@ -90,7 +90,11 @@
 
         <q-card-section class="text-body1">
           <p>Leaving channel as an <b>Admin</b> will cause the channel to be deleted!</p>
-          <p>Are you sure you want to leave <b>{{ channel.name }}</b>?</p>
+          
+          <p>Are you sure you want to leave 
+            <span style="display: inline-block; padding: 2px 8px; background: #f0f0f0; border-radius: 6px; font-weight: 600; color: #000;">
+              {{channel.name}}
+            </span>?</p>
         </q-card-section>
 
         <q-card-actions align="right" class="q-gutter-sm">
