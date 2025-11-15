@@ -1,85 +1,86 @@
 <template>
   <div class="profile-drawer">
+    <!-- Header with Settings - OUTSIDE scroll container -->
+    <div class="profile-header">
+      <div class="row items-center justify-between header-bar">
+        <!-- Settings Icon Button (vľavo) -->
+        <q-btn
+          flat
+          round
+          dense
+          icon="settings"
+          color="grey-7"
+          @click="settingsOpen = true"
+        >
+          <q-tooltip>Settings</q-tooltip>
+        </q-btn>
+        
+        <div class="text-h6 text-weight-medium">Profile</div>
+        
+        <!-- Close button (vpravo) -->
+        <q-btn
+          flat
+          round
+          dense
+          icon="close"
+          color="grey-7"
+          @click="closeDrawer"
+          
+        >
+          <q-tooltip>Close</q-tooltip>
+        </q-btn>
+      </div>
+    </div>
+
     <!-- Scrollable Content -->
     <div class="profile-scroll-container">
       <div class="q-pa-lg column q-gutter-lg">
-        <!-- Header with Settings -->
-        <div>
-          <div class="row items-center justify-between q-mb-lg">
-            <!-- Settings Icon Button (vľavo) -->
-            <q-btn
-              flat
-              round
-              dense
-              icon="settings"
-              color="grey-7"
-              @click="settingsOpen = true"
-            >
-              <q-tooltip>Settings</q-tooltip>
-            </q-btn>
-            
-            <div class="text-h6">Profile</div>
-            
-            <!-- Close button (vpravo) -->
-            <q-btn
-              flat
-              round
-              dense
-              icon="close"
-              color="grey-7"
-              @click="closeDrawer"
-              
-            >
-              <q-tooltip>Close</q-tooltip>
-            </q-btn>
-          </div>
 
-          <!-- Avatar + nick -->
-          <div class="column items-center q-gutter-sm q-mb-xl">
-            <ProfilePicture
-              :image-url="user.avatarUrl"
-              size="160px"
-              :editable="!isEditing"
-              alt="Your profile picture"
-              @edit="openAvatarPicker"
-            />
-            <div class="text-subtitle1">@{{ user.username }}</div>
-          </div>
-
-          <!-- VIEW MODE -->
-          <div v-if="!isEditing" class="column info-list">
-            <div class="field">
-              <div class="label">First name</div>
-              <div class="value">{{ user.first || '—' }}</div>
-            </div>
-            <div class="field">
-              <div class="label">Last name</div>
-              <div class="value">{{ user.last || '—' }}</div>
-            </div>
-            <div class="field">
-              <div class="label">E-mail address</div>
-              <div class="value">{{ user.email || '—' }}</div>
-            </div>
-          </div>
-
-          <!-- EDIT MODE -->
-          <q-form 
-            v-else @submit.prevent="save"
-            class="column q-gutter-md">
-            
-            <q-input
-              label="Username"
-              :model-value="user.username"
-              dense
-              filled
-              readonly
-            />
-
-            <q-input v-model="edit.first" label="First name" dense filled />
-            <q-input v-model="edit.last" label="Last name" dense filled />
-            <q-input v-model="edit.email" label="E-mail address" type="email" dense filled />
-          </q-form>
+        <!-- Avatar + nick -->
+        <div class="column items-center q-gutter-sm q-mb-xl">
+          <ProfilePicture
+            :image-url="user.avatarUrl"
+            size="160px"
+            :editable="!isEditing"
+            alt="Your profile picture"
+            @edit="openAvatarPicker"
+          />
+          <div class="text-subtitle1">@{{ user.username }}</div>
         </div>
+
+        <!-- VIEW MODE -->
+        <div v-if="!isEditing" class="column info-list">
+          <div class="field">
+            <div class="label">First name</div>
+            <div class="value">{{ user.first || '—' }}</div>
+          </div>
+          <div class="field">
+            <div class="label">Last name</div>
+            <div class="value">{{ user.last || '—' }}</div>
+          </div>
+          <div class="field">
+            <div class="label">E-mail address</div>
+            <div class="value">{{ user.email || '—' }}</div>
+          </div>
+        </div>
+
+        <!-- EDIT MODE -->
+        <q-form 
+          v-else @submit.prevent="save"
+          class="column q-gutter-md">
+          
+          <q-input
+            label="Username"
+            :model-value="user.username"
+            dense
+            filled
+            readonly
+          />
+
+          <q-input v-model="edit.first" label="First name" dense filled />
+          <q-input v-model="edit.last" label="Last name" dense filled />
+          <q-input v-model="edit.email" label="E-mail address" type="email" dense filled />
+        </q-form>
       </div>
     </div>
 
@@ -301,6 +302,23 @@ export default {
   flex-shrink: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.12);
   background: white;
+}
+
+/* Profile Header - Fixed height 64px to match app header */
+.profile-header {
+  background: white;
+  flex-shrink: 0;
+  height: 64px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+}
+
+.header-bar {
+  width: 100%;
+  padding: 0 16px;
+  height: 64px;
+  box-sizing: border-box;
 }
 
 /* čistý "list" štýl vo view mode */

@@ -40,13 +40,13 @@
 
                 <q-separator v-if="activeChatData.type === 'channel'" />
 
-                <!-- Leave channel -->
+                <!-- Leave channel / Close DM -->
                 <q-item clickable v-ripple @click="leaveChat" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
                   <q-item-section>
-                    Leave channel
+                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -56,12 +56,17 @@
       </div>
     </div>
 
-    <!-- Chat Messages - REMOVED 'col' class -->
+    <!-- Chat Messages -->
     <div 
-      class="q-pa-md chat-messages-container"
+      ref="chatContainer"
+      class="q-pa-md overflow-auto col chat-messages-container"
       :style="chatContainerStyle"
     >
-      <q-infinite-scroll reverse @load="onLoad">
+      <q-infinite-scroll 
+        reverse 
+        @load="onLoad"
+        :scroll-target="$refs.chatContainer"
+      >
         <template v-slot:loading>
           <div class="row justify-center q-my-md">
             <q-spinner color="primary" name="dots" size="40px" />
@@ -83,7 +88,7 @@
     </div>
 
     <!-- Typing indicator -->
-    <div v-if="typingUsers.length" class="typing-indicator row items-center q-pa-sm">
+    <div v-if="typingUsers.length" class="typing-indicator row items-center q-pa-sm relative">
       <span>
         <template v-for="user in typingUsers" :key="user">
           <a href="#" class="typing-user q-mr-xs" @click.prevent="onUserClick(user)">
@@ -123,7 +128,8 @@ export default {
       },
       directoryStore: null,
       isMuted: false,
-      isLoadingMessages: false  // PRIDANÉ
+      // Mock members (same as in TypingBar.vue)
+      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
     }
   },
 
@@ -135,36 +141,23 @@ export default {
     chatContainerStyle() {
       // 64px header + 56px chat header + 70px typing bar + typing indicator
       const typingIndicatorHeight = this.typingUsers.length ? 40 : 0
-      const typingBarHeight = 70
       return {
-        height: `calc(100vh - 64px - 56px - ${typingBarHeight}px - ${typingIndicatorHeight}px)`,
-        overflowY: 'auto',
-        overflowX: 'hidden',
-        flex: 'none' // Zabráni flex-grow
+        maxHeight: `calc(100vh - 64px - 56px - 70px - ${typingIndicatorHeight}px)`,
+        paddingBottom: this.typingUsers.length ? '16px' : '8px'
       }
     }
   },
   
   watch: {
-    // DOČASNE VYPNUTÉ PRE DEBUGGING
-    /*
     'directoryStore.activeChat': {
-      handler(newChat, oldChat) {
-        // Ak sa iba zmenil DM (nie celý channel), nereloaduj messages
-        if (oldChat && newChat && 
-            oldChat.type === 'dm' && newChat.type === 'dm') {
-          // Iba DM sa zmenil, ponechaj messages
-          this.isMuted = false
-          return
-        }
-        
-        // Inak reload messages
+      handler() {
+        // Reload messages when active chat changes
         this.loadMessages()
+        // Reset mute state for new chat
         this.isMuted = false
       },
       deep: true
     }
-    */
   },
 
   created() {
@@ -180,35 +173,36 @@ export default {
     this.scrollToBottom()
   },
   
+  updated() {
+    // Pri prvom načítaní správ, scrollneme dole
+    if (this.messages.length === 20) {
+      this.scrollToBottom()
+    }
+  },
+  
   methods: {
     loadMessages() {
-      this.isLoadingMessages = true
-      
-      // Pripravíme nové messages PRED vymazaním starých
-      const newMessages = []
-      let counter = 1
+      // Clear existing messages
+      this.messages = []
+      this.idCounter = 1
       
       // Load demo messages
       for (let i = 0; i < 20; i++) {
         const isPing = Math.random() < 0.2
 
-        newMessages.push({
-          id: counter++,
-          name: i % 2 === 0 ? 'abracadabra' : 'simsalabim',
-          text: i % 2 === 0 ? 'Smrdis' : 
+        this.addMessage(
+          i % 2 === 0 ? 'abracadabra' : 'simsalabim',
+          i % 2 === 0 ? 'Smrdis' : 
             isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
-          sent: i % 2 === 0,
-          stamp: Date.now()
-        })
+          i % 2 === 0
+        )
       }
       
-      // Teraz NARAZ vymeníme messages (žiadny prázdny stav)
-      this.messages = newMessages
-      this.idCounter = counter
-      this.isLoadingMessages = false
-      
+      // Dvojité $nextTick pre istotu
       this.$nextTick(() => {
-        this.scrollToBottom()
+        this.$nextTick(() => {
+          this.scrollToBottom()
+        })
       })
     },
     
@@ -224,6 +218,8 @@ export default {
 
     onLoad(index, done) {
       setTimeout(() => {
+        const oldScrollHeight = this.$refs.chatContainer?.scrollHeight || 0
+        
         const older = [
           {
             id: this.idCounter++,
@@ -240,7 +236,19 @@ export default {
             stamp: Date.now() - 120000
           }
         ]
+        
+        // Pridáme staršie správy na začiatok
         this.messages.unshift(...older)
+        
+        // Udržíme scroll pozíciu po pridaní starších správ
+        this.$nextTick(() => {
+          const container = this.$refs.chatContainer
+          if (container && oldScrollHeight) {
+            const newScrollHeight = container.scrollHeight
+            container.scrollTop = newScrollHeight - oldScrollHeight
+          }
+        })
+        
         done()
       }, 1000)
     },
@@ -250,10 +258,18 @@ export default {
     },
 
     scrollToBottom() {
-      const container = this.$refs.chatContainer
-      if (container) {
-        container.scrollTop = container.scrollHeight
-      }
+      this.$nextTick(() => {
+        const container = this.$refs.chatContainer
+        if (container) {
+          // Scrollneme úplne dole
+          container.scrollTop = container.scrollHeight
+          
+          // Backup scroll po 100ms
+          setTimeout(() => {
+            container.scrollTop = container.scrollHeight
+          }, 100)
+        }
+      })
     },
 
     toggleMute() {
@@ -273,18 +289,21 @@ export default {
     },
 
     viewMembers() {
-      // Emitujeme event nahor do layoutu
+      // Emitujeme event nahor do layoutu, aby sa otvoril pravý panel
       this.$emit('view-members')
     },
 
     leaveChat() {
       if (!this.activeChatData) return
       
+      const isChannel = this.activeChatData.type === 'channel'
       const chatName = this.activeChatData.title
       
       Dialog.create({
-        title: 'Leave Channel',
-        message: `Are you sure you want to leave ${chatName}?`,
+        title: isChannel ? 'Leave Channel' : 'Close Conversation',
+        message: isChannel 
+          ? `Are you sure you want to leave ${chatName}?`
+          : `Are you sure you want to close this conversation with ${chatName}?`,
         cancel: true,
         persistent: true
       }).onOk(() => {
@@ -295,7 +314,7 @@ export default {
         this.$router.push({ name: 'index' })
         
         Notify.create({
-          message: 'Left channel',
+          message: isChannel ? 'Left channel' : 'Conversation closed',
           color: 'info',
           position: 'top',
           timeout: 2000
@@ -311,7 +330,7 @@ export default {
 .chat-header {
   background: white;
   border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  height: 64px;
+  height: 56px;
   flex-shrink: 0;
   display: flex;
   align-items: center;
@@ -347,9 +366,7 @@ export default {
   flex-shrink: 0;
 }
 
-/* Chat messages container - FIXED HEIGHT, nie flex-grow */
 .chat-messages-container {
-  flex-shrink: 0; /* Nezmení sa */
   overflow-y: auto;
   overflow-x: hidden;
 }
