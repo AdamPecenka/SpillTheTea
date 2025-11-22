@@ -13,7 +13,7 @@ export default class Channel extends BaseModel {
   @column()
   declare name: string
 
-  @column()
+  @column({ columnName: 'is_private' })
   declare isPrivate: boolean
 
   @column()
@@ -25,26 +25,38 @@ export default class Channel extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
+  // ✅ Pôvodný relation (môžeš použiť .users)
   @manyToMany(() => User, {
     pivotTable: 'channel_members',
     pivotForeignKey: 'channel_id',
     pivotRelatedForeignKey: 'user_id',
     pivotTimestamps: true,
+    pivotColumns: ['is_admin', 'is_pinned'], // ✅ Pridané pivot stĺpce
   })
   public users!: ManyToMany<typeof User>
 
-  @hasMany(() => MessageLog, {
-      foreignKey: 'channel_id'
+  // ✅ NOVÝ alias "members" - to isté ako users, ale lepší názov pre channely
+  @manyToMany(() => User, {
+    pivotTable: 'channel_members',
+    pivotForeignKey: 'channel_id',
+    pivotRelatedForeignKey: 'user_id',
+    pivotTimestamps: true,
+    pivotColumns: ['is_admin', 'is_pinned'],
   })
-  public sentMessages!: HasMany<typeof MessageLog>
+  public members!: ManyToMany<typeof User>
+
+  @hasMany(() => MessageLog, {
+    foreignKey: 'channelId'
+  })
+  public messages!: HasMany<typeof MessageLog>
 
   @hasMany(() => ChannelBannedMember, {
-      foreignKey: 'channel_id'
+    foreignKey: 'channelId'
   })
-  public bans!: HasMany<typeof ChannelBannedMember>
+  public bannedMembers!: HasMany<typeof ChannelBannedMember>
   
   @hasMany(() => ChannelInvite, {
-    foreignKey: 'channel_id'
+    foreignKey: 'channelId'
   })
   public invites!: HasMany<typeof ChannelInvite>
 }

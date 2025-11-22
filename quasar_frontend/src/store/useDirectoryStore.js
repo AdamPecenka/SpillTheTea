@@ -1,181 +1,182 @@
+// src/store/useDirectoryStore.js
 import { defineStore } from 'pinia'
-
-function fetchChannels() {
-  return [
-    {
-      id: 'general',
-      name: 'general',
-      topic: 'team-wide',
-      members: 12,
-      isPrivate: false,
-      isPinned: true,
-      isInvite: false,
-    },
-    {
-      id: 'random',
-      name: 'random',
-      topic: 'off-topic',
-      members: 7,
-      isPrivate: true,
-      isPinned: false,
-      isInvite: false,
-    },
-    {
-      id: 'uni',
-      name: 'uni',
-      topic: 'off-topic',
-      members: 250,
-      isPrivate: false,
-      isPinned: false,
-      isInvite: false,
-    },
-    {
-      id: 'vpwa',
-      name: 'VPWA',
-      topic: 'web-dev',
-      members: 100,
-      isPrivate: true,
-      isPinned: true,
-      isInvite: false,
-    },
-    {
-      id: 'cooked',
-      name: 'cooked',
-      topic: '',
-      members: 45,
-      isPrivate: true,
-      isPinned: false,
-      isInvite: false,
-    },
-    {
-      id: 'cars',
-      name: 'cars',
-      topic: 'car-meets',
-      members: 300,
-      isPrivate: false,
-      isPinned: false,
-      isInvite: false,
-    },
-    {
-      id: 'nsfw',
-      name: 'NSFW(18+)',
-      topic: 'Single moms in ur area <3',
-      members: 69,
-      isPrivate: true,
-      isPinned: false,
-      isInvite: true,
-    },
-  ]
-}
-
-function fetchFriends() {
-  return [
-    { id: 'u-damian', name: 'Damian', status: 'online' },
-    { id: 'u-monika', name: 'Monika', status: 'away' },
-    { id: 'u-adam', name: 'Adam', status: 'offline' },
-    { id: 'u-jano', name: 'Jano', status: 'dnd' },
-    { id: 'u-katka', name: 'Katka', status: 'offline' },
-    { id: 'u-terka', name: 'Terka', status: 'away' },
-    { id: 'u-ema', name: 'Ema', status: 'away' },
-    { id: 'u-tyty', name: 'Tyty', status: 'dnd' },
-    { id: 'u-marek', name: 'Marek', status: 'online' },
-  ]
-}
+import * as api from 'src/services/api.service'
+import wsService from 'src/services/websocket.service'
 
 export const useDirectoryStore = defineStore('directory', {
   state: () => ({
     channels: [],
-    channelsLoaded: false,
-    friends: [],
-    friendsLoaded: false,
-    // Active chat tracking
-    activeChat: null, // { type: 'channel' | 'dm', id: 'channel-id' | 'user-id' }
+    activeChat: null,
   }),
+
   getters: {
-    channelBy: (state) => (idOrName) =>
-      state.channels.find((c) => c.id === idOrName || c.name === idOrName),
-    friendBy: (state) => (idOrName) =>
-      state.friends.find((u) => u.id === idOrName || u.name === idOrName),
-    channelsSorted: (state) => [...state.channels].sort((a, b) => a.name.localeCompare(b.name)),
-    friendsSorted: (state) => [...state.friends].sort((a, b) => a.name.localeCompare(b.name)),
-    // Getters pre aktívny chat
-    activeChatData: (state) => {
+    channelsSorted(state) {
+      return [...state.channels].sort((a, b) => {
+        if (a.isPinned && !b.isPinned) return -1
+        if (!a.isPinned && b.isPinned) return 1
+        if (a.isPrivate && !b.isPrivate) return -1
+        if (!a.isPrivate && b.isPrivate) return 1
+        return a.name.localeCompare(b.name)
+      })
+    },
+
+    activeChatData(state) {
       if (!state.activeChat) return null
       
-      if (state.activeChat.type === 'channel') {
-        const channel = state.channels.find(c => c.id === state.activeChat.id)
-        if (channel) {
-          return {
-            type: 'channel',
-            title: `#${channel.name}`,
-            subtitle: channel.topic || null,
-            data: channel
-          }
-        }
-      }
-      
-      if (state.activeChat.type === 'dm') {
-        const user = state.friends.find(u => u.id === state.activeChat.id)
-        if (user) {
-          const statusMap = {
-            'online': 'Online',
-            'away': 'Away',
-            'dnd': 'Do not disturb',
-            'offline': 'Offline'
-          }
-          return {
-            type: 'dm',
-            title: `@${user.name}`,
-            subtitle: statusMap[user.status] || user.status,
-            data: user
-          }
+      const channel = state.channels.find(c => c.id === state.activeChat)
+      if (channel) {
+        return {
+          id: channel.id,
+          title: channel.name,
+          subtitle: channel.description,
+          type: 'channel',
+          isPrivate: channel.isPrivate,
+          isPinned: channel.isPinned
         }
       }
       
       return null
     }
   },
+
   actions: {
-    loadChannels(force = false) {
-      if (this.channelsLoaded && !force) return
-      this.channels = fetchChannels()
-      this.channelsLoaded = true
-    },
-    loadFriends(force = false) {
-      if (this.friendsLoaded && !force) return
-      this.friends = fetchFriends()
-      this.friendsLoaded = true
-    },
-    addChannel(c) {
-      if (c) {
-        this.channels.push(c)
+    async loadChannels() {
+      try {
+        console.log('📡 Loading channels...')
+        
+        const channels = await api.getChannels()
+        this.channels = channels
+        
+        console.log('✅ Loaded', channels.length, 'channels')
+
+        if (!wsService.connected) {
+          wsService.init('http://localhost:3333')
+          
+          wsService.connectToChannels({
+            onChannelCreated: (channel) => {
+              console.log('🆕 New channel:', channel.name)
+              if (!this.channels.find(c => c.id === channel.id)) {
+                this.channels.push(channel)
+              }
+            },
+            
+            onChannelUpdated: (channel) => {
+              console.log('✏️ Updated:', channel.name)
+              const index = this.channels.findIndex(c => c.id === channel.id)
+              if (index !== -1) {
+                this.channels[index] = channel
+              }
+            },
+            
+            onChannelDeleted: ({ channelId }) => {
+              console.log('🗑️ Deleted channel:', channelId)
+              this.channels = this.channels.filter(c => c.id !== channelId)
+              
+              if (this.activeChat === channelId) {
+                this.activeChat = null
+              }
+            },
+            
+            onConnected: () => {
+              console.log('✅ WebSocket connected')
+            },
+            
+            onError: (error) => {
+              console.error('❌ WebSocket error:', error)
+            }
+          })
+        }
+        
+      } catch (error) {
+        console.error('Failed to load channels:', error)
       }
     },
-    deleteChannel(id) {
-      this.channels = this.channels.filter((c) => c.id !== id)
-      // Clear active chat if deleting active channel
-      if (this.activeChat?.type === 'channel' && this.activeChat?.id === id) {
-        this.activeChat = null
+
+    async createChannel(data) {
+      try {
+        console.log('➕ Creating:', data.name)
+        const channel = await api.createChannel(data)
+        console.log('✅ Created:', channel.name)
+        return channel
+      } catch (error) {
+        console.error('Create failed:', error)
+        throw error
       }
     },
-    togglePin(id) {
-      const ch = this.channels.find((c) => c.id === id)
-      if (ch) {
-        ch.isPinned = !ch.isPinned
+
+    async updateChannel(channelId, data) {
+      try {
+        console.log('✏️ Updating:', channelId)
+        const channel = await api.updateChannel(channelId, data)
+        console.log('✅ Updated:', channel.name)
+        return channel
+      } catch (error) {
+        console.error('Update failed:', error)
+        throw error
       }
     },
-    // Set active chat
-    setActiveChannel(channelId) {
-      this.activeChat = { type: 'channel', id: channelId }
+
+    async deleteChannel(channelId) {
+      try {
+        console.log('🗑️ Deleting:', channelId)
+        await api.deleteChannel(channelId)
+        console.log('✅ Deleted')
+      } catch (error) {
+        console.error('Delete failed:', error)
+        throw error
+      }
     },
-    setActiveDM(userId) {
-      this.activeChat = { type: 'dm', id: userId }
+
+    /**
+     * 🆕 Toggle pin channelu
+     */
+    async togglePin(channelId) {
+      try {
+        const channel = this.channels.find(c => c.id === channelId)
+        if (!channel) {
+          console.error('Channel not found:', channelId)
+          return
+        }
+        
+        const newPinState = !channel.isPinned
+        
+        console.log('📌 Toggling pin:', channelId, '→', newPinState)
+        
+        // Lokálne update (optimistic)
+        channel.isPinned = newPinState
+        
+        // Update cez API
+        await this.updateChannel(channelId, {
+          isPinned: newPinState
+        })
+        
+        console.log('✅ Pin toggled')
+        
+      } catch (error) {
+        console.error('Failed to toggle pin:', error)
+        // Vráť späť na pôvodný stav
+        const channel = this.channels.find(c => c.id === channelId)
+        if (channel) {
+          channel.isPinned = !channel.isPinned
+        }
+        throw error
+      }
     },
+
+    setActiveChat(channelId) {
+      this.activeChat = channelId
+    },
+
     clearActiveChat() {
       this.activeChat = null
+    },
+
+    disconnectWebSocket() {
+      wsService.disconnect()
+    },
+
+    loadFriends() {
+      // Dummy
     }
-  },
-  persist: {
-    storage: sessionStorage,
-  },
+  }
 })

@@ -1,56 +1,53 @@
+<!-- src/components/ChannelCreateDialog.vue -->
+<!-- KOMPLETNÝ SÚBOR -->
+
 <template>
-  <q-dialog v-model="isOpen" persistent>
-    <q-card style="min-width: 400px; max-width: 90vw; border-radius: 16px;">
-      <q-card-section class="row items-center justify-between">
-        <div class="text-h6">Create a new channel</div>
-        <q-btn icon="close" flat round dense v-close-popup />
+  <q-dialog :model-value="modelValue" @update:model-value="$emit('update:modelValue', $event)">
+    <q-card style="min-width: 400px">
+      <q-card-section>
+        <div class="text-h6">Create New Channel</div>
       </q-card-section>
 
-      <q-separator />
-
-      <q-card-section>
+      <q-card-section class="q-pt-none">
+        <!-- Názov channelu -->
         <q-input
           v-model="channelName"
-          label="Channel name"
+          label="Channel name *"
           filled
           autofocus
+          :rules="[val => !!val.trim() || 'Name is required']"
+          @keyup.enter="createChannel"
         />
+
+        <!-- Description -->
         <q-input
-          v-model="channelTopic"
-          label="Topic (optional)"
+          v-model="description"
+          label="Description (optional)"
           filled
-          class="q-mt-sm"
+          type="textarea"
+          rows="3"
+          class="q-mt-md"
         />
-        <q-toggle
+
+        <!-- Private checkbox -->
+        <q-checkbox
           v-model="isPrivate"
           label="Private channel"
-          color="primary"
           class="q-mt-md"
         />
-        <q-toggle
-          v-model="isPinned"
-          label="Pinned channel"
-          color="primary"
-          class="q-mt-md"
-        />
+        <div class="text-caption text-grey-7 q-ml-md">
+          Private channels require invitation to join
+        </div>
       </q-card-section>
 
-      <q-card-actions align="right" class="q-gutter-sm">
-        <q-btn 
-          flat 
-          label="Cancel" 
-          color="grey-7" 
-          class="rounded-btn"
-          v-close-popup 
-        />
-
+      <q-card-actions align="right">
+        <q-btn flat label="Cancel" color="grey-7" @click="closeDialog" />
         <q-btn
           unelevated
           label="Create"
           color="primary"
-          :disable="!channelName.trim()"
-          class="rounded-btn create-btn"
           @click="createChannel"
+          :loading="loading"
         />
       </q-card-actions>
     </q-card>
@@ -58,90 +55,91 @@
 </template>
 
 <script>
-import { Notify } from 'quasar';
-import { useDirectoryStore } from 'src/store/useDirectoryStore';
+import { useDirectoryStore } from 'src/store/useDirectoryStore'
 
 export default {
   name: 'ChannelCreateDialog',
+
   props: {
-    modelValue: { type: Boolean, required: true }
+    modelValue: Boolean
   },
+
   emits: ['update:modelValue'],
+
   data() {
     return {
       channelName: '',
-      channelTopic: '',
+      description: '',
       isPrivate: false,
-      isPinned: false,
-      channelStore: useDirectoryStore()
+      loading: false
     }
   },
-  computed: {
-    isOpen: {
-      get() { return this.modelValue },
-      set(v) { this.$emit('update:modelValue', v) }
-    }
-  },
+
   methods: {
-    createChannel() {
-      const name = this.channelName.trim()
-      if (!name) return
-
-      const existing = this.channelStore.channels.find(
-        c => c.name.toLowerCase() === name.toLowerCase()
-      )
-
-      if (existing) {
-        Notify.create({
-          message: `A channel named "${name}" already exists.`,
+    async createChannel() {
+      // Validácia
+      if (!this.channelName.trim()) {
+        this.$q.notify({
+          message: 'Channel name is required',
           color: 'negative',
           position: 'top',
-          icon: 'error'
+          timeout: 2000
         })
         return
       }
 
-      const newChannel = {
-        id: name.toLowerCase(),
-        name,
-        topic: this.channelTopic,
-        members: Math.floor(Math.random() * 21), // random num, max 20 members
-        isPrivate: this.isPrivate,
-        isPinned: this.isPinned
+      this.loading = true
+
+      try {
+        const store = useDirectoryStore()
+
+        // Vytvor channel
+        const newChannel = await store.createChannel({
+          name: this.channelName.trim(),
+          isPrivate: this.isPrivate,
+          description: this.description.trim() || undefined
+        })
+
+        // Success
+        this.$q.notify({
+          message: `Channel #${this.channelName} created!`,
+          color: 'positive',
+          position: 'top',
+          timeout: 2000,
+          icon: 'check_circle'
+        })
+
+        // Reset form
+        this.channelName = ''
+        this.description = ''
+        this.isPrivate = false
+
+        // Close dialog
+        this.$emit('update:modelValue', false)
+
+        // Navigate to new channel
+        this.$router.push({ name: 'chat', params: { id: newChannel.id } })
+
+      } catch (error) {
+        console.error('Failed to create channel:', error)
+        
+        this.$q.notify({
+          message: 'Failed to create channel',
+          color: 'negative',
+          position: 'top',
+          timeout: 3000
+        })
+      } finally {
+        this.loading = false
       }
+    },
 
-      this.channelStore.addChannel(newChannel)
-
-      Notify.create({
-        message: `Channel "${name}" created!`,
-        color: 'positive',
-        position: 'top'
-      })
-
+    closeDialog() {
       this.channelName = ''
-      this.channelTopic = ''
+      this.description = ''
       this.isPrivate = false
-      this.isPinned = false
-      this.isOpen = false
+      this.$emit('update:modelValue', false)
     }
   }
 }
 </script>
-
-<style>
-.rounded-btn {
-  border-radius: 12px;
-  padding: 8px 18px !important;
-  font-size: 15px;
-}
-
-.create-btn {
-  background: #D68AC3 !important;
-  color: white !important;
-}
-
-.create-btn:disabled {
-  background: #E8CAE2 !important;
-  color: #ffffffcc !important;
-}
-</style>

@@ -2,16 +2,16 @@ import { DateTime } from 'luxon'
 import { BaseModel, column } from '@adonisjs/lucid/orm'
 
 export default class ChannelMember extends BaseModel {
-  @column()
+  @column({ columnName: 'channel_id' })
   declare channelId: number
 
-  @column()
+  @column({ columnName: 'user_id' })
   declare userId: number
   
-  @column()
+  @column({ columnName: 'is_admin' })
   declare isAdmin: boolean
 
-  @column()
+  @column({ columnName: 'is_pinned' })
   declare isPinned: boolean
 
   @column.dateTime({ autoCreate: true })
