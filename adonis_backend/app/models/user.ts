@@ -12,7 +12,7 @@ import ChannelInvite from './channel_invite.js'
 import type { HasMany, ManyToMany } from '@adonisjs/lucid/types/relations'
 
 const AuthFinder = withAuthFinder(() => hash.use('scrypt'), {
-  uids: ['email', 'username'],
+  uids: ['username', 'email'],
   passwordColumnName: 'password',
 })
 
@@ -73,5 +73,5 @@ export default class User extends compose(BaseModel, AuthFinder) {
   })
   public invites!: HasMany<typeof ChannelInvite>
   
-  static accessTokens = DbAccessTokensProvider.forModel(User)
+  static accessTokens = DbAccessTokensProvider.forModel(User, {expiresIn: '7 days'})
 }

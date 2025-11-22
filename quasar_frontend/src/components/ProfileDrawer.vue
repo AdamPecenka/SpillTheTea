@@ -52,11 +52,11 @@
         <div v-if="!isEditing" class="column info-list">
           <div class="field">
             <div class="label">First name</div>
-            <div class="value">{{ user.first || '—' }}</div>
+            <div class="value">{{ user.firstname || '—' }}</div>
           </div>
           <div class="field">
             <div class="label">Last name</div>
-            <div class="value">{{ user.last || '—' }}</div>
+            <div class="value">{{ user.lastname || '—' }}</div>
           </div>
           <div class="field">
             <div class="label">E-mail address</div>
@@ -77,8 +77,8 @@
             readonly
           />
 
-          <q-input v-model="edit.first" label="First name" dense filled />
-          <q-input v-model="edit.last" label="Last name" dense filled />
+          <q-input v-model="edit.firstname" label="First name" dense filled />
+          <q-input v-model="edit.lastname" label="Last name" dense filled />
           <q-input v-model="edit.email" label="E-mail address" type="email" dense filled />
         </q-form>
       </div>
@@ -139,11 +139,10 @@
 </template>
 
 <script>
-import { useUserStore } from 'src/store/useUserStore'
+import { useAuthStore } from 'src/store/useAuthStore'
 import ProfilePicture from 'src/components/ProfilePicture.vue'
 import SettingsPanel from 'src/components/SettingsPanel.vue'
 import AvatarPicker from 'src/components/AvatarPicker.vue'
-import AvatarPic from 'src/assets/AvatarProfilePic.png'
 
 export default {
   name: 'ProfileDrawer',
@@ -169,14 +168,12 @@ export default {
       settingsOpen: false,
       avatarPickerOpen: false,
       edit: {
-        first: '',
-        last: '',
+        firstname: '',
+        lastname: '',
         email: ''
       },
-      userSettings: {
-        onlyMentions: false
-      },
-      userStore: null
+      mentionedNotify: false,
+      authStore: useAuthStore()
     }
   },
   
@@ -191,31 +188,12 @@ export default {
     },
     
     user() {
-      const storeUser = this.userStore?.user
-      if (!storeUser) {
-        return {
-          id: 'u-demo',
-          username: 'Username',
-          first: '',
-          last: '',
-          email: '',
-          status: 'online',
-          avatarUrl: AvatarPic
-        }
-      }
-      return storeUser
+      return this.authStore.user
     }
   },
   
   mounted() {
-    this.userStore = useUserStore()
-    if (typeof this.userStore.loadUser === 'function') {
-      this.userStore.loadUser()
-    }
-    
-    if (this.userStore.user?.settings) {
-      this.userSettings = { ...this.userStore.user.settings }
-    }
+    this.mentionedNotify = this.authStore.mentionedNotify
   },
   
   methods: {
@@ -224,8 +202,8 @@ export default {
     },
     
     enterEdit() {
-      this.edit.first = this.user.first || ''
-      this.edit.last = this.user.last || ''
+      this.edit.firstname = this.user.firstname || ''
+      this.edit.lastname = this.user.lastname || ''
       this.edit.email = this.user.email || ''
       this.isEditing = true
     },
@@ -237,8 +215,8 @@ export default {
     save() {
       // update store directly (or call an action if you have one)
       if (this.userStore.user) {
-        this.userStore.user.first = this.edit.first
-        this.userStore.user.last = this.edit.last
+        this.userStore.user.firstname = this.edit.firstname
+        this.userStore.user.lastname = this.edit.lastname
         this.userStore.user.email = this.edit.email
       }
       this.isEditing = false
@@ -251,8 +229,8 @@ export default {
     
     onAvatarSelected(avatarUrl) {
       // Update user avatar in store
-      if (this.userStore.user) {
-        this.userStore.user.avatarUrl = avatarUrl
+      if (this.authStore.user) {
+        this.authStore.user.avatarUrl = avatarUrl
       }
       
       this.$q.notify({
@@ -277,7 +255,7 @@ export default {
     },
     
     onLogOut(){
-      this.userStore.isLogged = false
+      this.authStore.logout()
       this.$router.push({ name: 'login'})
     }
   }

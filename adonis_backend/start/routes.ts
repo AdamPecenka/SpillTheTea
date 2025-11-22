@@ -8,7 +8,11 @@
 */
 
 import router from '@adonisjs/core/services/router'
+<<<<<<< HEAD
 import transmit from '@adonisjs/transmit/services/main'
+=======
+import AuthController from '#controllers/auth_controller'
+>>>>>>> 1c02d582796b84558482741d0fde1b2d43e652e0
 
 /*
 |--------------------------------------------------------------------------
@@ -29,6 +33,7 @@ router.get('/', async () => {
   }
 })
 
+<<<<<<< HEAD
 /*
 |--------------------------------------------------------------------------
 | API routes (DOČASNE BEZ AUTENTIFIKÁCIE - len na testovanie)
@@ -48,3 +53,10 @@ router.group(() => {
   router.post('/channels/:channelId/typing', '#controllers/messages_controller.typing')
   
 }).prefix('/api')  // ✅ Odstránené .middleware(middleware.auth())
+=======
+
+router.group(() => {
+  router.post('register', [AuthController, 'register'])
+  router.post('login', [AuthController, 'login'])
+}).prefix('auth')
+>>>>>>> 1c02d582796b84558482741d0fde1b2d43e652e0
