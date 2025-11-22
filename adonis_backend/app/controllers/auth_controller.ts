@@ -50,9 +50,11 @@ export default class AuthController {
 
         const token = await User.accessTokens.create(user)
 
+        const userToReturn = await user.refresh()
+
         return response.ok({
             token: token.value!.release(),
-            user: user,
+            user: userToReturn,
         })
     }
 }

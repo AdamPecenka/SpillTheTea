@@ -42,14 +42,20 @@ export const useAuthStore = defineStore('auth', {
                 this.user = response.data.user
                 api.defaults.headers.common.Authorization = `Bearer ${this.token}`
 
-                return true
+                return {
+                    ok: true,
+                    errMsg: null
+                }
             } catch(e) {
                 console.log(`[!!!]\n${e}`)
                 
                 const msg = e.response?.data?.message || 'Registration failed.'
                 
                 console.log('Store: ' + msg)
-                return { error: msg }
+                return {
+                    ok: false,
+                    errMsg: msg
+                }
             }
         },
         logout() {

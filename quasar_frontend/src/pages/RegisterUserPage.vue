@@ -102,7 +102,7 @@ export default {
     }
   },
   methods: {
-    onSubmit () {
+    async onSubmit () {
       const data = {
         firstname: this.firstname,
         lastname: this.lastname,
@@ -111,16 +111,14 @@ export default {
         password: this.password
       }
 
-      const result = this.authStore.register(data)
+      const result = await this.authStore.register(data)
 
-      console.log('Page: ' + result)
-
-      if(result === true) {
+      if(result.ok === true) {
         this.$router.push({ name: 'index' })
       } else {
         Notify.create({
           type: 'negative',
-          message: result.error
+          message: result.errMsg
         });
       }
     },
