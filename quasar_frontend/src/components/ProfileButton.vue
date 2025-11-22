@@ -79,8 +79,8 @@
 </template>
 
 <script>
-import { useUserStore } from 'src/store/useUserStore'
 import ProfilePicture from './ProfilePicture.vue'
+import { useAuthStore } from 'src/store/useAuthStore';
 
 export default {
   name: 'ProfileButton',
@@ -101,13 +101,13 @@ export default {
   data() {
     return {
       menu: false,
-      userStore: null
+      authStore: useAuthStore()
     }
   },
   
   computed: {
     user() {
-      return this.userStore?.user || null
+      return this.authStore?.user || null
     },
     
     getUserUsername() {
@@ -119,19 +119,14 @@ export default {
     }
   },
   
-  mounted() {
-    this.userStore = useUserStore()
-    this.userStore.loadUser()
-  },
-  
   methods: {
     handleClick() {
       this.$emit('click')
     },
     
     setStatus(status) {
-      if (this.userStore) {
-        this.userStore.setStatus(status)
+      if (this.authStore) {
+        this.authStore.setStatus(status)
       }
     }
   }

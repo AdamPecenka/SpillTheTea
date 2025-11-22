@@ -5,17 +5,17 @@ import User from '#models/user'
 
 export default class extends BaseSeeder {
   async run() {
-    await User.updateOrCreate(
-      { username: 'abracadabra' },  // podla tohto najprv prehlada db ci neexistuje zaznam
-      {  
+    await User.updateOrCreate(  
+      { username: 'abracadabra' },
+      {
         username: 'abracadabra',
         firstname: 'Abraca',
         lastname: 'Dabra',
         email: 'abraca@dabra.com',
-        password: await hash.make('Heslo@123'),
+        password: 'Heslo@123',
         status: UserStatus.ONLINE,
         mentionedNotify: true,
-        avatarUrl: '/avatars/avatar9.png'
+        avatarUrl: '/src/assets/avatars/avatar9.png'
       }
     )
   }

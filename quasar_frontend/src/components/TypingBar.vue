@@ -59,7 +59,7 @@
 
 <script>
 import { Notify, Dialog } from 'quasar';
-import { useUserStore } from 'src/store/useUserStore';
+import { useAuthStore } from 'src/store/useAuthStore';
 
 export default {
   name: 'TypingBar',
@@ -138,8 +138,8 @@ export default {
   
   computed: {
     userStatus() {
-      const userstore = useUserStore()
-      return userstore.user?.status || 'offline'
+      const authStore = useAuthStore()
+      return authStore.user?.status || 'offline'
     },
     
     filteredCommands() {

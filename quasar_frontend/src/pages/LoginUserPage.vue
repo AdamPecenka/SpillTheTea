@@ -53,37 +53,31 @@
 </template>
 
 <script>
-import { useUserStore } from 'src/store/useUserStore';
 import { Notify } from 'quasar';
+import { useAuthStore } from 'src/store/useAuthStore';
 
 export default {
   data () {
     return {
+      authStore: useAuthStore(),
       username: "",
       password: "",
       isPwd: true
     }
   },
   methods: {
-    onSubmit () {
-      const userStore = useUserStore()
-      userStore.loadUser()
+    async onSubmit () {
+      
+      const ok = await this.authStore.login(this.username, this.password);
 
-      if(userStore.user.username === this.username && userStore.user.password === this.password) {
-        userStore.isLogged = true
+      if(ok) {
         this.$router.push({ name: 'index' })
       } else {
-        console.log(`[i] ${userStore.user.username}`)
-        console.log(`[i] ${userStore.user.password}`)
-        console.log(`[i] ${this.username}`)
-        console.log(`[i] ${this.password}`)
-
         Notify.create({
           type: 'negative',
-          message: 'Invalid credentials!'
-        })
+          message: 'Invalid username or password'
+        });
       }
-
     },
     goToRegister () {
       this.$router.push({ name: 'register' })

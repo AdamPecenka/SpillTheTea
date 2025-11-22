@@ -86,6 +86,9 @@
 </template>
 
 <script>
+import { useAuthStore } from 'src/store/useAuthStore';
+import { Notify } from 'quasar';
+
 export default {
   data () {
     return {
@@ -94,18 +97,32 @@ export default {
       username: "",
       email: "",
       password: "",
-      isPwd: true
+      isPwd: true,
+      authStore: useAuthStore()
     }
   },
   methods: {
     onSubmit () {
-      console.log('Form submitted:', {
+      const data = {
         firstname: this.firstname,
         lastname: this.lastname,
         username: this.username,
         email: this.email,
         password: this.password
-      })
+      }
+
+      const result = this.authStore.register(data)
+
+      console.log('Page: ' + result)
+
+      if(result === true) {
+        this.$router.push({ name: 'index' })
+      } else {
+        Notify.create({
+          type: 'negative',
+          message: result.error
+        });
+      }
     },
     goToLogin () {
       this.$router.push({ name: 'login' })

@@ -44,3 +44,8 @@
 - [ ] Správa typing indikátora (emit / broadcast)
 - [ ] Správa live draft textu v reálnom čase
 
+### Dev notes
+- dorobit editovanie profilu
+    - mozno nemat defaul profilovu fotku
+        - nechat null v db?
+        - pridat avatar picker component do register page?
