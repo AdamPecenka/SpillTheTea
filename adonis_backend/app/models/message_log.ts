@@ -8,16 +8,16 @@ export default class MessageLog extends BaseModel {
   @column({ isPrimary: true })
   declare id: number
 
-  @column()
+  @column({ columnName: 'sender_id' })
   declare senderId: number
   
-  @column()
+  @column({ columnName: 'channel_id' })
   declare channelId: number
 
-  @column()
+  @column({ columnName: 'message_text' })
   declare messageText: string
 
-  @column()
+  @column.dateTime({ columnName: 'sent_timestamp' })
   declare sentTimestamp: DateTime
 
   @column.dateTime({ autoCreate: true })
@@ -26,13 +26,14 @@ export default class MessageLog extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
+  // ✅ OPRAVENÉ: Správny názov relation
   @belongsTo(() => User, {
-      foreignKey: 'sender_id',
-    })
-    public channelMember!: BelongsTo<typeof User>
+    foreignKey: 'senderId',
+  })
+  public sender!: BelongsTo<typeof User>
   
-    @belongsTo(() => Channel, {
-      foreignKey: 'channel_id'
-    })
-    public channel!: BelongsTo<typeof Channel>
+  @belongsTo(() => Channel, {
+    foreignKey: 'channelId'
+  })
+  public channel!: BelongsTo<typeof Channel>
 }

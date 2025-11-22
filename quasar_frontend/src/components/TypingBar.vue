@@ -361,6 +361,116 @@ export default {
       this.message = ''
       this.showCommandMenu = false
     }
+  },
+
+  async sendCurrentMessage() {
+    const trimmed = this.inputText.trim()
+    if (!trimmed) return
+    
+    // Získaj aktívny channel ID
+    const channelId = this.directoryStore?.activeChat
+    if (!channelId) {
+      console.warn('No active channel')
+      return
+  }
+
+  try {
+    // Import API service
+      const { sendMessage, sendTyping } = await import('src/services/api.service')
+      
+      // Pošli správu
+      await sendMessage(channelId, trimmed)
+      
+      // Stop typing indicator
+      await sendTyping(channelId, false)
+      
+      // Vyčisti input
+      this.inputText = ''
+      
+      // Správa sa automaticky zobrazí cez WebSocket event
+      
+  } catch (error) {
+      console.error('Failed to send message:', error)
+      
+      // Fallback notifikácia
+      this.$q.notify({
+        message: 'Failed to send message',
+        color: 'negative',
+        position: 'top',
+        timeout: 2000
+      })
+    }
+  },
+
+  async sendTypingIndicator(isTyping) {
+    const channelId = this.directoryStore?.activeChat
+    if (!channelId) return
+    
+    try {
+      const { sendTyping } = await import('src/services/api.service')
+      await sendTyping(channelId, isTyping)
+    } catch (error) {
+      console.error('Failed to send typing indicator:', error)
+    }
+  },
+
+  onInput(){
+    // Pošli "typing started" pri prvom znaku
+    if (this.inputText.length === 1) {
+      this.sendTypingIndicator(true)
+    }
+    
+    // Debounce typing stopped (2 sekundy bez písania)
+    clearTimeout(this.typingTimeout)
+    this.typingTimeout = setTimeout(() => {
+      if (this.inputText.trim()) {
+        this.sendTypingIndicator(false)
+      }
+    }, 2000)
+  },
+
+  async handleEnter(){
+    const trimmed = this.inputText.trim()
+    
+    // Command handling
+    if (trimmed.startsWith('/')) {
+      this.handleCommand(trimmed)
+      return
+    }
+    
+    // Pošli správu cez API
+    await this.sendCurrentMessage()
+  },
+  
+  async createChannelViaCommand(channelName) {
+    try {
+      const { createChannel } = await import('src/services/api.service')
+      
+      const newChannel = await createChannel({
+        name: channelName,
+        isPrivate: false,
+        description: `Created via /channel command`
+      })
+      
+      this.$q.notify({
+        message: `Channel #${channelName} created!`,
+        color: 'positive',
+        position: 'top',
+        timeout: 2000
+      })
+      // Prejdi na nový channel
+      this.$router.push({ name: 'chat', params: { id: newChannel.id } })
+      
+    } catch (error) {
+      console.error('Failed to create channel:', error)
+      
+      this.$q.notify({
+        message: 'Failed to create channel',
+        color: 'negative',
+        position: 'top',
+        timeout: 2000
+      })
+    }
   }
 }
 </script>
