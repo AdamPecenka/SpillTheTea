@@ -2,24 +2,31 @@
 |--------------------------------------------------------------------------
 | Routes file
 |--------------------------------------------------------------------------
-|
-| The routes file is used for defining the HTTP routes.
-|
 */
 
 import router from '@adonisjs/core/services/router'
-<<<<<<< HEAD
 import transmit from '@adonisjs/transmit/services/main'
-=======
 import AuthController from '#controllers/auth_controller'
->>>>>>> 1c02d582796b84558482741d0fde1b2d43e652e0
+import { middleware } from './kernel.js'
 
 /*
 |--------------------------------------------------------------------------
-| WebSocket endpoint
+| WebSocket endpoint (Transmit)
 |--------------------------------------------------------------------------
 */
-router.get('/__transmit/events', () => transmit.streamController())
+// ✅ REGISTRUJ ROUTE - Transmit v1 automaticky neregistruje!
+try {
+  // Transmit v2 má registerRoutes()
+  if (typeof transmit.registerRoutes === 'function') {
+    transmit.registerRoutes()
+    console.log('✅ Transmit routes registered via registerRoutes()')
+  } else {
+    // Transmit v1 nemá registerRoutes - musíme manuálne
+    console.log('⚠️ transmit.registerRoutes() not available, using manual route')
+  }
+} catch (e) {
+  console.log('⚠️ Error registering Transmit routes:', e.message)
+}
 
 /*
 |--------------------------------------------------------------------------
@@ -33,10 +40,19 @@ router.get('/', async () => {
   }
 })
 
-<<<<<<< HEAD
 /*
 |--------------------------------------------------------------------------
-| API routes (DOČASNE BEZ AUTENTIFIKÁCIE - len na testovanie)
+| Auth routes
+|--------------------------------------------------------------------------
+*/
+router.group(() => {
+  router.post('register', [AuthController, 'register'])
+  router.post('login', [AuthController, 'login'])
+}).prefix('auth')
+
+/*
+|--------------------------------------------------------------------------
+| API routes - S AUTH MIDDLEWARE
 |--------------------------------------------------------------------------
 */
 router.group(() => {
@@ -47,16 +63,12 @@ router.group(() => {
   router.put('/channels/:id', '#controllers/channels_controller.update')
   router.delete('/channels/:id', '#controllers/channels_controller.destroy')
   
+  // 🆕 Channel Member settings (isPinned, isAdmin, etc.)
+  router.put('/channels/:channelId/members/:userId', '#controllers/channels_controller.updateMember')
+  
   // Messages
   router.get('/channels/:channelId/messages', '#controllers/messages_controller.index')
   router.post('/channels/:channelId/messages', '#controllers/messages_controller.store')
   router.post('/channels/:channelId/typing', '#controllers/messages_controller.typing')
   
-}).prefix('/api')  // ✅ Odstránené .middleware(middleware.auth())
-=======
-
-router.group(() => {
-  router.post('register', [AuthController, 'register'])
-  router.post('login', [AuthController, 'login'])
-}).prefix('auth')
->>>>>>> 1c02d582796b84558482741d0fde1b2d43e652e0
+}).prefix('/api').use(middleware.auth())

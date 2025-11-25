@@ -17,7 +17,7 @@
       <q-separator class="q-mx-md q-my-xs" />
     </div>
 
-    <!-- Ivnitations -->
+    <!-- Invitations -->
     <div v-if="inviteChannels.length > 0">
       <div class="q-px-md q-pt-sm q-pb-xs">
         <div class="text-caption text-weight-bold text-grey-7">INVITED</div>
@@ -67,50 +67,62 @@
 </template>
 
 <script>
-import { computed } from 'vue'
 import ChannelListItem from 'components/ChannelListItem.vue'
-import { useDirectoryStore } from 'src/store/useDirectoryStore'  // <-- PRIDAJ TOTO
-import { Notify } from 'quasar';
+import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { Notify } from 'quasar'
 
 export default {
   name: 'ChannelList',
+  
   components: {
     ChannelListItem
   },
-  props: {
-    channels: {
-      type: Array,
-      required: true
-    }
-  },
+  
   emits: ['channel-selected'],
-  computed: {
-    pinnedChannels() {
-      return this.channels.filter(ch => ch.isPinned);
-    },
-    privateChannels() {
-      return this.channels.filter(ch => !ch.isPinned && ch.isPrivate && !ch.isInvite);
-    },
-    publicChannels() {
-      return this.channels.filter(ch => !ch.isPinned && !ch.isPrivate && !ch.isInvite);
-    },
-    inviteChannels() {
-      return this.channels.filter(ch => !ch.isPinned && ch.isInvite);
+  
+  setup() {
+    // ✅ Získaj store v setup()
+    const directoryStore = useDirectoryStore()
+    
+    return {
+      directoryStore
     }
   },
+  
+  computed: {
+    // ✅ PRIAMO ZO STORU - Vue reactivity automaticky updatene!
+    allChannels() {
+      return this.directoryStore.channels || []
+    },
+    
+    pinnedChannels() {
+      return this.allChannels.filter(ch => ch.isPinned)
+    },
+    
+    privateChannels() {
+      return this.allChannels.filter(ch => !ch.isPinned && ch.isPrivate && !ch.isInvite)
+    },
+    
+    publicChannels() {
+      return this.allChannels.filter(ch => !ch.isPinned && !ch.isPrivate && !ch.isInvite)
+    },
+    
+    inviteChannels() {
+      return this.allChannels.filter(ch => !ch.isPinned && ch.isInvite)
+    }
+  },
+  
   methods: {
     goToChat(channel) {
-      const directoryStore = useDirectoryStore()
+      console.log('Going to chat:', channel)
 
-      console.log(channel)
-
-      if(!channel.isInvite){
-        directoryStore.setActiveChannel(channel.id)
+      if (!channel.isInvite) {
+        this.directoryStore.setActiveChat(channel.id)
         this.$router.push({ name: 'chat' })
         this.$emit('channel-selected') // Emit event pre mobile drawer close
       } else {
         Notify.create({
-          message: 'You cant preview this channel, since u are not part of it',
+          message: 'You can\'t preview this channel, since you are not part of it',
           type: 'negative',
           position: 'top'
         })

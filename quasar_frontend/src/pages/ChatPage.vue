@@ -40,13 +40,13 @@
 
                 <q-separator v-if="activeChatData.type === 'channel'" />
 
-                <!-- Leave channel -->
+                <!-- Leave channel / Close DM -->
                 <q-item clickable v-ripple @click="leaveChat" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
                   <q-item-section>
-                    Leave channel
+                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -120,13 +120,16 @@ export default {
     return {
       idCounter: 1,
       messages: [],
-      typingUsers: [],
+      typingUsers: ['user1', 'user2'],
       activeTypingUser: null,
-      typingText: {},
+      typingText: {
+        user1: 'Hello, I am typing this...',
+        user2: 'And I am typing something else'
+      },
       directoryStore: null,
       isMuted: false,
-      messageListener: null,
-      typingListener: null
+      // Mock members (same as in TypingBar.vue)
+      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
     }
   },
 
@@ -152,8 +155,6 @@ export default {
         this.loadMessages()
         // Reset mute state for new chat
         this.isMuted = false
-        // Reset typing users
-        this.typingUsers = []
       },
       deep: true
     }
@@ -170,64 +171,17 @@ export default {
   
   mounted() {
     this.scrollToBottom()
-    this.setupWebSocketListeners()
   },
-
-  beforeUnmount() {
-    this.removeWebSocketListeners()
+  
+  updated() {
+    // Pri prvom načítaní správ, scrollneme dole
+    if (this.messages.length === 20) {
+      this.scrollToBottom()
+    }
   },
   
   methods: {
-    /**
-     * Načítanie správ z API alebo fallback na demo
-     */
-    async loadMessages() {
-      if (!this.activeChatData?.id) {
-        // Žiadny aktívny channel, načítaj demo správy
-        this.loadDemoMessages()
-        return
-      }
-      
-      try {
-        // Import API service
-        const { getMessages } = await import('src/services/api.service')
-        
-        // Načítaj správy z backendu
-        const response = await getMessages(this.activeChatData.id)
-        
-        // Clear existujúce správy
-        this.messages = []
-        this.idCounter = 1
-        
-        // Pridaj správy do UI (reverse lebo API vracia najnovšie prvé)
-        if (response.data && response.data.length > 0) {
-          response.data.reverse().forEach(msg => {
-            this.addMessage(
-              msg.sender.username,
-              msg.messageText,
-              msg.senderId === 1 // TODO: Nahraď aktuálnym user ID
-            )
-          })
-        }
-        
-        // Scroll na koniec
-        this.$nextTick(() => {
-          this.$nextTick(() => {
-            this.scrollToBottom()
-          })
-        })
-        
-      } catch (error) {
-        console.error('Failed to load messages:', error)
-        // Fallback na demo správy
-        this.loadDemoMessages()
-      }
-    },
-
-    /**
-     * Načítanie demo správ (fallback)
-     */
-    loadDemoMessages() {
+    loadMessages() {
       // Clear existing messages
       this.messages = []
       this.idCounter = 1
@@ -252,9 +206,6 @@ export default {
       })
     },
     
-    /**
-     * Pridanie správy do zoznamu
-     */
     addMessage(name, text, sent) {
       this.messages.push({
         id: this.idCounter++,
@@ -265,9 +216,6 @@ export default {
       })
     },
 
-    /**
-     * Infinite scroll - načítanie starších správ
-     */
     onLoad(index, done) {
       setTimeout(() => {
         const oldScrollHeight = this.$refs.chatContainer?.scrollHeight || 0
@@ -305,16 +253,10 @@ export default {
       }, 1000)
     },
 
-    /**
-     * Kliknutie na typing user
-     */
     onUserClick(username) {
       this.activeTypingUser = this.activeTypingUser === username ? null : username
     },
 
-    /**
-     * Scroll na koniec správ
-     */
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.chatContainer
@@ -330,9 +272,6 @@ export default {
       })
     },
 
-    /**
-     * Toggle mute notifikácií
-     */
     toggleMute() {
       this.isMuted = !this.isMuted
       
@@ -349,96 +288,11 @@ export default {
       })
     },
 
-    /**
-     * Zobrazenie members
-     */
     viewMembers() {
       // Emitujeme event nahor do layoutu, aby sa otvoril pravý panel
       this.$emit('view-members')
     },
 
-    /**
-     * 🆕 Setup WebSocket event listeners
-     */
-    setupWebSocketListeners() {
-      // Listener pre nové správy
-      this.messageListener = (event) => {
-        const message = event.detail
-        console.log('📨 Received new message:', message)
-        
-        // Pridaj správu do zoznamu
-        this.addMessage(
-          message.sender.username,
-          message.messageText,
-          message.senderId === 1 // TODO: Nahraď aktuálnym user ID
-        )
-        
-        // Scroll na koniec
-        this.scrollToBottom()
-        
-        // Ak nie je toto aktívne okno, zobraz notifikáciu
-        if (document.hidden && !this.isMuted) {
-          this.showMessageNotification(message)
-        }
-      }
-      
-      // Listener pre typing indicators
-      this.typingListener = (event) => {
-        const { userId, username, isTyping } = event.detail
-        console.log('⌨️ Typing event:', event.detail)
-        
-        if (isTyping) {
-          // Pridaj usera do typing zoznamu ak tam ešte nie je
-          if (!this.typingUsers.includes(username)) {
-            this.typingUsers.push(username)
-          }
-        } else {
-          // Vymaž usera zo typing zoznamu
-          this.typingUsers = this.typingUsers.filter(u => u !== username)
-        }
-      }
-      
-      // Registruj listenery
-      window.addEventListener('new-message', this.messageListener)
-      window.addEventListener('user-typing', this.typingListener)
-    },
-    
-    /**
-     * 🆕 Remove WebSocket event listeners
-     */
-    removeWebSocketListeners() {
-      if (this.messageListener) {
-        window.removeEventListener('new-message', this.messageListener)
-        this.messageListener = null
-      }
-      if (this.typingListener) {
-        window.removeEventListener('user-typing', this.typingListener)
-        this.typingListener = null
-      }
-    },
-    
-    /**
-     * 🆕 Zobraz notifikáciu pre novú správu
-     */
-    showMessageNotification(message) {
-      const channel = this.activeChatData?.title || 'Channel'
-      
-      this.$q.notify({
-        message: `${message.sender.username} in #${channel}`,
-        caption: message.messageText,
-        position: 'top-right',
-        color: 'primary',
-        timeout: 5000,
-        avatar: message.sender.avatarUrl,
-        actions: [
-          { icon: 'close', color: 'white', handler: () => {} }
-        ]
-      })
-    },
-
-    /**
-     * Leave chat dialog
-     */
     leaveChat() {
       if (!this.activeChatData) return
       
@@ -446,32 +300,12 @@ export default {
       const chatName = this.activeChatData.title
       
       Dialog.create({
-        title: 'Leave channel',
-        message: `
-          <div style="font-size: 15px; line-height: 1.5; color: #333;">
-            Are you sure you want to leave 
-            <span style="display: inline-block; padding: 2px 8px; background: #f0f0f0; border-radius: 6px; font-weight: 600; color: #000;">
-              ${chatName}
-            </span>?
-          </div>
-        `,
-        class: 'leave-channel-dialog',
-        cancel: {
-          label: 'CANCEL',
-          flat: true,
-          color: 'grey-7',
-          style: 'border-radius: 12px; padding: 8px 20px; text-transform: none;'
-        },
-        ok: {
-          label: 'LEAVE',
-          color: 'primary',
-          unelevated: true,
-          style: 'border-radius: 12px; padding: 8px 20px; text-transform: none;'
-        },
-        html: true,
-        persistent: true,
-        cardStyle: 'border-radius: 12px',
-        cardClass: 'leave-channel-dialog'
+        title: isChannel ? 'Leave Channel' : 'Close Conversation',
+        message: isChannel 
+          ? `Are you sure you want to leave ${chatName}?`
+          : `Are you sure you want to close this conversation with ${chatName}?`,
+        cancel: true,
+        persistent: true
       }).onOk(() => {
         // Clear active chat
         this.directoryStore.clearActiveChat()
@@ -518,10 +352,12 @@ export default {
   min-width: 0;
 }
 
+/* Ak NEMÁ subtitle, centruj vertikálne */
 .chat-header-content:not(.has-subtitle) .chat-header-left {
   justify-content: center;
 }
 
+/* Ak má subtitle, nechaj štandardne */
 .chat-header-content.has-subtitle .chat-header-left {
   justify-content: center;
 }
@@ -545,6 +381,7 @@ export default {
   font-size: 0.95rem;
   color: #444;
   position: relative;
+  background: rgba(255, 255, 255, 0.9);
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   flex-shrink: 0;
 }
@@ -571,10 +408,5 @@ export default {
   min-width: 180px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   z-index: 2000;
-}
-
-/* Leave Channel Dialog Styling */
-.leave-channel-dialog :deep(.q-card) {
-  border-radius: 12px;
 }
 </style>
