@@ -8,7 +8,7 @@
     </q-item-section>
     
     <q-item-section>
-      <q-item-label class="text-weight-medium">{{ user.name }}</q-item-label>
+      <q-item-label class="text-weight-medium">{{ user.fullname }}</q-item-label>
       <q-item-label caption :class="statusTextClass">
         {{ statusText }}
       </q-item-label>
@@ -43,12 +43,7 @@ export default {
   props: {
     user: {
       type: Object,
-      required: true,
-      validator(value) {
-        return typeof value.id === 'string' && 
-               typeof value.name === 'string' &&
-               (!value.status || ['online', 'away', 'dnd', 'offline'].includes(value.status))
-      }
+      required: true
     }
   },
 

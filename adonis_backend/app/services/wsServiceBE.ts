@@ -41,19 +41,20 @@ class WsServiceBE {
 
 
 
-        this.io.on("connection", (socket) => {
-            const USER_ID: number = socket.data.userId
-
+        this.io.on("connection", async (socket) => {
             console.log("[+] User connected:", socket.id)
+            
+            const USER_ID: number = socket.data.userId
+            const channelIds = await channelsController.getChannelIdsForUser(USER_ID)
 
             // JOINING SOCKET ROOMS
-            // user roomka aby sme vedeli robit real time updates pre konkretneho usera na vsetkych instanciach appky
             socket.join(`User:${USER_ID}`)
-
-            socket.on('Channel:JoinRoom', (channelId) => {
-                console.log(`[+] User ${USER_ID} joined channel socket room: ${channelId}`)
-                socket.join(`Channel:${channelId}`)
-            })
+            
+            for (const cId of channelIds) {
+                socket.join(`Channel:${cId}`)
+                console.log(`[+] User ${USER_ID} joined Channel room: Channel:${cId}`)
+            }
+            
 
             // SOCKET "ROUTES"
             socket.on('Channel:SetPin', ({ channelId, pinState }) => {

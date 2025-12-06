@@ -40,10 +40,6 @@ class WebSocketService {
 
     // sem definovat funkcie na emitovanie socket veci
 
-    joinChannelRoom(channelId: number) {
-        this.socket.emit('Channel:Join', channelId)
-    }
-
     pinChannel(channelId: number, pinState: boolean) {
         this.socket.emit('Channel:SetPin', {channelId: channelId, pinState: pinState})
     }

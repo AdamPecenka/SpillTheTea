@@ -46,9 +46,7 @@
 
 ### To Fix
 - farbicky pri typing indikatori
-- ked selectnem channel, tak v chatpage je hore nazov, popis, '...' menu
-    - po reload sa tento panel vypari, a namiesto neho vznikne biela fuga pod typing indikatorom
-
+- invited channels by mali byt v liste na vrchu
 
 ### Dev notes
 - dorobit editovanie profilu
@@ -57,7 +55,7 @@
         - pridat avatar picker component do register page?
 
 - pri socketoch v nasej appke nechceme namespaces, IBA rooms ako najvyssie delenie
-    - channel room
+    - channel rooms
         - `channel:<id>`
     - user room
         - `user:<id>`
@@ -71,5 +69,3 @@
 | socket.to(room).emit(event, data) / socket.broadcast.to(room).emit(...) | All sockets in the room except the sending socket | ❌ No (sender excluded) | Room-scoped broadcast that excludes the specific socket instance that emitted. Good for excluding just the current tab. |
 | io.in(room).except([socketId,...]).emit(...) | All sockets in the room except the listed socket ids | ❌ No (listed sockets excluded) | Allows excluding specific socket IDs (useful to exclude all sockets from a particular tab or device). Available in recent Socket.IO releases. |
 | socket.broadcast.to(room).emit(...) | All sockets in the room except the sender | ❌ No | Equivalent to socket.to(room).emit(...). |
-
-### To Fix

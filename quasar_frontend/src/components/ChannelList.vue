@@ -111,9 +111,9 @@ export default {
   },
   
   methods: {
-    goToChat(channel) {
+    async goToChat(channel) {
 
-      this.channelStore.setActiveChat(channel.id)
+      await this.channelStore.setActiveChat(channel.id)
       this.$router.push({ name: 'chat' })
       this.$emit('channel-selected') // Emit event pre mobile drawer close
       

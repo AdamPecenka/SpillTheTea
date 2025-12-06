@@ -63,33 +63,8 @@ export const useChannelStore = defineStore('channel', {
       }
     },
 
-    async updateChannel(channelId, data) {
-      try {
-        console.log('✏️ Updating channel:', channelId)
-        const channel = await api.updateChannel(channelId, data)
-        console.log('✅ Channel updated on server:', channel.name)
-        
-        // Note: Channel will be updated in list via WebSocket broadcast
-        
-        return channel
-      } catch (error) {
-        console.error('❌ Update channel failed:', error)
-        throw error
-      }
-    },
-
     async deleteChannel(channelId) {
-      try {
-        console.log('🗑️ Deleting channel:', channelId)
-        await api.deleteChannel(channelId)
-        console.log('✅ Channel deleted on server')
-        
-        // Note: Channel will be removed from list via WebSocket broadcast
-        
-      } catch (error) {
-        console.error('❌ Delete channel failed:', error)
-        throw error
-      }
+      // TODO
     },
 
     async togglePin(channelId) {
@@ -119,8 +94,13 @@ export const useChannelStore = defineStore('channel', {
       }
     },
 
-    setActiveChat(channelId) {
+    async setActiveChat(channelId) {
+      if (this.activeChannelId === channelId) return
+
       this.activeChannelId = channelId
+      this.activeChannelMembers = await channelService.getChannelMembers(channelId)
+
+      console.log('[+] Active channel members:\n', this.activeChannelMembers)
     },
 
     clearActiveChat() {
@@ -131,5 +111,9 @@ export const useChannelStore = defineStore('channel', {
     addNewChannel(channel) {
       this.channels.push(channel)
     },
+  },
+
+  persist: {
+    storage: sessionStorage,
   }
 })

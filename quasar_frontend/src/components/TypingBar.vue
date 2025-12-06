@@ -60,6 +60,7 @@
 <script>
 import { Notify, Dialog } from 'quasar';
 import { useAuthStore } from 'src/store/authStore';
+import { messageService } from 'src/services/messageService';
 
 export default {
   name: 'TypingBar',
@@ -126,7 +127,6 @@ export default {
           args: ''
         }
       ],
-      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
     }
   },
   
@@ -165,7 +165,6 @@ export default {
   
   methods: {
     onMessageChange(value) {
-      console.log('Message changed:', value)
       
       // Check if message starts with /
       if (value && value.startsWith('/')) {
@@ -177,8 +176,6 @@ export default {
         this.commandSearch = parts[0]
         this.selectedCommandIndex = 0
         
-        console.log('Command search:', this.commandSearch)
-        console.log('Filtered commands:', this.filteredCommands.length)
       } else {
         this.showCommandMenu = false
         this.commandSearch = ''
@@ -228,8 +225,6 @@ export default {
     },
     
     selectCommand(cmd) {
-      console.log('Selected command:', cmd.cmd)
-      
       // Replace message with selected command
       if (cmd.args) {
         this.message = `${cmd.cmd} ${cmd.args}`
@@ -269,88 +264,31 @@ export default {
 
       switch(cmd){
         case "/join":
-          Notify.create({
-            message: 'Join command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+          messageService.handleJoinCommand(text)
           break
           
         case "/invite":
-          Notify.create({
-            message: 'Invite command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+
           break
           
         case "/revoke":
-          Notify.create({
-            message: 'Revoke command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+          
           break
           
         case "/kick":
-          Notify.create({
-            message: 'Kick command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+          
           break
           
         case "/quit":
-          Notify.create({
-            message: 'Quit command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+          
           break
           
         case "/cancel":
-          Notify.create({
-            message: 'Cancel command - coming soon!',
-            color: 'info',
-            position: 'top'
-          })
+          
           break
           
         case "/list":
-          // ZMENA: Emit event na otvorenie Members drawer
           this.$emit('view-members')
-          break
-          
-        case "/help":
-          Dialog.create({
-            title: 'Available Commands',
-            message: `<ul style="padding-left: 1rem;">
-              ${this.commands.map(c => `<li><b>${c.cmd}</b> ${c.args || ''}: ${c.desc}</li>`).join('')}
-            </ul>`,
-            html: true,
-            ok: true,
-            persistent: true
-          })
-          break
-          
-        case "/notify":
-          if(this.userStatus !== 'dnd') {
-            Notify.create({
-              message: 'Vedel si o t...',
-              caption: '@Tyty',
-              position: 'bottom-right',
-              color: 'primary',
-              progress: true,
-              timeout: 2000
-            })
-          } else {
-            Notify.create({
-              message: 'Notifications are disabled (DND mode)',
-              color: 'warning',
-              position: 'top',
-              timeout: 2000
-            })
-          }
           break
           
         default:

@@ -18,7 +18,15 @@ router.group(() => {
 
 router.group(() => {
   router.get('/channels', [ChannelsController, 'getChannels'])
-  router.get('/channels/invites', [ChannelsController, 'getInvites'])
+  router.get('/channels/:id/members', [ChannelsController, 'getChannelMembers'])
+
+
+
+
+
+
+
+
   router.post('/channels', '#controllers/channels_controller.store')
   router.get('/channels/:id', '#controllers/channels_controller.show')
   router.put('/channels/:id', '#controllers/channels_controller.update')

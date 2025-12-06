@@ -133,7 +133,6 @@
       <MemberListDrawer
         v-else-if="rightDrawerMode === 'members'"
         v-model="rightDrawerOpen"
-        :members="currentChannelMembers"
         @kick-member="handleKickMember"
       />
     </q-drawer>
@@ -236,10 +235,6 @@ export default {
       return this.channelsSorted.filter(c => {
         return c.name.toLowerCase().startsWith(q)
       })
-    },
-
-    currentChannelMembers() {
-      return this.mockMembers
     },
 
     rightDrawerWidth() {

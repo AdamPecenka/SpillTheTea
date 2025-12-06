@@ -88,10 +88,11 @@
 
 <script>
 import UserListItem from './UserListItem.vue'
+import { useChannelStore } from 'src/store/channelStore'
 
 export default {
   name: 'MemberListDrawer',
-  
+
   components: {
     UserListItem
   },
@@ -100,10 +101,6 @@ export default {
     modelValue: {
       type: Boolean,
       required: true
-    },
-    members: {
-      type: Array,
-      default: () => []
     }
   },
   
@@ -113,34 +110,19 @@ export default {
     return {
       confirmKickOpen:false,
       memberToKick: null,
-      // Definícia poradia statusov (nižšie číslo = vyššia priorita)
       statusOrder: {
         'online': 1,
         'away': 2,
         'dnd': 3,
         'offline': 4
-      }
+      },
+      channelStore: useChannelStore()
     }
   },
   
   computed: {
     displayMembers() {
-      // ak máme members z parent
-      if (this.members && this.members.length > 0) {
-        return this.members
-      }
-      
-      // mock dáta
-      return [
-        { id: '1', name: 'Alice Johnson', status: 'online' },
-        { id: '2', name: 'Bob Smith', status: 'away' },
-        { id: '3', name: 'Charlie Brown', status: 'dnd' },
-        { id: '4', name: 'Diana Prince', status: 'online' },
-        { id: '5', name: 'Eve Anderson', status: 'offline' },
-        { id: '6', name: 'Frank Miller', status: 'online' },
-        { id: '7', name: 'Grace Lee', status: 'away' },
-        { id: '8', name: 'Henry Wilson', status: 'offline' }
-      ]
+      return this.channelStore.activeChannelMembers || []
     },
 
     sortedMembers() {
@@ -154,7 +136,7 @@ export default {
         }
         
         // Ak majú rovnaký status, porovnaj podľa mena
-        return a.name.localeCompare(b.name)
+        return a.fullname.localeCompare(b.name)
       })
     }
   },
