@@ -54,7 +54,7 @@
 
 <script>
 import { Notify } from 'quasar';
-import { useAuthStore } from 'src/store/useAuthStore';
+import { useAuthStore } from 'src/store/authStore';
 
 export default {
   data () {

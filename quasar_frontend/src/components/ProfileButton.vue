@@ -80,7 +80,7 @@
 
 <script>
 import ProfilePicture from './ProfilePicture.vue'
-import { useAuthStore } from 'src/store/useAuthStore';
+import { useAuthStore } from 'src/store/authStore';
 
 export default {
   name: 'ProfileButton',

@@ -86,7 +86,7 @@
 </template>
 
 <script>
-import { useAuthStore } from 'src/store/useAuthStore';
+import { useAuthStore } from 'src/store/authStore';
 import { Notify } from 'quasar';
 
 export default {

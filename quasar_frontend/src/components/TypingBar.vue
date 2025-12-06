@@ -59,7 +59,7 @@
 
 <script>
 import { Notify, Dialog } from 'quasar';
-import { useAuthStore } from 'src/store/useAuthStore';
+import { useAuthStore } from 'src/store/authStore';
 
 export default {
   name: 'TypingBar',

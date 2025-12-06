@@ -108,7 +108,7 @@
 </template>
 
 <script>
-import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { useChannelStore } from 'src/store/channelStore'
 import { Notify, Dialog } from 'quasar'
 
 export default {
@@ -126,7 +126,7 @@ export default {
         user1: 'Hello, I am typing this...',
         user2: 'And I am typing something else'
       },
-      directoryStore: null,
+      channelStore: null,
       isMuted: false,
       // Mock members (same as in TypingBar.vue)
       members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
@@ -135,7 +135,7 @@ export default {
 
   computed: {
     activeChatData() {
-      return this.directoryStore?.activeChatData || null
+      return this.channelStore?.activeChatData || null
     },
     
     chatContainerStyle() {
@@ -161,9 +161,8 @@ export default {
   },
 
   created() {
-    this.directoryStore = useDirectoryStore()
-    this.directoryStore.loadChannels()
-    this.directoryStore.loadFriends()
+    this.channelStore = useChannelStore()
+    this.channelStore.loadChannels()
     
     // Load initial messages
     this.loadMessages()
@@ -308,7 +307,7 @@ export default {
         persistent: true
       }).onOk(() => {
         // Clear active chat
-        this.directoryStore.clearActiveChat()
+        this.channelStore.clearActiveChat()
         
         // Navigate back to index
         this.$router.push({ name: 'index' })

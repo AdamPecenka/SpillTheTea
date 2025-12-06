@@ -1,6 +1,5 @@
 import { BaseSeeder } from '@adonisjs/lucid/seeders'
 import { UserStatus } from '../../app/enums/UserStatusEnum.js'
-import hash from '@adonisjs/core/services/hash'
 import User from '#models/user'
 
 export default class extends BaseSeeder {

@@ -122,13 +122,13 @@
 </template>
 
 <script>
-import { useDirectoryStore } from 'src/store/useDirectoryStore';
+import { useChannelStore } from 'src/store/channelStore';
 
 export default {
   name: 'ChannelListItem',
   data () {
     return {
-      channelStore: useDirectoryStore(),
+      channelStore: useChannelStore(),
       leaveDialog: false
     }
   },

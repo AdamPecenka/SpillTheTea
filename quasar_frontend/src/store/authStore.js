@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
+import { wsService } from 'src/services/wsServiceFE'
 
 export const useAuthStore = defineStore('auth', {
     state: () => ({
@@ -17,6 +18,7 @@ export const useAuthStore = defineStore('auth', {
         init() {
             if (this.token) {
                 api.defaults.headers.common.Authorization = `Bearer ${this.token}`
+                wsService.init(this.user.id, this.token)
             }
         },
         async login(username, password) {
@@ -26,10 +28,12 @@ export const useAuthStore = defineStore('auth', {
                 this.token = response.data.token
                 this.user = response.data.user
                 api.defaults.headers.common.Authorization = `Bearer ${this.token}`
-                
+
+                wsService.init(this.user.id, this.token)
+
                 return true
             } catch(e) {
-                console.log(`[!!!]\n${e}`)
+                console.error(`[!!!]\n${e}`)
                 this.logout()
                 return false
             }
@@ -62,6 +66,8 @@ export const useAuthStore = defineStore('auth', {
             this.token = null
             this.user = null
             delete api.defaults.headers.common.Authorization
+
+            wsService.destroy()
         },
         async fetchUser() {
             if (!this.token) return

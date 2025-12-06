@@ -166,7 +166,7 @@
 
 <script>
 import { useRouter } from 'vue-router'
-import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { useChannelStore } from 'src/store/channelStore'
 import { useQuasar } from 'quasar'
 import ProfileButton from 'src/components/ProfileButton.vue'
 import ProfileDrawer from 'src/components/ProfileDrawer.vue'
@@ -275,7 +275,7 @@ export default {
   },
   
   mounted() {
-    this.dir = useDirectoryStore()
+    this.dir = useChannelStore()
     this.router = useRouter()
     
     try {

@@ -25,17 +25,6 @@ export default class Channel extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true })
   declare updatedAt: DateTime
 
-  // ✅ Pôvodný relation (môžeš použiť .users)
-  @manyToMany(() => User, {
-    pivotTable: 'channel_members',
-    pivotForeignKey: 'channel_id',
-    pivotRelatedForeignKey: 'user_id',
-    pivotTimestamps: true,
-    pivotColumns: ['is_admin', 'is_pinned'], // ✅ Pridané pivot stĺpce
-  })
-  public users!: ManyToMany<typeof User>
-
-  // ✅ NOVÝ alias "members" - to isté ako users, ale lepší názov pre channely
   @manyToMany(() => User, {
     pivotTable: 'channel_members',
     pivotForeignKey: 'channel_id',

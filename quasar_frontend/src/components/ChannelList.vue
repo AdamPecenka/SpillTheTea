@@ -27,7 +27,7 @@
           v-for="ch in inviteChannels"
           :key="ch.id"
           :channel="ch"
-          @click="goToChat"
+          @click="preventOpeningInvitedChat"
         />
       </q-list>
       <q-separator class="q-mx-md q-my-xs" />
@@ -68,7 +68,7 @@
 
 <script>
 import ChannelListItem from 'components/ChannelListItem.vue'
-import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { useChannelStore } from 'src/store/channelStore'
 import { Notify } from 'quasar'
 
 export default {
@@ -81,18 +81,16 @@ export default {
   emits: ['channel-selected'],
   
   setup() {
-    // ✅ Získaj store v setup()
-    const directoryStore = useDirectoryStore()
+    const channelStore = useChannelStore()
     
     return {
-      directoryStore
+      channelStore
     }
   },
   
   computed: {
-    // ✅ PRIAMO ZO STORU - Vue reactivity automaticky updatene!
     allChannels() {
-      return this.directoryStore.channels || []
+      return this.channelStore.channels || []
     },
     
     pinnedChannels() {
@@ -114,21 +112,20 @@ export default {
   
   methods: {
     goToChat(channel) {
-      console.log('Going to chat:', channel)
 
-      if (!channel.isInvite) {
-        this.directoryStore.setActiveChat(channel.id)
-        this.$router.push({ name: 'chat' })
-        this.$emit('channel-selected') // Emit event pre mobile drawer close
-      } else {
-        Notify.create({
+      this.channelStore.setActiveChat(channel.id)
+      this.$router.push({ name: 'chat' })
+      this.$emit('channel-selected') // Emit event pre mobile drawer close
+      
+    },
+    preventOpeningInvitedChat() {
+      Notify.create({
           message: 'You can\'t preview this channel, since you are not part of it',
           type: 'negative',
           position: 'top'
         })
-        this.$router.push({ name: 'index' })
-      }
-    }
+      this.$router.push({ name: 'index' })
+    },
   }
 }
 </script>

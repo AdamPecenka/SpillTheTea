@@ -55,7 +55,7 @@
 </template>
 
 <script>
-import { useDirectoryStore } from 'src/store/useDirectoryStore'
+import { useChannelStore } from 'src/store/channelStore'
 
 export default {
   name: 'ChannelCreateDialog',
@@ -91,10 +91,10 @@ export default {
       this.loading = true
 
       try {
-        const store = useDirectoryStore()
+        const store = useChannelStore()
 
         // Vytvor channel
-        const newChannel = await store.createChannel({
+        await store.createChannel({
           name: this.channelName.trim(),
           isPrivate: this.isPrivate,
           description: this.description.trim() || undefined
@@ -116,9 +116,6 @@ export default {
 
         // Close dialog
         this.$emit('update:modelValue', false)
-
-        // Navigate to new channel
-        this.$router.push({ name: 'chat', params: { id: newChannel.id } })
 
       } catch (error) {
         console.error('Failed to create channel:', error)

@@ -139,7 +139,7 @@
 </template>
 
 <script>
-import { useAuthStore } from 'src/store/useAuthStore'
+import { useAuthStore } from 'src/store/authStore'
 import ProfilePicture from 'src/components/ProfilePicture.vue'
 import SettingsPanel from 'src/components/SettingsPanel.vue'
 import AvatarPicker from 'src/components/AvatarPicker.vue'

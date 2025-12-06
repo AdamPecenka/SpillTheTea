@@ -1,6 +1,6 @@
 import { boot } from 'quasar/wrappers'
 import axios from 'axios'
-import { useAuthStore } from 'src/store/useAuthStore'
+import { useAuthStore } from 'src/store/authStore'
 
 const api = axios.create({
     baseURL: 'http://localhost:3333',
