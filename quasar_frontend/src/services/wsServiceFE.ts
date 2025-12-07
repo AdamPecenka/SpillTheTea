@@ -1,5 +1,7 @@
+import { data } from 'autoprefixer';
 import { io, Socket } from 'socket.io-client';
 import { useChannelStore } from 'src/store/channelStore';
+import { messageService } from './messageService';
 
 class WebSocketService {
     private socket: Socket
@@ -29,12 +31,15 @@ class WebSocketService {
         // sem davat pocuvajuce socket veci
 
         this.socket.on('Channel:UpdatePinState', ({channelId, pinState}) => {
-            console.log(`[~] Channel pin state updated: ${channelId} -> ${pinState}`)
             useChannelStore().updatePinnedState(channelId, pinState)
         })
 
         this.socket.on('Channel:NewChannel', (channel) => {
             useChannelStore().addNewChannel(channel)
+        })
+
+        this.socket.on('Message:Receive', (message) => {
+            messageService.handleIncomingMessage(message)
         })
     }
 
@@ -44,8 +49,12 @@ class WebSocketService {
         this.socket.emit('Channel:SetPin', {channelId: channelId, pinState: pinState})
     }
 
-    createChannel(data: { name: string, isPrivate?: boolean, description?: string }) {
-        this.socket.emit('Channel:Create', data)
+    createChannel(channel: { name: string, isPrivate?: boolean, description?: string }) {
+        this.socket.emit('Channel:Create', channel)
+    }
+
+    sendMessage(message: { channelId: number, senderId: number, messageText: string }) {
+        this.socket.emit('Message:Send', message)
     }
 }
 

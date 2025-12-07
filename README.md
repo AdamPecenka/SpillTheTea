@@ -15,7 +15,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)
    - [x] správcom kanála je používateľ, ktorý kanál vytvoril
    - [ ] ak nie je kanál aktívny (nie je pridaná nová správa) viac ako 30 dní, kanál prestáva existovať (následne je možné použiť channelName kanála pre "nový" kanál)
-- [ ] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
+- [x] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
 - [ ] vytvorenie komunikačného kanála (channel) cez príkazový riadok
    - [ ] kanál môže vytvoriť ľubovolný používateľ cez príkaz /join channelName [private]
    - [ ] do súkromného kanála môže pridávať/odoberať používateľov iba správca kanála cez príkazy /invite nickName a /revoke nickName
@@ -25,10 +25,10 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [x] nickName ako aj channelName sú unikátne
    - [ ] správca môže kanál zatvoriť/zrušiť príkazom /quit
 - [ ] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
-- [ ] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
-   - [ ] správa je zvýraznená danému používateľovi v zozname správ
-- [ ] používateľ si môže pozrieť kompletnú históriu správ
-   - [ ] efektívny inifinite scroll
+- [x] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
+   - [x] správa je zvýraznená danému používateľovi v zozname správ
+- [x] používateľ si môže pozrieť kompletnú históriu správ
+   - [ ] efektívny inifinite scroll -> EEEEH... todo este
 - [ ] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
    - [ ] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
    - [ ] notifikácia obsahuje časť zo správy a odosielateľa

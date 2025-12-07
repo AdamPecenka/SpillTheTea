@@ -57,7 +57,7 @@ export default class ChannelsController {
         channelMemberRecord.save()
     }
 
-    async createChannel(userId: number, data: { name: string, isPrivate?: boolean, description?: string }): Promise<object> {
+    async createChannel(userId: number, data: { name: string, isPrivate?: boolean, description?: string }): Promise<any> {
 
         const channel = await Channel.create({
             name: data.name,

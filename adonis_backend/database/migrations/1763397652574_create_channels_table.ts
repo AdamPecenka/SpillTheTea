@@ -7,7 +7,7 @@ export default class extends BaseSchema {
     this.schema.createTable(this.tableName, (table) => {
       table.increments('id').primary().notNullable()
 
-      table.string('name', 20).notNullable().unique()
+      table.string('name', 50).notNullable().unique()
       table.boolean('is_private').notNullable().defaultTo(false)
       table.text('description').nullable()
 

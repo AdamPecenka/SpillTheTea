@@ -1,7 +1,8 @@
 import router from '@adonisjs/core/services/router'
+import { middleware } from './kernel.js'
 import AuthController from '#controllers/auth_controller'
 import ChannelsController from '#controllers/channels_controller'
-import { middleware } from './kernel.js'
+import MessagesController from '#controllers/messages_controller'
 
 router.get('/', async () => {
   return {
@@ -20,22 +21,6 @@ router.group(() => {
   router.get('/channels', [ChannelsController, 'getChannels'])
   router.get('/channels/:id/members', [ChannelsController, 'getChannelMembers'])
 
+  router.get('channels/:id/messages', [MessagesController, 'getMessagesForChannel'])
 
-
-
-
-
-
-
-  router.post('/channels', '#controllers/channels_controller.store')
-  router.get('/channels/:id', '#controllers/channels_controller.show')
-  router.put('/channels/:id', '#controllers/channels_controller.update')
-  router.delete('/channels/:id', '#controllers/channels_controller.destroy')
-  
-  router.put('/channels/:channelId/members/:userId', '#controllers/channels_controller.updateMember')
-
-  router.get('/channels/:channelId/messages', '#controllers/messages_controller.index')
-  router.post('/channels/:channelId/messages', '#controllers/messages_controller.store')
-  router.post('/channels/:channelId/typing', '#controllers/messages_controller.typing')
-  
 }).prefix('/api').use(middleware.auth())

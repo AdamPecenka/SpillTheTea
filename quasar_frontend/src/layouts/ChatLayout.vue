@@ -133,7 +133,6 @@
       <MemberListDrawer
         v-else-if="rightDrawerMode === 'members'"
         v-model="rightDrawerOpen"
-        @kick-member="handleKickMember"
       />
     </q-drawer>
 
@@ -156,7 +155,6 @@
         <TypingBar 
           placeholder="message @someone or enter /command" 
           @view-members="openMembersDrawer"
-          @show-notification="handleShowNotification"
         />
       </div>
     </div>
@@ -201,7 +199,7 @@ export default {
         email: '',
         status: 'online'
       },
-      dir: null,
+      channelStore: null,
       router: null,
     }
   },
@@ -217,9 +215,9 @@ export default {
     },
 
     channelsSorted() {
-      if (!this.dir || !this.dir.channels) return []
+      if (!this.channelStore || !this.channelStore.channels) return []
       
-      return [...this.dir.channels].sort((a, b) => {
+      return [...this.channelStore.channels].sort((a, b) => {
         if (a.isPinned && !b.isPinned) return -1
         if (!a.isPinned && b.isPinned) return 1
         if (a.isPrivate && !b.isPrivate) return -1
@@ -270,11 +268,11 @@ export default {
   },
   
   mounted() {
-    this.dir = useChannelStore()
+    this.channelStore = useChannelStore()
     this.router = useRouter()
     
     try {
-      this.dir.loadChannels()
+      this.channelStore.loadChannels()
     } catch (error) {
       console.error('Failed to load data:', error)
     }
@@ -337,30 +335,13 @@ export default {
     },
 
     goHome() {
+      this.channelStore.clearActiveChat()
       this.$router.push({ name: 'index' })
     },
 
     closeDrawers() {
       this.rightDrawerOpen = false
     },
-
-    handleKickMember (member) {
-      console.log('KICK:', member)
-    },
-
-    handleShowNotification(notificationData) {
-      this.$q.notify({
-        message: `${notificationData.username} in #${notificationData.channel}`,
-        caption: notificationData.message,
-        position: 'top-right',
-        color: 'primary',
-        timeout: 5000,
-        avatar: notificationData.avatar || undefined,
-        actions: [
-          { icon: 'close', color: 'white', handler: () => {} }
-        ]
-      })
-    }
   }
 }
 </script>

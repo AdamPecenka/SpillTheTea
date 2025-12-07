@@ -91,13 +91,13 @@ export default {
       this.loading = true
 
       try {
-        const store = useChannelStore()
+        const channelStore = useChannelStore()
 
         // Vytvor channel
-        await store.createChannel({
+        await channelStore.createChannel({
           name: this.channelName.trim(),
           isPrivate: this.isPrivate,
-          description: this.description.trim() || undefined
+          description: this.description.trim() || ''
         })
 
         // Success

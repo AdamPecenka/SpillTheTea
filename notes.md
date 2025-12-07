@@ -47,10 +47,11 @@
 ### To Fix
 - farbicky pri typing indikatori
 - invited channels by mali byt v liste na vrchu
+- odstranit nastevenie notifikacii pre kanalY
 
 ### Dev notes
 - dorobit editovanie profilu
-    - mozno nemat defaul profilovu fotku
+    - mozno nemat default profilovu fotku
         - nechat null v db?
         - pridat avatar picker component do register page?
 

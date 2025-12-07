@@ -11,18 +11,6 @@
           <q-btn flat round dense icon="more_vert">
             <q-menu auto-close>
               <q-list style="min-width: 180px">
-                <!-- Mute/Unmute -->
-                <q-item clickable v-ripple @click="toggleMute">
-                  <q-item-section avatar>
-                    <q-icon :name="isMuted ? 'notifications_off' : 'notifications_active'" :color="isMuted ? 'negative' : 'grey-7'" />
-                  </q-item-section>
-                  <q-item-section>
-                    {{ isMuted ? 'Unmute' : 'Mute' }} notifications
-                  </q-item-section>
-                </q-item>
-
-                <q-separator />
-
                 <!-- View members (pre channels) -->
                 <q-item 
                   v-if="activeChatData.type === 'channel'" 
@@ -67,22 +55,22 @@
         @load="onLoad"
         :scroll-target="$refs.chatContainer"
       >
-        <template v-slot:loading>
+        <!-- <template v-slot:loading>
           <div class="row justify-center q-my-md">
             <q-spinner color="primary" name="dots" size="40px" />
           </div>
-        </template>
+        </template> -->
 
         <q-chat-message
           v-for="msg in messages"
           :key="msg.id"
-          :name="msg.name"
-          :text="[msg.text]"
-          :sent="msg.sent"
-          :bg-color="msg.sent ? 'pink-11' : 'purple-4'"
+          :name="msg.senderName"
+          :text="[msg.messageText]"
+          :sent="msg.senderName === authStore.user.username ? true : false"
+          :bg-color="msg.senderName === authStore.user.username ? 'pink-11' : 'purple-4'"
           text-color="white"
-          :stamp="new Date(msg.stamp).toLocaleTimeString()"
-          :class="{ 'ping-highlight': msg.text.includes('@abracadabra') }"      
+          :stamp="new Date(msg.sentTimestamp).toLocaleTimeString()"
+          :class="{ 'ping-highlight': msg.messageText.includes(`@${authStore.user.username}`) && msg.senderName !== authStore.user.username }"      
         />
       </q-infinite-scroll>
     </div>
@@ -109,6 +97,8 @@
 
 <script>
 import { useChannelStore } from 'src/store/channelStore'
+import { useMessageStore } from 'src/store/messageStore';
+import { useAuthStore } from 'src/store/authStore';
 import { Notify, Dialog } from 'quasar'
 
 export default {
@@ -118,8 +108,6 @@ export default {
 
   data() {
     return {
-      idCounter: 1,
-      messages: [],
       typingUsers: ['user1', 'user2'],
       activeTypingUser: null,
       typingText: {
@@ -127,15 +115,25 @@ export default {
         user2: 'And I am typing something else'
       },
       channelStore: null,
-      isMuted: false,
-      // Mock members (same as in TypingBar.vue)
-      members: ['Alice', 'Bob', 'Charlie', 'Diana', 'Eve', 'Frank', 'Grace', 'Henry', 'Ivy', 'Jack']
+      authStore: null,
+      messageStore: null,
+      messagePageNum: 1,
     }
+  },
+
+  watch: {
+    'channelStore.activeChannelId'() {
+      this.messagePageNum = 1
+    },
   },
 
   computed: {
     activeChatData() {
       return this.channelStore?.activeChatData || null
+    },
+
+    messages(){
+      return this.messageStore?.messages[this.channelStore.activeChannelId] || []
     },
     
     chatContainerStyle() {
@@ -147,109 +145,37 @@ export default {
       }
     }
   },
-  
-  watch: {
-    'directoryStore.activeChat': {
-      handler() {
-        // Reload messages when active chat changes
-        this.loadMessages()
-        // Reset mute state for new chat
-        this.isMuted = false
-      },
-      deep: true
-    }
-  },
 
   created() {
     this.channelStore = useChannelStore()
+    this.authStore = useAuthStore()
+    this.messageStore = useMessageStore()
+
     this.channelStore.loadChannels()
-    
-    // Load initial messages
-    this.loadMessages()
+
+
+    // dynamicky watcher to, lebo ked som ho definoval v sekcii "watch", tak to nefungovalo ¯\_(ツ)_/¯
+    this.$watch(
+      () => {
+        const channelId = this.channelStore.activeChannelId
+        return this.messageStore.messages[channelId]?.length
+      },
+      () => {
+        this.scrollToBottom()
+      }
+    )
   },
-  
   mounted() {
     this.scrollToBottom()
   },
   
-  updated() {
-    // Pri prvom načítaní správ, scrollneme dole
-    if (this.messages.length === 20) {
-      this.scrollToBottom()
-    }
-  },
-  
   methods: {
-    loadMessages() {
-      // Clear existing messages
-      this.messages = []
-      this.idCounter = 1
-      
-      // Load demo messages
-      for (let i = 0; i < 20; i++) {
-        const isPing = Math.random() < 0.2
-
-        this.addMessage(
-          i % 2 === 0 ? 'abracadabra' : 'simsalabim',
-          i % 2 === 0 ? 'Smrdis' : 
-            isPing ? '@abracadabra ty smrdis' : 'Nieeee :(',
-          i % 2 === 0
-        )
+    async onLoad(index, done) {
+      if(this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
+        this.messagePageNum++
+        await this.messageStore.getMessages(this.channelStore.activeChannelId, this.messagePageNum)
       }
-      
-      // Dvojité $nextTick pre istotu
-      this.$nextTick(() => {
-        this.$nextTick(() => {
-          this.scrollToBottom()
-        })
-      })
-    },
-    
-    addMessage(name, text, sent) {
-      this.messages.push({
-        id: this.idCounter++,
-        name,
-        text,
-        sent,
-        stamp: Date.now()
-      })
-    },
-
-    onLoad(index, done) {
-      setTimeout(() => {
-        const oldScrollHeight = this.$refs.chatContainer?.scrollHeight || 0
-        
-        const older = [
-          {
-            id: this.idCounter++,
-            name: 'Adam',
-            text: 'Earlier...',
-            sent: true,
-            stamp: Date.now() - 60000
-          },
-          {
-            id: this.idCounter++,
-            name: 'Johannka',
-            text: 'Even earlier...',
-            sent: false,
-            stamp: Date.now() - 120000
-          }
-        ]
-        
-        // Pridáme staršie správy na začiatok
-        this.messages.unshift(...older)
-        
-        // Udržíme scroll pozíciu po pridaní starších správ
-        this.$nextTick(() => {
-          const container = this.$refs.chatContainer
-          if (container && oldScrollHeight) {
-            const newScrollHeight = container.scrollHeight
-            container.scrollTop = newScrollHeight - oldScrollHeight
-          }
-        })
-        
-        done()
-      }, 1000)
+      done()
     },
 
     onUserClick(username) {
@@ -268,22 +194,6 @@ export default {
             container.scrollTop = container.scrollHeight
           }, 100)
         }
-      })
-    },
-
-    toggleMute() {
-      this.isMuted = !this.isMuted
-      
-      const chatName = this.activeChatData?.title || 'Chat'
-      
-      Notify.create({
-        message: this.isMuted 
-          ? `Notifications muted for ${chatName}` 
-          : `Notifications enabled for ${chatName}`,
-        icon: this.isMuted ? 'notifications_off' : 'notifications_active',
-        color: this.isMuted ? 'negative' : 'positive',
-        position: 'top',
-        timeout: 2000
       })
     },
 
@@ -307,6 +217,7 @@ export default {
         persistent: true
       }).onOk(() => {
         // Clear active chat
+        // !!!! potom treba zmenit za odstranenie channela zo store, nie len zmazanie aktivneho id
         this.channelStore.clearActiveChat()
         
         // Navigate back to index

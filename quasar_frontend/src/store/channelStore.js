@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
-import * as api from 'src/services/api.service'
 import { channelService } from 'src/services/channelService'
 import { wsService } from 'src/services/wsServiceFE'
+import { useMessageStore } from './messageStore'
 
 
 export const useChannelStore = defineStore('channel', {
@@ -100,7 +100,14 @@ export const useChannelStore = defineStore('channel', {
       this.activeChannelId = channelId
       this.activeChannelMembers = await channelService.getChannelMembers(channelId)
 
-      console.log('[+] Active channel members:\n', this.activeChannelMembers)
+      const messageStore = useMessageStore()
+
+      if (
+        messageStore.moreMessagesAvailable[channelId] === undefined ||
+        messageStore.moreMessagesAvailable[channelId]
+      ) {
+        await messageStore.getMessages(channelId, 1)
+      }
     },
 
     clearActiveChat() {
@@ -109,6 +116,7 @@ export const useChannelStore = defineStore('channel', {
     },
 
     addNewChannel(channel) {
+      console.log(channel)
       this.channels.push(channel)
     },
   },

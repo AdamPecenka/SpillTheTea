@@ -3,12 +3,14 @@ import server from "@adonisjs/core/services/server";
 import { Secret } from "@adonisjs/core/helpers";
 import User from "#models/user";
 import ChannelsController from "#controllers/channels_controller";
+import MessagesController from "#controllers/messages_controller";
 
 class WsServiceBE {
     io: Server | undefined
     
     onBoot() {
         const channelsController = new ChannelsController();
+        const meessagesController = new MessagesController();
 
         this.io = new Server(server.getNodeServer(), {
             cors: {
@@ -57,23 +59,29 @@ class WsServiceBE {
             
 
             // SOCKET "ROUTES"
-            socket.on('Channel:SetPin', ({ channelId, pinState }) => {
-                channelsController.updatePinForChannel(USER_ID, channelId, pinState)
+            socket.on('Channel:SetPin', async ({ channelId, pinState }) => {
+                await channelsController.updatePinForChannel(USER_ID, channelId, pinState)
                 socket.to(`User:${USER_ID}`).emit('Channel:UpdatePinState', { channelId: channelId, pinState: pinState })
             })
 
             socket.on('Channel:Create', async (data) => {
                 const channel = await channelsController.createChannel(USER_ID, data)
+                socket.join(`Channel:${channel.id}`)
                 this.io?.to(`User:${USER_ID}`).emit('Channel:NewChannel', channel)
+            })
+
+            socket.on('Message:Send', async (data) => { 
+                const message = await meessagesController.sendMessage(data)
+                this.io?.to(`Channel:${data.channelId}`).emit('Message:Receive', message)
             })
 
 
 
 
-
+            console.log(socket.rooms)
 
             socket.on("disconnect", () => {
-                console.log("[-] User disconnected:", socket.id);
+                console.log(`\n[-] User disconnected: ${socket.id}\n`);
             });
         });
     }

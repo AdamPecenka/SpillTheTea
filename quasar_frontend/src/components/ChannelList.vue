@@ -119,6 +119,8 @@ export default {
       
     },
     preventOpeningInvitedChat() {
+      this.channelStore.clearActiveChat()
+
       Notify.create({
           message: 'You can\'t preview this channel, since you are not part of it',
           type: 'negative',

@@ -104,7 +104,7 @@ export default {
     }
   },
   
-  emits: ['update:modelValue', 'kick-member'],
+  emits: ['update:modelValue'],
 
   data(){
     return {
@@ -153,7 +153,7 @@ export default {
 
     confirmKick() {
       if (this.memberToKick) {
-        this.$emit('kick-member', this.memberToKick)
+        // handle kick here
       }
       this.confirmKickOpen = false
       this.memberToKick = null
