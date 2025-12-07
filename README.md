@@ -29,13 +29,13 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [x] správa je zvýraznená danému používateľovi v zozname správ
 - [x] používateľ si môže pozrieť kompletnú históriu správ
    - [ ] efektívny inifinite scroll -> EEEEH... todo este
-- [ ] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
-   - [ ] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
-   - [ ] notifikácia obsahuje časť zo správy a odosielateľa
+- [x] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
+   - [x] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
+   - [x] notifikácia obsahuje časť zo správy a odosielateľa
    - [ ] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
 - [ ] používateľ si môže nastaviť stav (online, DND, offline)
    - [ ] stav sa zobrazuje používateľom
-   - [ ] ak je nastavený DND stav, neprichádzajú notifikácie
+   - [x] ak je nastavený DND stav, neprichádzajú notifikácie
    - [ ] ak je nastavený offline stav, neprichádzajú používateľovi správy, po prepnutí do online sú kanály automaticky aktualizované
 - [x] používateľ si môže pozrieť zoznam členov kanála (ak je tiež členom kanála) príkazom /list
 - [ ] ak má používateľ aktívny niektorý z kanálov (nachádza sa v okne správ pre daný kanál) vidí v stavovej lište informáciu o tom, kto aktuálne píše správu (napr. Ed is typing)

@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia'
-import { wsService } from 'src/services/wsServiceFE'
 import { messageService } from 'src/services/messageService'
 
 export const useMessageStore = defineStore('message', {

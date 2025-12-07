@@ -3,6 +3,7 @@ import { useChannelStore } from 'src/store/channelStore'
 import { useAuthStore } from 'src/store/authStore'
 import { useMessageStore } from 'src/store/messageStore'
 import { wsService } from 'src/services/wsServiceFE'
+import { notificationService } from 'src/services/notificationService'
 
 
 export const messageService = {
@@ -71,8 +72,10 @@ export const messageService = {
 
   handleIncomingMessage(message) {
     const messageStore = useMessageStore()
-    const authStore = useAuthStore()
 
+    console.log('handling incoming message')
+    notificationService.handleNotification(message)
+    
     messageStore.appendMessage(message)
   },
 }

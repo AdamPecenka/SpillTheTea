@@ -73,18 +73,18 @@ export default defineConfig((/* ctx */) => {
 
     // Full list of options: https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#devserver
     devServer: {
-    port: 9000,
-    open: {
-      app: {
-        name:
-          os.platform() === 'darwin'
-            ? 'Google Chrome'      // macOS
-            : os.platform() === 'win32'
-              ? 'chrome'           // Windows
-              : 'google-chrome'    // Linux
-      }
-    }
-  },
+      port: 9000,
+      open: {
+        app: {
+          name:
+            os.platform() === 'darwin'
+              ? 'Google Chrome' // macOS
+              : os.platform() === 'win32'
+                ? 'chrome' // Windows
+                : 'google-chrome', // Linux
+        },
+      },
+    },
 
     // https://v2.quasar.dev/quasar-cli-vite/quasar-config-file#framework
     framework: {
@@ -101,10 +101,7 @@ export default defineConfig((/* ctx */) => {
       // directives: [],
 
       // Quasar plugins
-      plugins: [
-        'Notify',
-        'Dialog'
-      ],
+      plugins: ['Notify', 'Dialog', 'AppVisibility'],
     },
 
     // animations: 'all', // --- includes all animations

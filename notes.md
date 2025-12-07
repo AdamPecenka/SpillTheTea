@@ -48,6 +48,7 @@
 - farbicky pri typing indikatori
 - invited channels by mali byt v liste na vrchu
 - odstranit nastevenie notifikacii pre kanalY
+- mentionNotify UI fix
 
 ### Dev notes
 - dorobit editovanie profilu

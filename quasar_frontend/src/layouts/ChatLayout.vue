@@ -171,6 +171,7 @@ import MemberListDrawer from 'src/components/MemberListDrawer.vue'
 import ChannelList from 'src/components/ChannelList.vue'
 import TypingBar from 'src/components/TypingBar.vue'
 import ChannelCreateDialog from 'src/components/ChannelCreateDialog.vue'
+import { notificationService } from 'src/services/notificationService'
 
 export default {
   name: 'ChatLayout',
