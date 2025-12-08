@@ -9,29 +9,35 @@ import Channel from '#models/channel'
 export default class MessagesController {
     public async getMessagesForChannel({ request, response }: HttpContext) {
         const channelId = request.param('id')
-        const pageNum = request.input('pageNum')
-        const pageSize = request.input('pageSize')
+        const pageSize = request.input('pageSize', 20)
+        const oldestTimestamp = request.input('oldestTimestamp', null)
 
-        const messages = await db
-            .from('message_logs')
-                .join('users', 'message_logs.sender_id', '=', 'users.id')
-                .join('channels', 'message_logs.channel_id', '=', 'channels.id')
-                    .where('message_logs.channel_id', channelId)
-                        .select(
-                            'message_logs.id as msgId',
-                            'users.username',
-                            'message_logs.message_text as messageText',
-                            'message_logs.sent_timestamp as sentTimestamp',
-                            'channels.name as channelName'
-                        )
-                        .orderBy('message_logs.sent_timestamp', 'desc')
-                        .paginate(pageNum, pageSize)
+        const query = db.from('message_logs')
+            .join('users', 'message_logs.sender_id', '=', 'users.id')
+            .join('channels', 'message_logs.channel_id', '=', 'channels.id')
+            .where('message_logs.channel_id', channelId)
+            .select(
+                'message_logs.id as msgId',
+                'users.username',
+                'message_logs.message_text as messageText',
+                'message_logs.sent_timestamp as sentTimestamp',
+                'channels.name as channelName'
+            )
+
+        if (oldestTimestamp) {
+            query.andWhere('message_logs.sent_timestamp', '<', oldestTimestamp)
+        }
+
+        query.orderBy('message_logs.sent_timestamp', 'desc')
+            .limit(pageSize)
+
+        const messages = await query
 
         if (!messages) {
             return response.ok([])
         }
 
-        const result = messages.all().map((msg) => ({
+        const result = messages.map((msg) => ({
             id: msg.msgId,
             senderName: msg.username,
             messageText: msg.messageText,

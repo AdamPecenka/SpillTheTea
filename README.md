@@ -9,7 +9,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - [x] registrácia, prihlásenie a odhlásenie používateľa
     - [x] používateľ má meno a priezvisko, nickName a email
 - [x] používateľ vidí zoznam kanálov, v ktorých je členom
-   - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zoznamu
+   - [ ] pri opustení kanála, alebo trvalom vyhodení z kanála je daný kanál odobratý zo zwoznamu
    - [ ] pri pozvánke do kanála je daný kanál zvýraznený a topovaný
    - [ ] v zozname môže cez používateľské rozhranie kanál vytvoriť, opustiť, a ak je správcom aj zrušiť
    - [x] dva typy kanálov - súkromný (private channel) a verejný kanál (public channel)

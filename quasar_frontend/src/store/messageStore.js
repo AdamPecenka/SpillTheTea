@@ -12,26 +12,21 @@ export const useMessageStore = defineStore('message', {
   getters: {},
 
   actions: {
-    async getMessages(channelId, pageNum) {
+    async getMessages(channelId) {
       if (!this.messages[channelId]) {
         this.messages[channelId] = []
       }
 
-      const messages = await messageService.getMessagesForChannel(channelId, pageNum, this.pageSize)
+      const oldest = messageService.getOldestMessage(this.messages[channelId])
+      const oldestTimestamp = oldest ? oldest.sentTimestamp : null
 
-      // aby sme nepridavali duplicitne spravy pri meneni aktivenho kanalu
-      // kedze vtedy sa vzdy zavola tato funkcia s pageNum = 1
-      if (pageNum !== 1 || this.messages[channelId].length === 0) {
-        this.messages[channelId] = [...this.messages[channelId], ...messages].sort(
-          (a, b) => new Date(a.sentTimestamp).getTime() - new Date(b.sentTimestamp).getTime(),
-        )
-      }
+      const messages = await messageService.getMessagesForChannel(channelId, this.pageSize, oldestTimestamp)
 
-      if (messages.length === this.pageSize) {
-        this.moreMessagesAvailable[channelId] = true
-      } else {
-        this.moreMessagesAvailable[channelId] = false
-      }
+      this.messages[channelId] = [...this.messages[channelId], ...messages].sort(
+        (a, b) => new Date(a.sentTimestamp).getTime() - new Date(b.sentTimestamp).getTime(),
+      )
+
+      this.moreMessagesAvailable[channelId] = messages.length === this.pageSize
     },
 
     appendMessage(message) {

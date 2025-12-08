@@ -7,11 +7,11 @@ import { notificationService } from 'src/services/notificationService'
 
 
 export const messageService = {
-  async getMessagesForChannel(channelId, pageNum, pageSize) {
+  async getMessagesForChannel(channelId, pageSize, oldestTimestamp) {
     const response = await api.get(`/api/channels/${channelId}/messages`, {
       params: {
-        pageNum,
         pageSize,
+        oldestTimestamp,
       },
     })
     return response.data
@@ -78,4 +78,14 @@ export const messageService = {
     
     messageStore.appendMessage(message)
   },
+
+  getOldestMessage(messages) {
+    if (!messages || messages.length === 0) return null
+
+    const sorted = [...messages].sort((a, b) => {
+      return new Date(a.sentTimestamp).getTime() - new Date(b.sentTimestamp).getTime();
+    });
+
+    return sorted[0];
+  }
 }

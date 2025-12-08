@@ -55,12 +55,6 @@
         @load="onLoad"
         :scroll-target="$refs.chatContainer"
       >
-        <!-- <template v-slot:loading>
-          <div class="row justify-center q-my-md">
-            <q-spinner color="primary" name="dots" size="40px" />
-          </div>
-        </template> -->
-
         <q-chat-message
           v-for="msg in messages"
           :key="msg.id"
@@ -69,7 +63,7 @@
           :sent="msg.senderName === authStore.user.username ? true : false"
           :bg-color="msg.senderName === authStore.user.username ? 'pink-11' : 'purple-4'"
           text-color="white"
-          :stamp="new Date(msg.sentTimestamp).toLocaleTimeString()"
+          :stamp="new Date(msg.sentTimestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })"
           :class="{ 'ping-highlight': msg.messageText.includes(`@${authStore.user.username}`) && msg.senderName !== authStore.user.username }"      
         />
       </q-infinite-scroll>
@@ -117,7 +111,6 @@ export default {
       channelStore: null,
       authStore: null,
       messageStore: null,
-      messagePageNum: 1,
     }
   },
 
@@ -154,7 +147,7 @@ export default {
     this.channelStore.loadChannels()
 
 
-    // dynamicky watcher to, lebo ked som ho definoval v sekcii "watch", tak to nefungovalo ¯\_(ツ)_/¯
+    // dynamicky watcher tu, lebo ked som ho definoval v sekcii "watch", tak to nefungovalo ¯\_(ツ)_/¯
     this.$watch(
       () => {
         const channelId = this.channelStore.activeChannelId
@@ -172,8 +165,7 @@ export default {
   methods: {
     async onLoad(index, done) {
       if(this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
-        this.messagePageNum++
-        await this.messageStore.getMessages(this.channelStore.activeChannelId, this.messagePageNum)
+        await this.messageStore.getMessages(this.channelStore.activeChannelId)
       }
       done()
     },
