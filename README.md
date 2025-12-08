@@ -28,7 +28,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - [x] správu v kanáli je možné adresovať konkrétnemu používateľovi cez príkaz @nickname
    - [x] správa je zvýraznená danému používateľovi v zozname správ
 - [x] používateľ si môže pozrieť kompletnú históriu správ
-   - [ ] efektívny inifinite scroll -> EEEEH... todo este
+   - [x] efektívny inifinite scroll
 - [x] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
    - [x] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
    - [x] notifikácia obsahuje časť zo správy a odosielateľa
