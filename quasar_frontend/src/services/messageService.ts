@@ -73,9 +73,9 @@ export const messageService = {
   handleIncomingMessage(message) {
     const messageStore = useMessageStore()
 
-    console.log('handling incoming message')
     notificationService.handleNotification(message)
-    
+
+    messageStore.removeTypingUser(message.senderName)
     messageStore.appendMessage(message)
   },
 
@@ -87,5 +87,36 @@ export const messageService = {
     });
 
     return sorted[0];
+  },
+
+  handleJoinCommand(text) {
+    const parts = text.split(' ')
+
+    if (parts.length < 2) {
+      this.sendMessage(text)
+      return
+    }
+
+    const channelName = parts[1].trim()
+    const isPrivate = parts[2] === 'private'
+
+    wsService.joinChannel(channelName, isPrivate)
+  },
+
+  handleQuitCancelCommand(channelId) {
+    if (useChannelStore().activeChannelId !== channelId || useChannelStore().activeChannelId === null) {
+      return
+    }
+    
+    useChannelStore().leaveChannel(channelId)
+  },
+
+  emitMessage(text) {
+    const username = useAuthStore().user.username
+    const channelId = useChannelStore().activeChannelId
+
+    if(channelId === null) return
+
+    wsService.typeMessage(channelId, username, text)
   }
 }

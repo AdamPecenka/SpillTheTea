@@ -93,29 +93,33 @@ export default {
       try {
         const channelStore = useChannelStore()
 
-        // Vytvor channel
-        await channelStore.createChannel({
+        const response = await channelStore.createChannel({
           name: this.channelName.trim(),
           isPrivate: this.isPrivate,
           description: this.description.trim() || ''
         })
 
-        // Success
-        this.$q.notify({
-          message: `Channel #${this.channelName} created!`,
-          color: 'positive',
-          position: 'top',
-          timeout: 2000,
-          icon: 'check_circle'
-        })
+        console.log(response)
 
-        // Reset form
-        this.channelName = ''
-        this.description = ''
-        this.isPrivate = false
-
-        // Close dialog
-        this.$emit('update:modelValue', false)
+        if (response.ok === true) {
+          this.$q.notify({
+            message: `Channel #${this.channelName} created!`,
+            color: 'positive',
+            position: 'top',
+            timeout: 2000,
+            icon: 'check_circle'
+          })
+        } else {
+          this.$q.notify({
+            message: response.message,
+            color: 'negative',
+            position: 'top',
+            timeout: 2000,
+            icon: 'error'
+          })
+        }
+      
+        this.closeDialog()
 
       } catch (error) {
         console.error('Failed to create channel:', error)

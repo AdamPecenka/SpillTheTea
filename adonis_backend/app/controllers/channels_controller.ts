@@ -1,6 +1,11 @@
 import type { HttpContext } from '@adonisjs/core/http'
 import Channel from '#models/channel'
 import ChannelMember from '#models/channel_member'
+import MessageLog from '#models/message_log'
+import ChannelInvite from '#models/channel_invite'
+import ChannelBannedMember from '#models/channel_banned_member'
+import User from '#models/user'
+
 
 export default class ChannelsController {
     public async getChannels({ response, auth }: HttpContext) {
@@ -59,6 +64,16 @@ export default class ChannelsController {
 
     async createChannel(userId: number, data: { name: string, isPrivate?: boolean, description?: string }): Promise<any> {
 
+        const existing = await Channel.findBy('name', data.name)
+
+        if (existing) { 
+            return {
+                ok: false,
+                message: `Channel #${data.name} already exists!`,
+            }
+        }
+
+
         const channel = await Channel.create({
             name: data.name,
             isPrivate: data.isPrivate,
@@ -72,13 +87,16 @@ export default class ChannelsController {
         })
 
         return {
-            id: channel.id,
-            name: channel.name,
-            isPrivate: channel.isPrivate,
-            description: channel.description,
-            isPinned: false,
-            isAdmin: true,
-            isInvite: false
+            ok: true,
+            channel: {
+                id: channel.id,
+                name: channel.name,
+                isPrivate: channel.isPrivate,
+                description: channel.description,
+                isPinned: false,
+                isAdmin: true,
+                isInvite: false
+            }
         }
     }
 
@@ -116,6 +134,101 @@ export default class ChannelsController {
         } catch (error) {
             console.error('[!] Failed to load channel members', error)
             return response.notFound({ error: 'Channel not found' })
+        }
+    }
+
+    async removeUserFromChannel(userId: number, channelId: number): Promise<void> {
+        
+
+        await ChannelMember.query()
+            .where('user_id', userId)
+            .andWhere('channel_id', channelId)
+            .delete()
+    }
+
+    async deleteChannel(channelId: number): Promise<void> {
+        await Channel.query()
+            .where('id', channelId)
+            .delete()
+        
+        await ChannelMember.query()
+            .where('channel_id', channelId)
+            .delete()
+
+        await MessageLog.query()
+            .where('channel_id', channelId)
+            .delete()
+
+        await ChannelInvite.query()
+            .where('channel_id', channelId)
+            .delete()
+
+        await ChannelBannedMember.query()
+            .where('channel_id', channelId)
+            .delete()
+    }
+
+    async joinChannel(userId: number, channelName: string, isPrivate: boolean): Promise<any> {
+        const channel = await Channel.findBy('name', channelName)
+
+        if(channel){
+            if(channel.isPrivate === true){
+                return {
+                    error: true,
+                }
+            }
+
+            const existingMembership = await ChannelMember.query()
+                .where('user_id', userId)
+                .andWhere('channel_id', channel.id)
+                .first()
+
+            if(existingMembership){ 
+                return { 
+                    error: true,
+                }
+            }
+
+            await ChannelMember.create({
+                channelId: channel.id,
+                userId: userId,
+                isAdmin: false,
+            })
+
+            const user = await User.findBy('id', userId)
+
+            return {
+                createdNewChannel: false,
+                member:{
+                    id: user?.id,
+                    status: user?.status,
+                    fullname: `${user?.firstname} ${user?.lastname}`
+                },
+                channel: {
+                    id: channel.id,
+                    name: channel.name,
+                    isPrivate: channel.isPrivate,
+                    description: channel.description,
+                    isPinned: false,
+                    isAdmin: false,
+                    isInvite: false
+                }
+            }
+        }
+
+        const newChannel = await this.createChannel(userId, {name: channelName, isPrivate: isPrivate, description: ''})
+
+        return {
+            createdNewChannel: true,
+            channel: {
+                id: newChannel.channel.id,
+                name: newChannel.channel.name,
+                isPrivate: newChannel.channel.isPrivate,
+                description: newChannel.channel.description,
+                isPinned: newChannel.channel.isPinned,
+                isAdmin: newChannel.channel.isAdmin,
+                isInvite: newChannel.channel.isInvite
+            }
         }
     }
 }

@@ -65,15 +65,56 @@ class WsServiceBE {
             })
 
             socket.on('Channel:Create', async (data) => {
-                const channel = await channelsController.createChannel(USER_ID, data)
-                socket.join(`Channel:${channel.id}`)
-                this.io?.to(`User:${USER_ID}`).emit('Channel:NewChannel', channel)
+                const channelResult = await channelsController.createChannel(USER_ID, data)
+
+                if(channelResult.ok === false){ 
+                    socket.emit('Channel:Create:Duplicate', {  message: channelResult.message })
+                    return
+                }
+
+                socket.join(`Channel:${channelResult.channel.id}`)
+                this.io?.to(`User:${USER_ID}`).emit('Channel:NewChannel', channelResult.channel)
             })
 
             socket.on('Message:Send', async (data) => { 
                 const message = await meessagesController.sendMessage(data)
                 this.io?.to(`Channel:${data.channelId}`).emit('Message:Receive', message)
             })
+
+            socket.on('Channel:Leave', async ({ channelId }) => {
+                await channelsController.removeUserFromChannel(USER_ID, channelId)
+                socket.to(`User:${USER_ID}`).emit('Channel:Remove', { channelId: channelId })
+                socket.to(`Channel:${channelId}`).emit('Channel:UserLeft', {userId: USER_ID })
+                socket.leave(`Channel:${channelId}`)
+            })
+
+            socket.on('Channel:Delete', async ({ channelId }) => {
+                await channelsController.deleteChannel(channelId)
+                socket.to(`Channel:${channelId}`).emit('Channel:Remove', { channelId: channelId })
+            })
+
+            socket.on('Channel:Join', async ({channelName, isPrivate}) => {
+                const channelResult = await channelsController.joinChannel(USER_ID, channelName, isPrivate)
+                
+                if (channelResult.error === true){
+                    return
+                }
+
+                socket.join(`Channel:${channelResult.channel.id}`)
+
+                this.io?.to(`User:${USER_ID}`).emit('Channel:NewChannel', channelResult.channel)
+                
+                if(channelResult.createdNewChannel === false){
+                    socket.to(`Channel:${channelResult.channel.id}`).emit('Channel:NewMember', { channelId: channelResult.channel.id, member: channelResult.member})
+                }
+            })
+
+            socket.on('Typing:Emit', ({ channelId, username, messageText }) => {
+                socket.to(`Channel:${channelId}`).emit('Typing:Broadcast', { channelId, username, messageText })
+            })
+
+
+
 
 
 
@@ -84,6 +125,11 @@ class WsServiceBE {
                 console.log(`\n[-] User disconnected: ${socket.id}\n`);
             });
         });
+    }
+
+    channelCleanUp(channelId: number) {
+        this.io?.to(`Channel:${channelId}`).emit('Channel:Remove', { channelId })
+        this.io?.in(`Channel:${channelId}`).socketsLeave(`Channel:${channelId}`);
     }
 }
 

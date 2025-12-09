@@ -3,10 +3,11 @@ import { messageService } from 'src/services/messageService'
 
 export const useMessageStore = defineStore('message', {
   state: () => ({
-    messages: {}, // { channelId: [{message}, {message}, ...], ... }
     pageSize: 20,
-    offlineMessages: {},
-    moreMessagesAvailable: {}, // { channelId: boolean, ... }
+    messages: {},               // { channelId: [{message}, {message}, ...], ... }
+    moreMessagesAvailable: {},  // { channelId: boolean, ... }
+    typingIndicators: {},       // { userId: message, ... }
+    typingTimers: {}            // { username: timeoutId, ... }
   }),
 
   getters: {},
@@ -44,6 +45,47 @@ export const useMessageStore = defineStore('message', {
         sentTimestamp: message.sentTimestamp,
         channelName: message.channelName,
       })
+    },
+
+    clearMessagesForChannel(channelId) {
+      if(this.messages[channelId] !== undefined) {
+        delete this.messages[channelId]
+      }
+      if(this.moreMessagesAvailable[channelId] !== undefined) {
+        delete this.moreMessagesAvailable[channelId]
+      }
+    },
+
+    addTypingUser(username, message){
+      this.typingIndicators[username] = message
+
+      clearTimeout(this.typingTimers[username])
+
+      this.typingTimers[username] = setTimeout(() => {
+        if (this.typingIndicators[username] !== undefined) {
+          delete this.typingIndicators[username]
+        }
+        delete this.typingTimers[username]
+      }, 3000)
+    },
+
+    removeTypingUser(username) {
+      if (this.typingTimers[username]) {
+        clearTimeout(this.typingTimers[username])
+        delete this.typingTimers[username]
+      }
+      if (this.typingIndicators[username]) {
+        delete this.typingIndicators[username]
+      }
+    },
+
+    resetTypingIndicators() {
+      for (const username in this.typingTimers) {
+        clearTimeout(this.typingTimers[username])
+      }
+
+      this.typingTimers = {}
+      this.typingIndicators = {}
     }
   },
 

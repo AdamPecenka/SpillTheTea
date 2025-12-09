@@ -58,9 +58,9 @@
 </template>
 
 <script>
-import { Notify, Dialog } from 'quasar';
-import { useAuthStore } from 'src/store/authStore';
+import { Notify } from 'quasar';
 import { messageService } from 'src/services/messageService';
+import { useChannelStore } from 'src/store/channelStore';
 
 export default {
   name: 'TypingBar',
@@ -127,6 +127,7 @@ export default {
           args: ''
         }
       ],
+      channelStore: useChannelStore(),
     }
   },
   
@@ -137,11 +138,6 @@ export default {
   emits: ['view-members'],
   
   computed: {
-    userStatus() {
-      const authStore = useAuthStore()
-      return authStore.user?.status || 'offline'
-    },
-    
     filteredCommands() {
       // keď je len samotné "/" → zobraz všetky príkazy
       if (!this.commandSearch && this.message === '/') {
@@ -165,7 +161,9 @@ export default {
   
   methods: {
     onMessageChange(value) {
-      
+      console.log(value)
+      messageService.emitMessage(value)
+
       // Check if message starts with /
       if (value && value.startsWith('/')) {
         console.log('Starts with /')
@@ -212,16 +210,6 @@ export default {
         event.preventDefault()
         this.showCommandMenu = false
       }
-
-      // Enter to select (when menu is open)
-      if (event.key === 'Enter') {
-        event.preventDefault()
-        const selected = this.filteredCommands[this.selectedCommandIndex]
-        if (selected) {
-          this.selectCommand(selected)
-        }
-        return
-      }
     },
     
     selectCommand(cmd) {
@@ -256,14 +244,18 @@ export default {
       this.selectedCommandIndex = 0
     },
     
-    onSend() {
+    async onSend() {
       const text = this.message.trim()
       if (!text) return
 
       const cmd = text.split(' ')[0]
 
+      this.message = ''
+      this.showCommandMenu = false
+
       switch(cmd){
         case "/join":
+          messageService.handleJoinCommand(text)
           break
           
         case "/invite":
@@ -279,11 +271,43 @@ export default {
           break
           
         case "/quit":
-          
+          if(this.channelStore.activeChatData === null){
+            Notify.create({
+              type: 'negative',
+              message: 'No active channel to leave!',
+              position: 'top',
+              timeout: 3000,
+            })
+
+            return
+          }
+          if(this.channelStore.activeChatData.isAdmin === false){
+            Notify.create({
+              type: 'negative',
+              message: 'This is ADMIN ONLY command! Please use /cancel to leave the channel.',
+              position: 'top',
+              timeout: 3000,
+            })
+
+            return
+          }
+
+          messageService.handleQuitCancelCommand(this.channelStore.activeChatData.id)
           break
           
         case "/cancel":
+          if(this.channelStore.activeChatData === null){
+            Notify.create({
+              type: 'negative',
+              message: 'No active channel to leave!',
+              position: 'top',
+              timeout: 3000,
+            })
+
+            return
+          }
           
+          messageService.handleQuitCancelCommand(this.channelStore.activeChatData.id)
           break
           
         case "/list":
@@ -291,16 +315,33 @@ export default {
           break
         
         case "/shrug":
+          if(this.channelStore.activeChatData === null){
+            Notify.create({
+              type: 'negative',
+              message: 'You must be in a channel to send messages',
+              position: 'top',
+              timeout: 3000,
+            })
+
+            return
+          }
           messageService.hahahihi(text)
           break
           
         default:
+          if(this.channelStore.activeChatData === null){
+            Notify.create({
+              type: 'negative',
+              message: 'You must be in a channel to send messages',
+              position: 'top',
+              timeout: 3000,
+            })
+
+            return
+          }
           messageService.sendMessage(text)
           break
       }
-      
-      this.message = ''
-      this.showCommandMenu = false
     }
   },
 }

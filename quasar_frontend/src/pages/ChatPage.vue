@@ -8,12 +8,20 @@
           <div v-if="activeChatData.subtitle" class="text-caption text-grey-7">{{ activeChatData.subtitle }}</div>
         </div>
         <div class="chat-header-right">
+          <div v-if="activeChatData.isAdmin" class="admin-badge q-mr-sm">
+            <q-badge 
+              outline 
+              color="purple-7" 
+              text-color="purple-10" 
+              label="Admin"
+              class="text-weight-medium"
+            />
+          </div>
           <q-btn flat round dense icon="more_vert">
             <q-menu auto-close>
               <q-list style="min-width: 180px">
                 <!-- View members (pre channels) -->
-                <q-item 
-                  v-if="activeChatData.type === 'channel'" 
+                <q-item
                   clickable 
                   v-ripple 
                   @click="viewMembers"
@@ -26,15 +34,15 @@
                   </q-item-section>
                 </q-item>
 
-                <q-separator v-if="activeChatData.type === 'channel'" />
+                <q-separator  />
 
                 <!-- Leave channel / Close DM -->
-                <q-item clickable v-ripple @click="leaveChat" class="text-negative">
+                <q-item clickable v-ripple @click="leaveChannel" class="text-negative">
                   <q-item-section avatar>
                     <q-icon name="logout" color="negative" />
                   </q-item-section>
                   <q-item-section>
-                    {{ activeChatData.type === 'channel' ? 'Leave channel' : 'Close conversation' }}
+                    Leave channel
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -83,7 +91,7 @@
 
       <!-- Popup showing typing text for selected user -->
       <div v-if="activeTypingUser" class="typing-popup q-pa-sm shadow-2">
-        <strong>@{{ activeTypingUser }}:</strong> {{ typingText[activeTypingUser] || 'Typing...' }}
+        <strong>@{{ activeTypingUser }}:</strong> {{ typingText[activeTypingUser] }}
       </div>
     </div>
   </q-page>
@@ -102,21 +110,19 @@ export default {
 
   data() {
     return {
-      typingUsers: ['user1', 'user2'],
       activeTypingUser: null,
-      typingText: {
-        user1: 'Hello, I am typing this...',
-        user2: 'And I am typing something else'
-      },
       channelStore: null,
       authStore: null,
       messageStore: null,
+      dontScrollDown: false,
     }
   },
 
   watch: {
     'channelStore.activeChannelId'() {
-      this.messagePageNum = 1
+      if(this.channelStore.activeChannelId === null) {
+        this.$router.push({ name: 'index' })
+      }
     },
   },
 
@@ -136,7 +142,16 @@ export default {
         maxHeight: `calc(100vh - 64px - 56px - 70px - ${typingIndicatorHeight}px)`,
         paddingBottom: this.typingUsers.length ? '16px' : '8px'
       }
-    }
+    },
+    
+    typingUsers() {
+      return Object.keys(this.messageStore.typingIndicators)
+    },
+
+    typingText() {
+      return this.messageStore.typingIndicators
+    },
+    
   },
 
   created() {
@@ -164,6 +179,7 @@ export default {
   
   methods: {
     async onLoad(index, done) {
+      this.dontScrollDown = true
       if(this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
         await this.messageStore.getMessages(this.channelStore.activeChannelId)
       }
@@ -177,7 +193,7 @@ export default {
     scrollToBottom() {
       this.$nextTick(() => {
         const container = this.$refs.chatContainer
-        if (container) {
+        if (container && this.dontScrollDown === false) {
           // Scrollneme úplne dole
           container.scrollTop = container.scrollHeight
           
@@ -187,40 +203,29 @@ export default {
           }, 100)
         }
       })
+
+      this.dontScrollDown = false
     },
 
     viewMembers() {
-      // Emitujeme event nahor do layoutu, aby sa otvoril pravý panel
       this.$emit('view-members')
     },
 
-    leaveChat() {
+    leaveChannel() {
       if (!this.activeChatData) return
       
-      const isChannel = this.activeChatData.type === 'channel'
       const chatName = this.activeChatData.title
       
       Dialog.create({
-        title: isChannel ? 'Leave Channel' : 'Close Conversation',
-        message: isChannel 
-          ? `Are you sure you want to leave ${chatName}?`
-          : `Are you sure you want to close this conversation with ${chatName}?`,
+        title: 'Leave Channel',
+        message: `Are you sure you want to leave ${chatName}?`,
         cancel: true,
         persistent: true
       }).onOk(() => {
-        // Clear active chat
-        // !!!! potom treba zmenit za odstranenie channela zo store, nie len zmazanie aktivneho id
-        this.channelStore.clearActiveChat()
         
-        // Navigate back to index
+        this.channelStore.leaveChannel(this.activeChatData.id)
+        
         this.$router.push({ name: 'index' })
-        
-        Notify.create({
-          message: isChannel ? 'Left channel' : 'Conversation closed',
-          color: 'info',
-          position: 'top',
-          timeout: 2000
-        })
       })
     }
   }
@@ -266,6 +271,8 @@ export default {
 
 .chat-header-right {
   flex-shrink: 0;
+  display: flex;
+  align-items: center;
 }
 
 .chat-messages-container {
@@ -310,5 +317,10 @@ export default {
   min-width: 180px;
   box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   z-index: 2000;
+}
+
+.admin-badge {
+  display: flex;
+  align-items: center;
 }
 </style>

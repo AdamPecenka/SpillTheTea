@@ -166,7 +166,7 @@ export default {
     },
     confirmLeaveChannel() {
       this.leaveDialog = false
-      this.channelStore.deleteChannel(this.channel.id)
+      this.channelStore.leaveChannel(this.channel.id)
     }
   }
 }
