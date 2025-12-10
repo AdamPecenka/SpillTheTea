@@ -91,6 +91,7 @@ class WsServiceBE {
             socket.on('Channel:Delete', async ({ channelId }) => {
                 await channelsController.deleteChannel(channelId)
                 socket.to(`Channel:${channelId}`).emit('Channel:Remove', { channelId: channelId })
+                socket.leave(`Channel:${channelId}`)
             })
 
             socket.on('Channel:Join', async ({channelName, isPrivate}) => {
@@ -113,7 +114,7 @@ class WsServiceBE {
                 socket.to(`Channel:${channelId}`).emit('Typing:Broadcast', { channelId, username, messageText })
             })
 
-
+            
 
 
 

@@ -179,7 +179,6 @@ export default {
   
   methods: {
     async onLoad(index, done) {
-      this.dontScrollDown = true
       if(this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
         await this.messageStore.getMessages(this.channelStore.activeChannelId)
       }
@@ -203,8 +202,6 @@ export default {
           }, 100)
         }
       })
-
-      this.dontScrollDown = false
     },
 
     viewMembers() {

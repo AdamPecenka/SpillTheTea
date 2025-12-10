@@ -1,6 +1,3 @@
-import { comment } from 'postcss'
-import { compile } from 'vue'
-
 const routes = [
   {
     name: 'home',
