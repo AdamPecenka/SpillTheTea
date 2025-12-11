@@ -68,7 +68,7 @@ class WsServiceBE {
                 const channelResult = await channelsController.createChannel(USER_ID, data)
 
                 if(channelResult.ok === false){ 
-                    socket.emit('Channel:Create:Duplicate', {  message: channelResult.message })
+                    socket.emit('Error:Message', {  message: channelResult.message })
                     return
                 }
 
@@ -97,8 +97,8 @@ class WsServiceBE {
             socket.on('Channel:Join', async ({channelName, isPrivate}) => {
                 const channelResult = await channelsController.joinChannel(USER_ID, channelName, isPrivate)
                 
-                if (channelResult.error === true){
-                    return
+                if (channelResult.ok === false){
+                    socket.emit('Error:Message', { message: channelResult.message })
                 }
 
                 socket.join(`Channel:${channelResult.channel.id}`)

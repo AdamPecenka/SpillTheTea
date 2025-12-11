@@ -3,6 +3,7 @@ import { io, Socket } from 'socket.io-client';
 import { useChannelStore } from 'src/store/channelStore';
 import { messageService } from './messageService';
 import { useMessageStore } from 'src/store/messageStore';
+import { notificationService } from './notificationService';
 
 class WebSocketService {
     private socket: Socket
@@ -58,6 +59,10 @@ class WebSocketService {
         this.socket.on('Typing:Broadcast', ({ channelId, username, messageText }) => {
             if(useChannelStore().activeChannelId !== channelId) return
             useMessageStore().addTypingUser(username, messageText)
+        })
+
+        this.socket.on('Error:Message', ({ message }) => {
+            notificationService.displayError(message)
         })
     }
 

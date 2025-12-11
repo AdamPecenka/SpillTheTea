@@ -1,12 +1,8 @@
-/SpillTheTea $ npm i -g @quasar/cli
-
-
 ### To Fix
 - farbicky pri typing indikatori
 - invited channels by mali byt v liste na vrchu
 - mentionNotify UI fix
 - rozdielne Dialog karty pre leavovanie kanalu (channel list / 3dot menu v kanali)
-- infinity scroll by nemal scrollnut na spodok zakazdym
 
 ### Dev notes
 - dorobit editovanie profilu

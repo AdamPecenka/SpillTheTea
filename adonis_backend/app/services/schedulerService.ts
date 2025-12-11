@@ -42,24 +42,30 @@ export class SchedulerService {
     }
 }
 
-export class ChannelCleanupJob extends Job { 
-    async run() { 
+export class ChannelCleanupJob extends Job {
+    async run() {
         try {
             const target = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)
-            // const target = new Date(Date.now() - 3 * 60 * 1000) // 3 minutes for testing
+            // const target = new Date(Date.now() - 3 * 60 * 1000) // testing
 
             const allChannels = await Channel.all()
 
-            for (const channel of allChannels) { 
-                const newsetMessage = await db
+            for (const channel of allChannels) {
+
+                channel.createdAt
+                
+                const channelCreatedAt = channel.createdAt.toJSDate()
+                if (channelCreatedAt >= target) continue
+
+                const newestMessage = await db
                     .from('message_logs')
                     .where('channel_id', channel.id)
                     .max('sent_timestamp as lastMessageAt')
-                    .first();
+                    .first()
 
-                const lastMessageAt = newsetMessage?.lastMessageAt
-                    ? new Date(newsetMessage.lastMessageAt)
-                    : null;
+                const lastMessageAt = newestMessage?.lastMessageAt
+                    ? new Date(newestMessage.lastMessageAt)
+                    : null
 
                 if (lastMessageAt && lastMessageAt >= target) continue
 
@@ -68,7 +74,7 @@ export class ChannelCleanupJob extends Job {
                 console.log('[-] Deleting channel:', channel.name)
                 await channel.delete()
             }
-        } catch(e){
+        } catch (e) {
             console.log('[!] Error during ChannelCleanupJob')
             console.error(e)
         }

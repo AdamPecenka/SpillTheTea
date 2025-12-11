@@ -64,7 +64,9 @@ export default class ChannelsController {
 
     async createChannel(userId: number, data: { name: string, isPrivate?: boolean, description?: string }): Promise<any> {
 
-        const existing = await Channel.findBy('name', data.name)
+        const existing = await Channel.query()
+            .where('name', data.name)
+            .first()
 
         if (existing) { 
             return {
@@ -117,7 +119,7 @@ export default class ChannelsController {
             const members = await channel
                 .related('members')
                 .query()
-                .select('id', 'firstname', 'lastname', 'status')
+                .select('id', 'firstname', 'lastname', 'status', 'avatar_url')
 
             const result = members.map((m) => {
                 const first = m.firstname?.trim() ?? ''
@@ -127,6 +129,7 @@ export default class ChannelsController {
                     id: m.id,
                     status: m.status,
                     fullname,
+                    avatarUrl: m.avatarUrl
                 }
             })
 
@@ -174,7 +177,30 @@ export default class ChannelsController {
         if(channel){
             if(channel.isPrivate === true){
                 return {
-                    error: true,
+                    ok: false,
+                    message: `Channel #${channelName} is private! You cannot join it`,
+                }
+            }
+
+            const bannedEntries = await ChannelBannedMember
+                .query()
+                .where('channel_id', channel.id)    
+                .andWhere('user_id', userId)
+
+            const isHardBanned = bannedEntries.some(entry => entry.isBanned === true)
+
+            const uniqueKickers = new Set(
+                bannedEntries
+                    .filter(entry => entry.kickedUserId)
+                    .map(entry => entry.kickedUserId)
+            )
+
+            const isSoftBanned = uniqueKickers.size >= 3
+
+            if (isHardBanned || isSoftBanned) {
+                return {
+                    ok: false,
+                    message: `You are banned from #${channelName}`,
                 }
             }
 
@@ -184,8 +210,9 @@ export default class ChannelsController {
                 .first()
 
             if(existingMembership){ 
-                return { 
-                    error: true,
+                return {
+                    ok: false,
+                    message: `You are already a member of channel #${channelName}`,
                 }
             }
 

@@ -14,6 +14,7 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('channels')
         .onDelete('CASCADE')
+        
       table
         .integer('user_id')
         .unsigned()
@@ -21,7 +22,15 @@ export default class extends BaseSchema {
         .references('id')
         .inTable('users')
         .onDelete('CASCADE')
-      table.integer('kick_count').notNullable().defaultTo(0)
+
+      table
+        .integer('kicked_user_id')
+        .unsigned()
+        .notNullable()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+
       table.boolean('is_banned').notNullable().defaultTo(false)
 
       table.timestamp('created_at', { useTz: true }).notNullable()

@@ -161,12 +161,10 @@ export default {
   
   methods: {
     onMessageChange(value) {
-      console.log(value)
       messageService.emitMessage(value)
 
       // Check if message starts with /
       if (value && value.startsWith('/')) {
-        console.log('Starts with /')
         this.showCommandMenu = true
         
         // Extract search term (everything after / until space)

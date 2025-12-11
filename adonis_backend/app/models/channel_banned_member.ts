@@ -15,7 +15,7 @@ export default class ChannelBannedMember extends BaseModel {
   declare channelId: number
 
   @column()
-  declare kickCount: number
+  declare kickedUserId: number
 
   @column()
   declare isBanned: boolean
@@ -30,6 +30,11 @@ export default class ChannelBannedMember extends BaseModel {
     foreignKey: 'user_id'
   })
   public user!: BelongsTo<typeof User>
+
+  @belongsTo(() => User, {
+    foreignKey: 'kicked_user_id'
+  })
+  public kickedUser!: BelongsTo<typeof User>
 
   @belongsTo(() => Channel, {
     foreignKey: 'channel_id'

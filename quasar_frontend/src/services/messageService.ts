@@ -22,7 +22,6 @@ export const messageService = {
     const authStore = useAuthStore()
 
     const channelId = channelStore.activeChannelId
-    const userId = authStore.user.id
 
     if (!channelId) {
       console.error('[!] No active channel to send message to.')
@@ -31,7 +30,8 @@ export const messageService = {
 
     const message = {
       channelId: channelId,
-      senderId: userId,
+      senderId: authStore.user.id,
+      senderAvatarUrl: authStore.user.avatarUrl,
       messageText: messageContent,
     }
 
@@ -43,7 +43,6 @@ export const messageService = {
     const authStore = useAuthStore()
 
     const channelId = channelStore.activeChannelId
-    const userId = authStore.user.id
 
     const shrug = '¯\\_(ツ)_/¯'
     const parts = messageContent.split(' ')
@@ -63,7 +62,8 @@ export const messageService = {
 
     const message = {
       channelId: channelId,
-      senderId: userId,
+      senderId: authStore.user.id,
+      senderAvatarUrl: authStore.user.avatarUrl,
       messageText: messageContent,
     }
 

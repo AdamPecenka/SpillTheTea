@@ -52,27 +52,12 @@ export const useChannelStore = defineStore('channel', {
     },
 
     async createChannel(data) {
-      const socket = wsService.socket
-
-      return await new Promise((resolve) => {
-        const duplicateHandler = (response) => {
-          clearTimeout(successTimer)
-          resolve({
-            ok: false,
-            message: response.message,
-          })
-        }
-
-        socket.once('Channel:Create:Duplicate', duplicateHandler)
-
+      try {
         wsService.createChannel(data)
-
-        const successTimer = setTimeout(() => {
-          resolve({
-            ok: true,
-          })
-        }, 50)
-      })
+      } catch (e) {
+        console.error('[!] Create channel failed:', e)
+        throw e
+      }
     },
 
     async togglePin(channelId) {

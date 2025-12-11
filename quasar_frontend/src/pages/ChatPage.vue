@@ -67,6 +67,7 @@
           v-for="msg in messages"
           :key="msg.id"
           :name="msg.senderName"
+          :avatar="msg.senderAvatarUrl"
           :text="[msg.messageText]"
           :sent="msg.senderName === authStore.user.username ? true : false"
           :bg-color="msg.senderName === authStore.user.username ? 'pink-11' : 'purple-4'"
@@ -179,10 +180,17 @@ export default {
   
   methods: {
     async onLoad(index, done) {
-      if(this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
+      this.dontScrollDown = true
+
+      if (this.messageStore.moreMessagesAvailable[this.channelStore.activeChannelId]) {
         await this.messageStore.getMessages(this.channelStore.activeChannelId)
       }
+
       done()
+
+      setTimeout(() => {
+        this.dontScrollDown = false
+      }, 200)
     },
 
     onUserClick(username) {

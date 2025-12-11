@@ -19,6 +19,7 @@ export default class MessagesController {
             .select(
                 'message_logs.id as msgId',
                 'users.username',
+                'users.avatar_url',
                 'message_logs.message_text as messageText',
                 'message_logs.sent_timestamp as sentTimestamp',
                 'channels.name as channelName'
@@ -40,6 +41,7 @@ export default class MessagesController {
         const result = messages.map((msg) => ({
             id: msg.msgId,
             senderName: msg.username,
+            senderAvatarUrl: msg.avatar_url,
             messageText: msg.messageText,
             sentTimestamp: msg.sentTimestamp,
             channelName: msg.channelName,
@@ -59,7 +61,7 @@ export default class MessagesController {
 
         const sender = await User.query()
             .where('id', data.senderId)
-            .select('username')
+            .select('username', 'avatar_url')
             .first()
 
         const channelName = await Channel.query()
@@ -70,6 +72,7 @@ export default class MessagesController {
         return {
             id: inserted.id,
             senderName: sender?.username,
+            senderAvatarUrl: sender?.avatarUrl,
             messageText: inserted.messageText,
             sentTimestamp: inserted.sentTimestamp,
             channelName: channelName?.name,

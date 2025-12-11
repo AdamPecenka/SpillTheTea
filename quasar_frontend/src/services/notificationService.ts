@@ -1,6 +1,7 @@
 import { useAuthStore } from "src/store/authStore"
 import { AppVisibility } from "quasar"
 import { utils } from "src/utils/utils"
+import { Notify } from "quasar"
 
 export const notificationService = {
     handleNotification(message) {
@@ -41,5 +42,15 @@ export const notificationService = {
             window.focus()
             notification.close()
         }
+    },
+
+    displayError(message) {
+        if (!message) return
+    
+        Notify.create({
+            message: message,
+            type: 'negative',
+            position: 'top',
+        })
     }
 }

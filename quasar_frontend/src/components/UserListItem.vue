@@ -2,7 +2,7 @@
   <q-item>
     <q-item-section avatar>
       <q-avatar size="40px" color="grey-5">
-        <q-icon name="person" color="grey-9" size="24px" />
+        <q-icon :name="`img:${user.avatarUrl}`" color="grey-9" size="40px" />
         <StatusDot :status="user.status" />
       </q-avatar>
     </q-item-section>

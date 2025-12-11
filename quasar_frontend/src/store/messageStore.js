@@ -41,6 +41,7 @@ export const useMessageStore = defineStore('message', {
       this.messages[message.channelId].push({
         id: message.id,
         senderName: message.senderName,
+        senderAvatarUrl: message.senderAvatarUrl,
         messageText: message.messageText,
         sentTimestamp: message.sentTimestamp,
         channelName: message.channelName,
