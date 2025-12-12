@@ -6,7 +6,6 @@ import { useMessageStore } from './messageStore'
 export const useChannelStore = defineStore('channel', {
   state: () => ({
     channels: [],
-    inviteChannels: [],
     activeChannelId: null,
     activeChannelMembers: [],
   }),
