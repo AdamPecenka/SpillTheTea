@@ -113,18 +113,6 @@ export default {
           desc: 'Zobrazenie zoznamu clenov kanala',
           icon: 'people',
           args: ''
-        },
-        { 
-          cmd: '/help', 
-          desc: 'Zobrazenie tohto help menu',
-          icon: 'help',
-          args: ''
-        },
-        { 
-          cmd: '/notify', 
-          desc: 'Poslanie demo notifikacie (if not DND)',
-          icon: 'notifications',
-          args: ''
         }
       ],
       channelStore: useChannelStore(),

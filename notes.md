@@ -3,6 +3,7 @@
 - invited channels by mali byt v liste na vrchu
 - mentionNotify UI fix
 - rozdielne Dialog karty pre leavovanie kanalu (channel list / 3dot menu v kanali)
+- pouzivatel nesmie byt shopny pomenovat kanal s whitespaces
 
 ### Dev notes
 - dorobit editovanie profilu
