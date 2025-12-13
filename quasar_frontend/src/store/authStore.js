@@ -96,6 +96,17 @@ export const useAuthStore = defineStore('auth', {
 
       console.log(this.notificationPermission)
     },
+    setMentionSettings(value) {
+      if(!this.user) return
+
+      this.user.mentionedNotify = value
+      
+      wsService.updateMentionSettings(value)
+    },
+    updateMentionSettings(value) {
+      if(!this.user) return
+      this.user.mentionedNotify = value
+    }
   },
 
   persist: {

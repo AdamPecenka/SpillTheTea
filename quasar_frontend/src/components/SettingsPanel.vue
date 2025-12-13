@@ -40,10 +40,9 @@
               </div>
             </div>
             <q-toggle
-              v-model="localSettings.onlyMentions"
+              v-model="mentionedNotify"
               color="positive"
               size="lg"
-              @update:model-value="onSettingChange"
             />
           </div>
         </div>
@@ -66,6 +65,8 @@
 </template>
 
 <script>
+import { useAuthStore } from 'src/store/authStore';
+
 export default {
   name: 'SettingsPanel',
   
@@ -73,12 +74,6 @@ export default {
     modelValue: {
       type: Boolean,
       default: false
-    },
-    settings: {
-      type: Object,
-      default: () => ({
-        onlyMentions: false
-      })
     },
     userStatus: {
       type: String,
@@ -91,9 +86,7 @@ export default {
   
   data() {
     return {
-      localSettings: {
-        onlyMentions: false
-      }
+      authStore: useAuthStore(),
     }
   },
   
@@ -104,6 +97,23 @@ export default {
       },
       set(value) {
         this.$emit('update:modelValue', value)
+      }
+    },
+
+    mentionedNotify: {
+      get() {
+        return this.authStore.user.mentionedNotify
+      },
+      set(value) {
+        this.authStore.setMentionSettings(value)
+
+        this.$q.notify({
+          message: 'Settings saved',
+          color: 'positive',
+          position: 'top',
+          timeout: 1000,
+          icon: 'check_circle'
+        })
       }
     },
     
@@ -125,7 +135,7 @@ export default {
 
     isMobile(){
       return this.$q.screen.width < 600
-    }
+    },
   },
   
   watch: {
@@ -139,19 +149,6 @@ export default {
   },
   
   methods: {
-    onSettingChange() {
-      // Emit zmeny (už nevypíname onlyMentions pri DND)
-      this.$emit('update:settings', { ...this.localSettings })
-      
-      // Notify o uložení
-      this.$q.notify({
-        message: 'Settings saved',
-        color: 'positive',
-        position: 'top',
-        timeout: 1000,
-        icon: 'check_circle'
-      })
-    }
   }
 }
 </script>

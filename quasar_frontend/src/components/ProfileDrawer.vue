@@ -124,7 +124,6 @@
     <!-- Settings Panel -->
     <SettingsPanel
       v-model="settingsOpen"
-      :settings="userSettings"
       :user-status="user.status"
       @update:settings="onSettingsUpdate"
     />
@@ -240,18 +239,6 @@ export default {
         timeout: 2000,
         icon: 'check_circle'
       })
-    },
-    
-    onSettingsUpdate(newSettings) {
-      this.userSettings = { ...newSettings }
-      
-      // Save to store
-      if (this.userStore.user) {
-        this.userStore.user.settings = { ...newSettings }
-      }
-      
-      // Emit to parent
-      this.$emit('save', { ...this.user, settings: newSettings })
     },
     
     onLogOut(){

@@ -4,6 +4,7 @@ import { useChannelStore } from 'src/store/channelStore';
 import { messageService } from './messageService';
 import { useMessageStore } from 'src/store/messageStore';
 import { notificationService } from './notificationService';
+import { useAuthStore } from 'src/store/authStore';
 
 class WebSocketService {
     private socket: Socket
@@ -64,6 +65,10 @@ class WebSocketService {
         this.socket.on('Error:Message', ({ message }) => {
             notificationService.displayError(message)
         })
+
+        this.socket.on('User:UpdateMentions', ({ newValue }) => {
+            useAuthStore().updateMentionSettings(newValue)
+        })
     }
 
     // sem definovat funkcie na emitovanie socket veci
@@ -94,6 +99,10 @@ class WebSocketService {
 
     typeMessage(channelId: number, username: string, messageText: string) { 
         this.socket.emit('Typing:Emit', { channelId, username, messageText })
+    }
+
+    updateMentionSettings(newValue: boolean) {
+        this.socket.emit('User:ChangeMentions', { newValue })
     }
 }
 

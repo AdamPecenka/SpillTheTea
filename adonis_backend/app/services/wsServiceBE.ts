@@ -4,6 +4,7 @@ import { Secret } from "@adonisjs/core/helpers";
 import User from "#models/user";
 import ChannelsController from "#controllers/channels_controller";
 import MessagesController from "#controllers/messages_controller";
+import UsersController from "#controllers/users_controller";
 
 class WsServiceBE {
     io: Server | undefined
@@ -11,6 +12,7 @@ class WsServiceBE {
     onBoot() {
         const channelsController = new ChannelsController();
         const meessagesController = new MessagesController();
+        const usersController = new UsersController();
 
         this.io = new Server(server.getNodeServer(), {
             cors: {
@@ -85,7 +87,7 @@ class WsServiceBE {
                 await channelsController.removeUserFromChannel(USER_ID, channelId)
                 socket.to(`User:${USER_ID}`).emit('Channel:Remove', { channelId: channelId })
                 socket.to(`Channel:${channelId}`).emit('Channel:UserLeft', {userId: USER_ID })
-                socket.leave(`Channel:${channelId}`)
+                socket.leave(`Channel:${channelId}`)    
             })
 
             socket.on('Channel:Delete', async ({ channelId }) => {
@@ -112,6 +114,11 @@ class WsServiceBE {
 
             socket.on('Typing:Emit', ({ channelId, username, messageText }) => {
                 socket.to(`Channel:${channelId}`).emit('Typing:Broadcast', { channelId, username, messageText })
+            })
+
+            socket.on('User:ChangeMentions', async ({ newValue }) => {
+                await usersController.updateMentionSettingForUser(USER_ID, newValue)
+                socket.to(`User:${USER_ID}`).emit('User:UpdateMentions', { newValue })
             })
 
             
