@@ -4,6 +4,7 @@ import { useAuthStore } from 'src/store/authStore'
 import { useMessageStore } from 'src/store/messageStore'
 import { wsService } from 'src/services/wsServiceFE'
 import { notificationService } from 'src/services/notificationService'
+import { Notify } from 'quasar'
 
 
 export const messageService = {
@@ -118,5 +119,33 @@ export const messageService = {
     if(channelId === null) return
 
     wsService.typeMessage(channelId, username, text)
+  },
+
+  handleInviteCommand(text) {
+    const activeChannelId = useChannelStore().activeChannelId
+    const channel = useChannelStore().channels.find(c => c.id === activeChannelId)
+    const parts = text.split(' ')
+    const username = parts[1]
+
+    console.log('handling invite')
+
+    if(!activeChannelId) return
+
+    if (parts.length < 2) {
+      this.sendMessage(text)
+      return
+    }
+
+    if(channel.isPrivate === true && channel.isAdmin === false) {
+      Notify.create({
+        message: 'Only admin can invite into private channel!',
+        type: 'negative',
+      })
+      return
+    }
+
+    console.log('calling socket')
+    
+    wsService.sendInvite(activeChannelId, username)
   }
 }

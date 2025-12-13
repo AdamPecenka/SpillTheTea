@@ -110,7 +110,6 @@ export const useChannelStore = defineStore('channel', {
     },
 
     addNewChannel(channel) {
-      console.log(channel)
       this.channels.push(channel)
     },
 
@@ -127,7 +126,6 @@ export const useChannelStore = defineStore('channel', {
 
       this.clearActiveChat()
       this.channels = this.channels.filter((c) => c.id !== channelId)
-      this.inviteChannels = this.inviteChannels.filter((c) => c.id !== channelId)
 
       messageStore.clearMessagesForChannel(channelId)
     },
@@ -138,10 +136,6 @@ export const useChannelStore = defineStore('channel', {
     },
 
     updateMemberList(channelId, member) {
-      console.log('new member incoming')
-
-      console.log('active channel:', this.activeChannelId)
-      console.log('member channel:', channelId)
       console.log(this.activeChannelId === channelId)
 
       if (this.activeChannelId !== channelId) return
@@ -151,6 +145,34 @@ export const useChannelStore = defineStore('channel', {
       this.activeChannelMembers.push(member)
 
       console.log(this.activeChannelMembers)
+    },
+    acceptInvite(channelId){
+      const channel = this.channels.find(ch => ch?.id === channelId)
+
+      if (!channel) {
+        console.warn('Channel not found:', channelId)
+        return
+      }
+
+      channel.isInvite = false
+      wsService.acceptInvite(channelId)
+    },
+    inviteAccepted(channelId){
+      const channel = this.channels.find(ch => ch?.id === channelId)
+
+      if (!channel) {
+        console.warn('Channel not found:', channelId)
+        return
+      }
+
+      channel.isInvite = false
+
+      console.log(this.channels)
+    },
+    rejectInvite(channelId){
+        this.removeChannel(channelId)
+
+        wsService.rejecetInvite(channelId)
     }
   },
 

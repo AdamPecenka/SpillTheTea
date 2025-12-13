@@ -1,5 +1,21 @@
 <template>
   <q-scroll-area class="fit">
+    <!-- Invitations -->
+    <div v-if="inviteChannels.length > 0">
+      <div class="q-px-md q-pt-sm q-pb-xs">
+        <div class="text-caption text-weight-bold text-grey-7">INVITED</div>
+      </div>
+      <q-list padding>
+        <ChannelListItem
+          v-for="ch in inviteChannels"
+          :key="ch.id"
+          :channel="ch"
+          @click="preventOpeningInvitedChat"
+        />
+      </q-list>
+      <q-separator class="q-mx-md q-my-xs" />
+    </div>
+    
     <!-- Pinned Channels -->
     <div v-if="pinnedChannels.length > 0">
       <div class="q-px-md q-pt-sm q-pb-xs">
@@ -12,22 +28,6 @@
           :channel="ch"
           :pinned="true"
           @click="goToChat"
-        />
-      </q-list>
-      <q-separator class="q-mx-md q-my-xs" />
-    </div>
-
-    <!-- Invitations -->
-    <div v-if="inviteChannels.length > 0">
-      <div class="q-px-md q-pt-sm q-pb-xs">
-        <div class="text-caption text-weight-bold text-grey-7">INVITED</div>
-      </div>
-      <q-list padding>
-        <ChannelListItem
-          v-for="ch in inviteChannels"
-          :key="ch.id"
-          :channel="ch"
-          @click="preventOpeningInvitedChat"
         />
       </q-list>
       <q-separator class="q-mx-md q-my-xs" />

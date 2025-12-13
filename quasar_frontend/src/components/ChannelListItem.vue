@@ -167,7 +167,14 @@ export default {
     confirmLeaveChannel() {
       this.leaveDialog = false
       this.channelStore.leaveChannel(this.channel.id)
+    },
+    acceptInvite(){
+      this.channelStore.acceptInvite(this.channel.id)
+    },
+    rejectInvite(){
+      this.channelStore.rejectInvite(this.channel.id)
     }
+
   }
 }
 </script>

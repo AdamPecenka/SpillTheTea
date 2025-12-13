@@ -121,7 +121,32 @@ class WsServiceBE {
                 socket.to(`User:${USER_ID}`).emit('User:UpdateMentions', { newValue })
             })
 
-            
+            socket.on('Channel:Invite', async ({channelId, username}) => {
+                const invitedChannel = await channelsController.inviteUser(channelId, username, USER_ID)
+
+                if(invitedChannel?.ok === false){
+                    socket.emit('Error:Message', { message: invitedChannel.message })
+                }
+                else if(invitedChannel?.ok === true){
+                    this.io?.to(`User:${invitedChannel.targetUserId}`).emit('Channel:NewInvite', invitedChannel.channel)
+                }
+            })
+
+            socket.on('Channel:AcceptInvite', async ({channelId}) => {
+                const res = await channelsController.acceptInvite(channelId, USER_ID)
+
+                this.io?.in(`User:${USER_ID}`).socketsJoin(`Channel:${channelId}`)
+
+                socket.to(`User:${USER_ID}`).emit('Channel:InviteAccepted', { channelId: channelId })
+                socket.to(`Channel:${channelId}`).emit('Channel:NewMember', { channelId: channelId, member: res})
+            })
+
+            socket.on('Channel:RejectInvite', async ({channelId}) => {
+                await channelsController.rejectInvite(channelId, USER_ID)
+                socket.to(`User:${USER_ID}`).emit('Channel:InviteRejected', { channelId: channelId })
+            })
+
+
 
 
 

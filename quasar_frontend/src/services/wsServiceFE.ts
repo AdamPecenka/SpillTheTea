@@ -5,6 +5,7 @@ import { messageService } from './messageService';
 import { useMessageStore } from 'src/store/messageStore';
 import { notificationService } from './notificationService';
 import { useAuthStore } from 'src/store/authStore';
+import { roundHistory } from '@quasar/extras/material-icons-round';
 
 class WebSocketService {
     private socket: Socket
@@ -67,7 +68,21 @@ class WebSocketService {
         })
 
         this.socket.on('User:UpdateMentions', ({ newValue }) => {
-            useAuthStore().updateMentionSettings(newValue)
+            useAuthStore().updateMentionSettings(newValue)  
+        })
+
+        this.socket.on('Channel:NewInvite', ( channel ) => {
+            useChannelStore().addNewChannel(channel)
+        })
+
+        this.socket.on('Channel:InviteAccepted', ({channelId}) => {
+            console.log('accepting invite: ', channelId)
+            useChannelStore().inviteAccepted(channelId)
+        })
+
+        this.socket.on('Channel:InviteRejected', ({channelId}) => {
+            console.log('rejecting invite: ', channelId)
+            useChannelStore().removeChannel(channelId)
         })
     }
 
@@ -103,6 +118,18 @@ class WebSocketService {
 
     updateMentionSettings(newValue: boolean) {
         this.socket.emit('User:ChangeMentions', { newValue })
+    }
+
+    sendInvite(channelId: number, username: string){
+        this.socket.emit('Channel:Invite', {channelId, username})
+    }
+
+    acceptInvite(channelId: number){
+        this.socket.emit('Channel:AcceptInvite', {channelId})
+    }
+
+    rejecetInvite(channelId: number) {
+        this.socket.emit('Channel:RejectInvite', {channelId})
     }
 }
 

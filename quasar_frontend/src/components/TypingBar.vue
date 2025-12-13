@@ -245,7 +245,7 @@ export default {
           break
           
         case "/invite":
-          
+          messageService.handleInviteCommand(text)
           break
           
         case "/revoke":

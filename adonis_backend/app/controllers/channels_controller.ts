@@ -5,10 +5,13 @@ import MessageLog from '#models/message_log'
 import ChannelInvite from '#models/channel_invite'
 import ChannelBannedMember from '#models/channel_banned_member'
 import User from '#models/user'
+import { isParameter } from 'typescript'
+import { isIP } from 'net'
+import bodyParserConfig from '#config/bodyparser'
 
 
 export default class ChannelsController {
-    public async getChannels({ response, auth }: HttpContext) {
+    async getChannels({ response, auth }: HttpContext) {
         const userId = auth.user!.id
 
         // Fetch channels where the user is a member OR invited.
@@ -229,7 +232,8 @@ export default class ChannelsController {
                 member:{
                     id: user?.id,
                     status: user?.status,
-                    fullname: `${user?.firstname} ${user?.lastname}`
+                    fullname: `${user?.firstname} ${user?.lastname}`,
+                    avatarUrl: user?.avatarUrl
                 },
                 channel: {
                     id: channel.id,
@@ -257,5 +261,101 @@ export default class ChannelsController {
                 isInvite: newChannel.channel.isInvite
             }
         }
+    }
+
+    async inviteUser(channelId: number, username: string, myUserId: number) {
+        const targetUser = await User.query()
+            .where('username', username)
+            .first()
+
+        if(!targetUser) {
+            return {
+                ok: false,
+                message: `Invalid username`,
+            }
+        }
+
+        if(myUserId === targetUser.id){
+            return {
+                ok: false,
+                message: `You cannot invite yourself :D`,
+            }
+        }
+            
+        const exists = await ChannelMember.query()
+            .where('user_id', targetUser.id)
+            .andWhere('channel_id', channelId)
+            .first()
+
+        if(exists) {
+            return {
+                ok: false,
+                message: `User ${username} is already a member of this channel`,
+            }
+        }
+
+        const inviteExists = await ChannelInvite.query()
+            .where('user_id', targetUser.id)
+            .where('channel_id', channelId)
+            .first()
+
+        if (inviteExists) {
+            return {
+                ok: false,
+                message: `User ${username} already has a pending invite`,
+            }
+        }
+
+        await ChannelInvite.create({
+            userId: targetUser.id,
+            channelId: channelId,
+        })
+
+        const channel = await Channel.findByOrFail('id', channelId)
+
+        return {
+            ok: true,
+            targetUserId: targetUser.id,
+            channel: {
+                id: channel.id,
+                name: channel.name,
+                isPrivate: channel.isPrivate,
+                description: channel.description,
+                isPinned: false,
+                isAdmin: false,
+                isInvite: true
+            }
+        }
+    }
+
+    async acceptInvite(channelId: number, userId: number) {
+        await ChannelInvite.query()
+            .where('user_id', userId)
+            .andWhere('channel_id', channelId)
+            .delete()
+
+        await ChannelMember.create({
+            channelId: channelId,
+            userId: userId,
+            isAdmin: false,
+            isPinned: false,
+        })
+
+        const user = await User.findBy('id', userId)
+
+        return {
+            id: user?.id,
+            status: user?.status,
+            fullname: `${user?.firstname} ${user?.lastname}`,
+            avatarUrl: user?.avatarUrl
+        }
+
+    }
+
+    async rejectInvite(channelId: number, userId: number) {
+        await ChannelInvite.query()
+            .where('user_id', userId)
+            .andWhere('channel_id', channelId)
+            .delete()
     }
 }
