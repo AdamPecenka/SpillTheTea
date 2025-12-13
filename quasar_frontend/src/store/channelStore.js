@@ -146,6 +146,7 @@ export const useChannelStore = defineStore('channel', {
 
       console.log(this.activeChannelMembers)
     },
+
     acceptInvite(channelId){
       const channel = this.channels.find(ch => ch?.id === channelId)
 
@@ -157,6 +158,7 @@ export const useChannelStore = defineStore('channel', {
       channel.isInvite = false
       wsService.acceptInvite(channelId)
     },
+
     inviteAccepted(channelId){
       const channel = this.channels.find(ch => ch?.id === channelId)
 
@@ -169,6 +171,7 @@ export const useChannelStore = defineStore('channel', {
 
       console.log(this.channels)
     },
+
     rejectInvite(channelId){
         this.removeChannel(channelId)
 

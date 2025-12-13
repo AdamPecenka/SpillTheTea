@@ -84,6 +84,10 @@ class WebSocketService {
             console.log('rejecting invite: ', channelId)
             useChannelStore().removeChannel(channelId)
         })
+
+        this.socket.on('Channel:MemberRevoked', ({userId}) => {
+            useChannelStore().removeMemberFromActiveChannel(userId)
+        })
     }
 
     // sem definovat funkcie na emitovanie socket veci
@@ -130,6 +134,10 @@ class WebSocketService {
 
     rejecetInvite(channelId: number) {
         this.socket.emit('Channel:RejectInvite', {channelId})
+    }
+
+    revokeMember(channelId: number, username: string){
+        this.socket.emit('Channel:RevokeMember', {channelId, username})
     }
 }
 

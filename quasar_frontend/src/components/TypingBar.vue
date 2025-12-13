@@ -249,11 +249,11 @@ export default {
           break
           
         case "/revoke":
-          
+          messageService.handleRevokeCommand(text)
           break
           
         case "/kick":
-          
+          messageService.handleKickCommand(text)
           break
           
         case "/quit":

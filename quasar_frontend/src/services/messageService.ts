@@ -127,8 +127,6 @@ export const messageService = {
     const parts = text.split(' ')
     const username = parts[1]
 
-    console.log('handling invite')
-
     if(!activeChannelId) return
 
     if (parts.length < 2) {
@@ -143,9 +141,47 @@ export const messageService = {
       })
       return
     }
-
-    console.log('calling socket')
     
     wsService.sendInvite(activeChannelId, username)
+  },
+
+  handleRevokeCommand(text){
+    const activeChannelId = useChannelStore().activeChannelId
+    const channel = useChannelStore().channels.find(c => c.id === activeChannelId)
+
+    if(!activeChannelId) return
+
+    const parts = text.split(' ')
+    const username = parts[1]
+
+    if(username === useAuthStore().user.username) {
+      Notify.create({
+        message: 'Cant remove yourself',
+        type: 'warn'
+      })
+
+      return
+    }
+
+    if (parts.length < 2) {
+      this.sendMessage(text)
+      return
+    }
+
+    if(channel.isAdmin === false){
+      Notify.create({
+        message: 'This command is only for ADMINS',
+        type: 'negative'
+      })
+
+      return
+    }
+
+    useChannelStore()
+    wsService.revokeMember(activeChannelId, username)
+  },
+
+  handleKickCommand(text){
+    // todo
   }
 }

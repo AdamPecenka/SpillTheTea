@@ -5,10 +5,7 @@ import MessageLog from '#models/message_log'
 import ChannelInvite from '#models/channel_invite'
 import ChannelBannedMember from '#models/channel_banned_member'
 import User from '#models/user'
-import { isParameter } from 'typescript'
-import { isIP } from 'net'
-import bodyParserConfig from '#config/bodyparser'
-
+import { setUncaughtExceptionCaptureCallback } from 'process'
 
 export default class ChannelsController {
     async getChannels({ response, auth }: HttpContext) {
@@ -144,8 +141,6 @@ export default class ChannelsController {
     }
 
     async removeUserFromChannel(userId: number, channelId: number): Promise<void> {
-        
-
         await ChannelMember.query()
             .where('user_id', userId)
             .andWhere('channel_id', channelId)
@@ -357,5 +352,38 @@ export default class ChannelsController {
             .where('user_id', userId)
             .andWhere('channel_id', channelId)
             .delete()
+    }
+
+    async revokeMember(channelId: number, username: string){
+        const user = await User.query()
+            .where('username', username)
+            .select('id')
+            .first()
+
+        if(!user) {
+            return{
+                ok: false,
+                message: 'User does not exist'
+            }
+        }
+
+        const member = await ChannelMember.query()
+            .where('user_id', user.id)
+            .where('channel_id', channelId)
+            .first()
+
+        if (!member) {
+            return {
+                ok: false,
+                message: 'User is not a member of this channel',
+            }
+        }
+
+        await this.removeUserFromChannel(user.id, channelId)
+        
+        return {
+            ok: true,
+            userId: user.id
+        }
     }
 }
