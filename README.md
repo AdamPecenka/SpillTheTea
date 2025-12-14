@@ -16,12 +16,12 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
    - [x] správcom kanála je používateľ, ktorý kanál vytvoril
    - [x] ak nie je kanál aktívny (nie je pridaná nová správa) viac ako 30 dní, kanál prestáva existovať (následne je možné použiť channelName kanála pre "nový" kanál)
 - [x] používateľ odosiela správy a príkazy cez "príkazový riadok", ktorý je "fixným" prvkom aplikácie. používateľ môže odoslať správu v kanáli, ktorého je členom
-- [ ] vytvorenie komunikačného kanála (channel) cez príkazový riadok
+- [x] vytvorenie komunikačného kanála (channel) cez príkazový riadok
    - [x] kanál môže vytvoriť ľubovolný používateľ cez príkaz /join channelName [private]
    - [x] do súkromného kanála môže pridávať/odoberať používateľov iba správca kanála cez príkazy /invite nickName a /revoke nickName
    - [x] do verejného kanála sa môže pridať ľubovolný používateľ cez príkaz /join channelName (ak kanál neexistuje, automaticky sa vytvorí)
    - [x] do verejného kanála môže člen kanála pozvať iného používateľa príkazom /invite nickName
-   - [ ] vo verejnom kanáli môže člen "vyhodiť" iného člena príkazom /kick nickName. ak tak spravia aspoň 3 členovia, používateľ má "trvalý" ban pre daný kanál. správca môže používateľa vyhodiť "natrvalo" kedykoľvek príkazom /kick nickName, alebo naopak "obnovit" používateľovi prístup do kanála cez príkaz /invite
+   - [x] vo verejnom kanáli môže člen "vyhodiť" iného člena príkazom /kick nickName. ak tak spravia aspoň 3 členovia, používateľ má "trvalý" ban pre daný kanál. správca môže používateľa vyhodiť "natrvalo" kedykoľvek príkazom /kick nickName, alebo naopak "obnovit" používateľovi prístup do kanála cez príkaz /invite
    - [x] nickName ako aj channelName sú unikátne
    - [x] správca môže kanál zatvoriť/zrušiť príkazom /quit
 - [x] používateľ môže zrušiť svoje členstvo v kanáli príkazom /cancel, ak tak spraví správca kanála, kanál zaniká
@@ -32,7 +32,7 @@ Aplikácia na textovú komunikáciu v štýle IRC (zjednodušený Slack)
 - [x] používateľ je informovaný o každej novej správe prostredníctvom notifikácie
    - [x] notifikácia sa vystavuje iba ak aplikácia nie je v stave "visible" (pozrite quasar docu App Visibility)
    - [x] notifikácia obsahuje časť zo správy a odosielateľa
-   - [ ] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
+   - [x] používateľ si môže nastaviť, aby mu chodili notifikácie iba pre správy, ktoré sú mu adresované
 - [ ] používateľ si môže nastaviť stav (online, DND, offline)
    - [ ] stav sa zobrazuje používateľom
    - [x] ak je nastavený DND stav, neprichádzajú notifikácie

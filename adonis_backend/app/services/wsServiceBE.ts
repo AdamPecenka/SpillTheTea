@@ -5,7 +5,6 @@ import User from "#models/user";
 import ChannelsController from "#controllers/channels_controller";
 import MessagesController from "#controllers/messages_controller";
 import UsersController from "#controllers/users_controller";
-import { channel } from "diagnostics_channel";
 
 class WsServiceBE {
     io: Server | undefined
@@ -87,7 +86,7 @@ class WsServiceBE {
             socket.on('Channel:Leave', async ({ channelId }) => {
                 await channelsController.removeUserFromChannel(USER_ID, channelId)
                 socket.to(`User:${USER_ID}`).emit('Channel:Remove', { channelId: channelId })
-                socket.to(`Channel:${channelId}`).emit('Channel:UserLeft', {userId: USER_ID })
+                socket.to(`Channel:${channelId}`).emit('Channel:RemoveMember', {userId: USER_ID })
                 socket.leave(`Channel:${channelId}`)    
             })
 
@@ -102,6 +101,7 @@ class WsServiceBE {
                 
                 if (channelResult.ok === false){
                     socket.emit('Error:Message', { message: channelResult.message })
+                    return
                 }
 
                 socket.join(`Channel:${channelResult.channel.id}`)
@@ -130,7 +130,7 @@ class WsServiceBE {
                     return
                 }
                 
-                this.io?.to(`User:${invitedChannel.targetUserId}`).emit('Channel:NewInvite', invitedChannel.channel)
+                this.io?.to(`User:${invitedChannel.targetUserId}`).emit('Channel:NewChannel', invitedChannel.channel)
             })
 
             socket.on('Channel:AcceptInvite', async ({channelId}) => {
@@ -144,7 +144,7 @@ class WsServiceBE {
 
             socket.on('Channel:RejectInvite', async ({channelId}) => {
                 await channelsController.rejectInvite(channelId, USER_ID)
-                socket.to(`User:${USER_ID}`).emit('Channel:InviteRejected', { channelId: channelId })
+                socket.to(`User:${USER_ID}`).emit('Channel:Remove', { channelId: channelId })
             })
 
             socket.on('Channel:RevokeMember', async ({channelId, username}) => {
@@ -154,10 +154,23 @@ class WsServiceBE {
                     return
                 }
 
-                this.io?.to(`Channel:${channelId}`).emit('Channel:MemberRevoked', {userId: res.userId})
+                this.io?.to(`Channel:${channelId}`).emit('Channel:RemoveMember', {userId: res.userId})
                 this.io?.to(`User:${res.userId}`).emit('Channel:Remove', { channelId: channelId })
 
                 this.io?.in(`User:${res.userId}`).socketsLeave(`Channel:${channelId}`)
+            })
+
+            socket.on('Channel:Kick', async ({channelId, targetName, adminKick}) => {
+                const res = await channelsController.kickMember(channelId, USER_ID, targetName, adminKick)
+
+                if(res.ok === false) {
+                    socket.emit('Error:Message', {message: res.message })
+                }
+
+                this.io?.to(`Channel:${channelId}`).emit('Channel:RemoveMember', { userId: res.targetUserId })
+                this.io?.to(`User:${res.targetUserId}`).emit('Channel:Remove', { channelId: channelId })
+
+                this.io?.in(`User:${res.targetUserId}`).socketsLeave(`Channel:${channelId}`)
             })
 
 

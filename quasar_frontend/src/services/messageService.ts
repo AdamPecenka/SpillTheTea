@@ -182,6 +182,41 @@ export const messageService = {
   },
 
   handleKickCommand(text){
-    // todo
+    const activeChannelId = useChannelStore().activeChannelId
+    const channel = useChannelStore().channels.find(c => c.id === activeChannelId)
+
+    if(!activeChannelId) return
+
+    const parts = text.split(' ')
+    const username = parts[1]
+
+    if(username === useAuthStore().user.username){
+      Notify.create({
+        message: 'Cant kick yourself',
+        type: 'negative',
+        position: 'top'
+      })
+
+      return
+    }
+
+    if(parts.length < 2) {
+      this.sendMessage(text)
+      return
+    }
+
+    if(channel.isPrivate === true && channel.isAdmin === false) {
+      Notify.create({
+        message: 'Only admin can kick from private channel!',
+        type: 'negative',
+        position: 'top'
+      })
+
+      return
+    }
+
+    const adminKick = channel.isAdmin === true
+
+    wsService.kickMember(activeChannelId, username, adminKick)
   }
 }

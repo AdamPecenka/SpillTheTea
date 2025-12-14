@@ -5,7 +5,6 @@ import MessageLog from '#models/message_log'
 import ChannelInvite from '#models/channel_invite'
 import ChannelBannedMember from '#models/channel_banned_member'
 import User from '#models/user'
-import { setUncaughtExceptionCaptureCallback } from 'process'
 
 export default class ChannelsController {
     async getChannels({ response, auth }: HttpContext) {
@@ -183,19 +182,11 @@ export default class ChannelsController {
             const bannedEntries = await ChannelBannedMember
                 .query()
                 .where('channel_id', channel.id)    
-                .andWhere('user_id', userId)
+                .andWhere('kicked_user_id', userId)
 
-            const isHardBanned = bannedEntries.some(entry => entry.isBanned === true)
+            const isBanned = bannedEntries.some(entry => entry.isBanned === true)
 
-            const uniqueKickers = new Set(
-                bannedEntries
-                    .filter(entry => entry.kickedUserId)
-                    .map(entry => entry.kickedUserId)
-            )
-
-            const isSoftBanned = uniqueKickers.size >= 3
-
-            if (isHardBanned || isSoftBanned) {
+            if (isBanned) {
                 return {
                     ok: false,
                     message: `You are banned from #${channelName}`,
@@ -276,6 +267,11 @@ export default class ChannelsController {
                 message: `You cannot invite yourself :D`,
             }
         }
+
+        const inviter = await ChannelMember.query()
+            .where('user_id', myUserId)
+            .andWhere('channel_id', channelId)
+            .first()
             
         const exists = await ChannelMember.query()
             .where('user_id', targetUser.id)
@@ -291,7 +287,7 @@ export default class ChannelsController {
 
         const inviteExists = await ChannelInvite.query()
             .where('user_id', targetUser.id)
-            .where('channel_id', channelId)
+            .andWhere('channel_id', channelId)
             .first()
 
         if (inviteExists) {
@@ -299,6 +295,25 @@ export default class ChannelsController {
                 ok: false,
                 message: `User ${username} already has a pending invite`,
             }
+        }
+
+        const isBanned = await ChannelBannedMember.query()
+            .where('channel_id', channelId)
+            .andWhere('kicked_user_id', targetUser.id)
+            .first()
+
+        if(isBanned && !inviter?.isAdmin) {
+            return {
+                ok: false,
+                message: 'User is banned from this channel'
+            }
+        }
+
+        if(inviter?.isAdmin === true) {
+            await ChannelBannedMember.query()
+                .where('channel_id', channelId)
+                .andWhere('kicked_user_id', targetUser.id)
+                .delete()
         }
 
         await ChannelInvite.create({
@@ -384,6 +399,72 @@ export default class ChannelsController {
         return {
             ok: true,
             userId: user.id
+        }
+    }
+
+    async kickMember(channelId: number, casterId: number, targetName: string, adminKick: boolean) {
+        const targetUser = await User.query()
+            .where('username', targetName)
+            .select('id')
+            .first()
+
+        if(!targetUser) {
+            return {
+                ok: false,
+                message: 'User does not exist'
+            }
+        }
+
+        const member = await ChannelMember.query()
+            .where('user_id', targetUser.id)
+            .andWhere('channel_id', channelId)
+            .first()
+
+        if(!member) {
+            return {
+                ok: false,
+                message: 'User is not a member if this channel'
+            }
+        }
+
+        if(member.isAdmin){
+            return {
+                ok: false,
+                message: 'You cannot kick admin user'
+            }
+        }
+
+        await this.removeUserFromChannel(targetUser.id, channelId)
+
+        let isBanned = adminKick
+
+        if(!adminKick) {
+            const uniqueCasters = await ChannelBannedMember.query()
+                .where('channel_id', channelId)
+                .andWhere('kicked_user_id', targetUser.id)
+                .distinct('user_id')
+
+            const casterIds = uniqueCasters.map(c => c.userId)
+
+            if(!casterIds.includes(casterId)){
+                casterIds.push(casterId)
+            }
+
+            if(casterIds.length >= 3){
+                isBanned = true
+            }
+        }
+
+        await ChannelBannedMember.create({
+            channelId,
+            userId: casterId,
+            kickedUserId: targetUser.id,
+            isBanned
+        })
+
+        return {
+            ok: true,
+            targetUserId: targetUser.id
         }
     }
 }

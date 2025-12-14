@@ -1,11 +1,9 @@
-import { data } from 'autoprefixer';
 import { io, Socket } from 'socket.io-client';
 import { useChannelStore } from 'src/store/channelStore';
 import { messageService } from './messageService';
 import { useMessageStore } from 'src/store/messageStore';
 import { notificationService } from './notificationService';
 import { useAuthStore } from 'src/store/authStore';
-import { roundHistory } from '@quasar/extras/material-icons-round';
 
 class WebSocketService {
     private socket: Socket
@@ -50,7 +48,7 @@ class WebSocketService {
             useChannelStore().removeChannel(channelId)
         })
 
-        this.socket.on('Channel:UserLeft', ({userId}) => {
+        this.socket.on('Channel:RemoveMember', ({userId}) => {
             useChannelStore().removeMemberFromActiveChannel(userId)
         })
 
@@ -71,22 +69,9 @@ class WebSocketService {
             useAuthStore().updateMentionSettings(newValue)  
         })
 
-        this.socket.on('Channel:NewInvite', ( channel ) => {
-            useChannelStore().addNewChannel(channel)
-        })
-
         this.socket.on('Channel:InviteAccepted', ({channelId}) => {
             console.log('accepting invite: ', channelId)
             useChannelStore().inviteAccepted(channelId)
-        })
-
-        this.socket.on('Channel:InviteRejected', ({channelId}) => {
-            console.log('rejecting invite: ', channelId)
-            useChannelStore().removeChannel(channelId)
-        })
-
-        this.socket.on('Channel:MemberRevoked', ({userId}) => {
-            useChannelStore().removeMemberFromActiveChannel(userId)
         })
     }
 
@@ -138,6 +123,10 @@ class WebSocketService {
 
     revokeMember(channelId: number, username: string){
         this.socket.emit('Channel:RevokeMember', {channelId, username})
+    }
+
+    kickMember(channelId: number, targetName: string, adminKick: boolean) {
+        this.socket.emit('Channel:Kick', {channelId, targetName, adminKick})
     }
 }
 
