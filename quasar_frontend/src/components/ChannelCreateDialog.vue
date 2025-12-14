@@ -15,7 +15,10 @@
           label="Channel name *"
           filled
           autofocus
-          :rules="[val => !!val.trim() || 'Name is required']"
+          :rules="[
+            val => !!val.trim() || 'Name is required',
+            val => !/\s/.test(val.trim()) || 'Name must be a single word (no spaces)'
+          ]"
           @keyup.enter="createChannel"
         />
 
