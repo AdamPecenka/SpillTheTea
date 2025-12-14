@@ -25,7 +25,20 @@ export const messageService = {
     const channelId = channelStore.activeChannelId
 
     if (!channelId) {
-      console.error('[!] No active channel to send message to.')
+      Notify.create({
+        message: 'Select a channel to send messages to',
+        type: 'negative',
+        position: 'top'
+      })
+      return
+    }
+
+    if (authStore.user.status === 'offline') {
+      Notify.create({
+        message: 'Cant send messages when you are offline',
+        type: 'negative',
+        position: 'top'
+      })
       return
     }
 
@@ -57,7 +70,20 @@ export const messageService = {
     }
 
     if (!channelId) {
-      console.error('[!] No active channel to send message to.')
+      Notify.create({
+        message: 'Select a channel to send messages to',
+        type: 'negative',
+        position: 'top'
+      })
+      return
+    }
+
+    if (authStore.user.status === 'offline') {
+      Notify.create({
+        message: 'Cant send messages when you are offline',
+        type: 'negative',
+        position: 'top'
+      })
       return
     }
 
@@ -88,6 +114,22 @@ export const messageService = {
     });
 
     return sorted[0];
+  },
+
+  getNewestTimestampsByChannel() {
+    return Object.entries(useMessageStore().messages).map(([channelId, msgs]) => {
+      let newestTimestamp = null
+
+      if (Array.isArray(msgs) && msgs.length > 0) {
+        const lastMessage = msgs[msgs.length - 1]
+        newestTimestamp = new Date(lastMessage.sentTimestamp)
+      }
+
+      return {
+        channelId: Number(channelId),
+        newestTimestamp
+      }
+    })
   },
 
   handleJoinCommand(text) {

@@ -5,6 +5,7 @@ import User from "#models/user";
 import ChannelsController from "#controllers/channels_controller";
 import MessagesController from "#controllers/messages_controller";
 import UsersController from "#controllers/users_controller";
+import { UserStatus } from "../enums/UserStatusEnum.js";
 
 class WsServiceBE {
     io: Server | undefined
@@ -171,6 +172,41 @@ class WsServiceBE {
                 this.io?.to(`User:${res.targetUserId}`).emit('Channel:Remove', { channelId: channelId })
 
                 this.io?.in(`User:${res.targetUserId}`).socketsLeave(`Channel:${channelId}`)
+            })
+
+            socket.on('User:SetStatus', async ({status, newestTimestamps}) => {
+                await usersController.setStatus(USER_ID, status)
+                const currentAllChannels = await channelsController.getChannelIdsForUser(USER_ID)
+
+                if(status === UserStatus.OFFLINE){
+                    for (const cId of currentAllChannels) {
+                        socket.to(`Channel:${cId}`).emit('Channel:UpdateUserStatus', { status: status, userId: USER_ID })
+                        socket.leave(`Channel:${cId}`)
+                        console.log(`[-] User ${USER_ID} left Channel room: Channel:${cId}`)
+                    }
+
+                    this.io?.to(`User:${USER_ID}`).emit('User:UpdateStatus', { status: status, newerMessages: null })
+
+                    return
+                }
+
+                let messagesPerChannel = null
+
+                if(newestTimestamps && newestTimestamps.length > 0){
+                    messagesPerChannel = await meessagesController.getNewerMessages(USER_ID, newestTimestamps)
+                }
+
+                for (const cId of currentAllChannels) {
+                    if (!socket.rooms.has(`Channel:${cId}`)) {
+                        socket.join(`Channel:${cId}`)
+                        console.log(`[+] User ${USER_ID} joined Channel room: Channel:${cId}`)
+                    }
+                }
+
+                for(const cId of currentAllChannels){
+                    socket.to(`Channel:${cId}`).emit('Channel:UpdateUserStatus', {status: status, userId: USER_ID})
+                }
+                this.io?.to(`User:${USER_ID}`).emit('User:UpdateStatus', { status: status, newerMessages: messagesPerChannel })
             })
 
 

@@ -1,7 +1,7 @@
 import { defineStore } from 'pinia'
 import { api } from 'boot/axios'
 import { wsService } from 'src/services/wsServiceFE'
-import { notificationService } from 'src/services/notificationService'
+import { messageService } from 'src/services/messageService'
 
 export const useAuthStore = defineStore('auth', {
   state: () => ({
@@ -88,6 +88,23 @@ export const useAuthStore = defineStore('auth', {
     },
     setStatus(status) {
       if (!this.user) return
+
+      const previousStatus = this.user.status
+      
+      if(previousStatus === status) return
+  
+      this.user.status = status
+
+      let newestTimestamps = null
+
+      if(previousStatus === 'offline' && status !== 'offline'){
+        newestTimestamps = messageService.getNewestTimestampsByChannel()
+      }
+
+      wsService.updateStatus(status, newestTimestamps)      
+    },
+    updateStatus(status) {
+      if(!this.user || !status) return
       this.user.status = status
     },
     setNotificationPermission(perm) {

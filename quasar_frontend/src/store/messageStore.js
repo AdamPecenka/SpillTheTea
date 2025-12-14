@@ -35,9 +35,6 @@ export const useMessageStore = defineStore('message', {
         this.messages[message.channelId] = []
       }
 
-      console.log('[i] New message received in channel', message.channelId, ':', message)
-      console.log('[i] Current messages in channel:', this.messages[message.channelId])
-
       this.messages[message.channelId].push({
         id: message.id,
         senderName: message.senderName,
@@ -87,7 +84,28 @@ export const useMessageStore = defineStore('message', {
 
       this.typingTimers = {}
       this.typingIndicators = {}
-    }
+    },
+
+    appendNewMessages(newMessagesByChannel) {
+      console.log(newMessagesByChannel)
+      
+      if (!Array.isArray(newMessagesByChannel)) return
+
+      newMessagesByChannel.forEach(({ channelId, messages }) => {
+        if (!Array.isArray(messages) || messages.length === 0) return
+
+        if (!this.messages[channelId]) {
+          this.messages[channelId] = []
+        }
+
+        this.messages[channelId].push(...messages)
+
+        // just in case :3
+        this.messages[channelId].sort((a, b) => {
+          return new Date(a.sentTimestamp).getTime() - new Date(b.sentTimestamp).getTime()
+        })
+      })
+    },
   },
 
   persist: {

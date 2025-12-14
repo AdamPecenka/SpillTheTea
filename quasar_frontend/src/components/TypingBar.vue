@@ -60,6 +60,7 @@
 <script>
 import { Notify } from 'quasar';
 import { messageService } from 'src/services/messageService';
+import { useAuthStore } from 'src/store/authStore';
 import { useChannelStore } from 'src/store/channelStore';
 
 export default {
@@ -149,7 +150,9 @@ export default {
   
   methods: {
     onMessageChange(value) {
-      messageService.emitMessage(value)
+      if(useAuthStore().user.status !== 'offline'){
+        messageService.emitMessage(value)
+      }
 
       // Check if message starts with /
       if (value && value.startsWith('/')) {

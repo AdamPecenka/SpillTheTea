@@ -4,6 +4,7 @@ import { messageService } from './messageService';
 import { useMessageStore } from 'src/store/messageStore';
 import { notificationService } from './notificationService';
 import { useAuthStore } from 'src/store/authStore';
+import { useRenderCache } from 'quasar';
 
 class WebSocketService {
     private socket: Socket
@@ -70,8 +71,18 @@ class WebSocketService {
         })
 
         this.socket.on('Channel:InviteAccepted', ({channelId}) => {
-            console.log('accepting invite: ', channelId)
             useChannelStore().inviteAccepted(channelId)
+        })
+
+        this.socket.on('Channel:UpdateUserStatus', ({status, userId}) => {
+            useChannelStore().updateMemberStatus(userId, status)
+        })
+
+        this.socket.on('User:UpdateStatus', ({status, newerMessages}) => {
+            useAuthStore().updateStatus(status)
+            if(newerMessages){
+                useMessageStore().appendNewMessages(newerMessages)
+            }
         })
     }
 
@@ -127,6 +138,10 @@ class WebSocketService {
 
     kickMember(channelId: number, targetName: string, adminKick: boolean) {
         this.socket.emit('Channel:Kick', {channelId, targetName, adminKick})
+    }
+
+    updateStatus(status: string, newestTimestamps: [{number: Date | null}] | null) {
+        this.socket.emit('User:SetStatus', {status, newestTimestamps: newestTimestamps})
     }
 }
 

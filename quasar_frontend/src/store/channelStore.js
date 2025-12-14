@@ -147,6 +147,16 @@ export const useChannelStore = defineStore('channel', {
       console.log(this.activeChannelMembers)
     },
 
+    updateMemberStatus(userId, status) {
+      if(!this.activeChannelId || this.activeChannelMembers.length === 0) return
+
+      const member = this.activeChannelMembers.find(m => m.id === userId)
+
+      if(!member) return
+
+      member.status = status
+    },
+
     acceptInvite(channelId){
       const channel = this.channels.find(ch => ch?.id === channelId)
 
