@@ -6,7 +6,7 @@ export const useMessageStore = defineStore('message', {
     pageSize: 20,
     messages: {},               // { channelId: [{message}, {message}, ...], ... }
     moreMessagesAvailable: {},  // { channelId: boolean, ... }
-    typingIndicators: {},       // { userId: message, ... }
+    typingIndicators: {},       // { username: message, ... }
     typingTimers: {}            // { username: timeoutId, ... }
   }),
 

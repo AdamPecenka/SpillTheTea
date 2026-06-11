@@ -1,6 +1,8 @@
 <template>
   <q-layout view="hHh LpR fFf">
 
+    <!-- Sneziiiik -->
+
     <!-- Top App Bar -->
     <q-header elevated class="bg-grey-9 items-center text-white">
       <q-toolbar>
@@ -171,7 +173,6 @@ import MemberListDrawer from 'src/components/MemberListDrawer.vue'
 import ChannelList from 'src/components/ChannelList.vue'
 import TypingBar from 'src/components/TypingBar.vue'
 import ChannelCreateDialog from 'src/components/ChannelCreateDialog.vue'
-import { notificationService } from 'src/services/notificationService'
 
 export default {
   name: 'ChatLayout',
@@ -182,7 +183,7 @@ export default {
     MemberListDrawer,
     ChannelList,
     TypingBar,
-    ChannelCreateDialog
+    ChannelCreateDialog,
   },
   
   data() {
